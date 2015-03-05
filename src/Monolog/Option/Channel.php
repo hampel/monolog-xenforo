@@ -13,7 +13,7 @@ class Monolog_Option_Channel
 		return true;
 	}
 
-	public static function get()
+	public static function getDefault()
 	{
 		return XenForo_Application::getOptions()->monologDefaultChannel;
 	}

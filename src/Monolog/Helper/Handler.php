@@ -7,7 +7,7 @@ class Monolog_Helper_Handler
 {
 	public static function createStream($filename = "", $level = 0)
 	{
-		if (empty($filename)) $filename = Monolog_Option_Channel::get() . ".log";
+		if (empty($filename)) $filename = Monolog_Option_Channel::getDefault() . ".log";
 		if ($level == 0) $level = Monolog_Option_Loglevel::get();
 
 		return new StreamHandler(

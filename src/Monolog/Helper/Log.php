@@ -8,35 +8,23 @@ class Monolog_Helper_Log
 	/**
 	 * Create a new monolog instance
 	 *
-	 * @param string $name
+	 * @param $name channel name
 	 *
 	 * @return Logger
+	 * @throws XenForo_Exception
 	 */
-	public static function create($name = "")
+	public static function create($name)
 	{
-		if (empty($name)) $name = Monolog_Option_Channel::get();
-
-		$channels = self::_getChannels();
-
-		$channel = "monolog-channel-{$name}";
-		$channels[] = $channel;
+		if (empty($name)) throw new XenForo_Exception(new XenForo_Phrase('monolog_name_parameter_required'));
 
 		$logger = new Logger($name);
 
 		XenForo_Application::set("monolog-channel-{$name}", $logger);
-		XenForo_Application::set("monolog-channels", $channels);
+
+		$handler = Monolog_Helper_Handler::getDefault();
+		$logger->pushHandler($handler);
 
 		return $logger;
-	}
-
-	protected static function _getChannels()
-	{
-		if (!XenForo_Application::isRegistered("monolog-channels"))
-		{
-			return [];
-		}
-
-		return XenForo_Application::get("monolog-channels");
 	}
 
 	/**
@@ -49,7 +37,8 @@ class Monolog_Helper_Log
 	 */
 	public static function get($name = "")
 	{
-		if (empty($name)) $name = Monolog_Option_Channel::get();
+		// if no name specified, get the name of the default channel instead
+		if (empty($name)) $name = Monolog_Option_Channel::getDefault();
 
 		return XenForo_Application::get("monolog-channel-{$name}");
 	}
@@ -61,21 +50,7 @@ class Monolog_Helper_Log
 	 */
 	public static function getDefault()
 	{
-		return self::get(Monolog_Option_Channel::get());
-	}
-
-	/**
-	 * Pushes a handler onto loggers for all registered channels
-	 *
-	 * @param HandlerInterface $handler
-	 */
-	public static function setHandler(HandlerInterface $handler)
-	{
-		$channels = self::_getChannels();
-		foreach ($channels as $channel)
-		{
-			self::setHandlerOnChannel($channel, $handler);
-		}
+		return self::get(Monolog_Option_Channel::getDefault());
 	}
 
 	/**
@@ -86,7 +61,7 @@ class Monolog_Helper_Log
 	 *
 	 * @return Logger
 	 */
-	public static function setHandlerOnChannel($name, HandlerInterface $handler)
+	public static function setHandler($name, HandlerInterface $handler)
 	{
 		$log = self::get($name);
 		$log->pushHandler($handler);
