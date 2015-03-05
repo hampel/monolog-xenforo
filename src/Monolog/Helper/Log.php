@@ -8,8 +8,9 @@ class Monolog_Helper_Log
 	/**
 	 * Create a new monolog instance
 	 *
-	 * @param $name
-	 * @param int $level
+	 * @param string $name
+	 *
+	 * @return Logger
 	 */
 	public static function create($name = "")
 	{
