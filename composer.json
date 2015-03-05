@@ -1,0 +1,14 @@
+{
+    "name": "hampel/monolog-xenforo",
+    "description": "Monolog implementation for XenForo",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Simon Hampel",
+            "email": "simon@hampelgroup.com"
+        }
+    ],
+	"require": {
+		"monolog/monolog": "~1.11"
+	}
+}
