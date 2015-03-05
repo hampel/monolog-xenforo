@@ -1,32 +1,100 @@
 <?php
 
 use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
+use Monolog\Handler\HandlerInterface;
 
 class Monolog_Helper_Log
 {
-	protected static $_instance = null;
-
-	protected $_monolog = null;
-
-	private function __construct()
+	/**
+	 * Create a new monolog instance
+	 *
+	 * @param $name
+	 * @param int $level
+	 */
+	public static function create($name = "")
 	{
-		$this->_monolog = self::createMonolog();
+		if (empty($name)) $name = Monolog_Option_Channel::get();
+
+		$channels = self::_getChannels();
+
+		$channel = "monolog-channel-{$name}";
+		$channels[] = $channel;
+
+		$logger = new Logger($name);
+
+		XenForo_Application::set("monolog-channel-{$name}", $logger);
+		XenForo_Application::set("monolog-channels", $channels);
+
+		return $logger;
+	}
+
+	protected static function _getChannels()
+	{
+		if (!XenForo_Application::isRegistered("monolog-channels"))
+		{
+			return [];
+		}
+
+		return XenForo_Application::get("monolog-channels");
 	}
 
 	/**
 	 * Return our instance of the Monolog logger
 	 *
+	 * @param string $name
+	 *
 	 * @return Logger
+	 * @throws Zend_Exception
 	 */
-	public static function getMonolog()
+	public static function get($name = "")
 	{
-		$object = self::_getInstance();
-		return $object->_monolog;
+		if (empty($name)) $name = Monolog_Option_Channel::get();
+
+		return XenForo_Application::get("monolog-channel-{$name}");
 	}
 
 	/**
-	 * Adds a log record at an arbitrary level.
+	 * Return the default instance of the Monolog logger
+	 *
+	 * @return Logger
+	 */
+	public static function getDefault()
+	{
+		return self::get(Monolog_Option_Channel::get());
+	}
+
+	/**
+	 * Pushes a handler onto loggers for all registered channels
+	 *
+	 * @param HandlerInterface $handler
+	 */
+	public static function setHandler(HandlerInterface $handler)
+	{
+		$channels = self::_getChannels();
+		foreach ($channels as $channel)
+		{
+			self::setHandlerOnChannel($channel, $handler);
+		}
+	}
+
+	/**
+	 * Pushes a handler onto the logger for a single channel
+	 *
+	 * @param $name
+	 * @param HandlerInterface $handler
+	 *
+	 * @return Logger
+	 */
+	public static function setHandlerOnChannel($name, HandlerInterface $handler)
+	{
+		$log = self::get($name);
+		$log->pushHandler($handler);
+
+		return $log;
+	}
+
+	/**
+	 * Adds a log record at an arbitrary level on the default channel
 	 *
 	 * This method allows for compatibility with common interfaces.
 	 *
@@ -37,11 +105,11 @@ class Monolog_Helper_Log
 	 */
 	public static function log($level, $message, array $context = array())
 	{
-		return self::getMonolog()->log($level, $message, $context);
+		return self::getDefault()->log($level, $message, $context);
 	}
 
     /**
-     * Adds a log record at the DEBUG level.
+     * Adds a log record at the DEBUG level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -51,11 +119,11 @@ class Monolog_Helper_Log
      */
 	public static function debug($message, array $context = array())
 	{
-		return self::getMonolog()->debug($message, $context);
+		return self::getDefault()->debug($message, $context);
 	}
 
     /**
-     * Adds a log record at the INFO level.
+     * Adds a log record at the INFO level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -65,11 +133,11 @@ class Monolog_Helper_Log
      */
 	public static function info($message, array $context = array())
 	{
-		return self::getMonolog()->info($message, $context);
+		return self::getDefault()->info($message, $context);
 	}
 
     /**
-     * Adds a log record at the NOTICE level.
+     * Adds a log record at the NOTICE level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -79,11 +147,11 @@ class Monolog_Helper_Log
      */
 	public static function notice($message, array $context = array())
 	{
-		return self::getMonolog()->notice($message, $context);
+		return self::getDefault()->notice($message, $context);
 	}
 
     /**
-     * Adds a log record at the WARNING level.
+     * Adds a log record at the WARNING level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -93,11 +161,11 @@ class Monolog_Helper_Log
      */
 	public static function warning($message, array $context = array())
 	{
-		return self::getMonolog()->warning($message, $context);
+		return self::getDefault()->warning($message, $context);
 	}
 
    /**
-     * Adds a log record at the ERROR level.
+     * Adds a log record at the ERROR level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -107,11 +175,11 @@ class Monolog_Helper_Log
      */
 	public static function error($message, array $context = array())
 	{
-		return self::getMonolog()->error($message, $context);
+		return self::getDefault()->error($message, $context);
 	}
 
    /**
-     * Adds a log record at the CRITICAL level.
+     * Adds a log record at the CRITICAL level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -121,11 +189,11 @@ class Monolog_Helper_Log
      */
 	public static function critical($message, array $context = array())
 	{
-		return self::getMonolog()->critical($message, $context);
+		return self::getDefault()->critical($message, $context);
 	}
 
    /**
-     * Adds a log record at the ALERT level.
+     * Adds a log record at the ALERT level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -135,11 +203,11 @@ class Monolog_Helper_Log
      */
 	public static function alert($message, array $context = array())
 	{
-		return self::getMonolog()->alert($message, $context);
+		return self::getDefault()->alert($message, $context);
 	}
 
     /**
-     * Adds a log record at the EMERGENCY level.
+     * Adds a log record at the EMERGENCY level on the default channel
      *
      * This method allows for compatibility with common interfaces.
      *
@@ -149,26 +217,6 @@ class Monolog_Helper_Log
      */
 	public static function emergency($message, array $context = array())
 	{
-		return self::getMonolog()->emergency($message, $context);
-	}
-
-	protected static final function _getInstance()
-	{
-		if (!self::$_instance)
-		{
-			self::$_instance = new self();
-		}
-
-		return self::$_instance;
-	}
-
-	protected static function createMonolog()
-	{
-		$log = new Logger('monolog');
-		$log->pushHandler(
-			new StreamHandler(XenForo_Helper_File::getInternalDataPath() . '/monolog.log', Logger::WARNING)
-		);
-
-		return $log;
+		return self::getDefault()->emergency($message, $context);
 	}
 }
