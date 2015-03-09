@@ -40,7 +40,14 @@ class Monolog_Helper_Log
 		// if no name specified, get the name of the default channel instead
 		if (empty($name)) $name = Monolog_Option_Channel::getDefault();
 
-		return XenForo_Application::get("monolog-channel-{$name}");
+		$index = "monolog-channel-{$name}";
+
+		if (!XenForo_Application::isRegistered($index))
+		{
+			throw new XenForo_Exception('Monolog channel not registered: ' . $index);
+		}
+
+		return XenForo_Application::get($index);
 	}
 
 	/**
