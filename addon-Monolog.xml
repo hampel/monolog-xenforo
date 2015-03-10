@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="Monolog" title="Monolog for XenForo" version_string="0.3" version_id="4" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="Monolog" title="Monolog for XenForo" version_string="1.0.0" version_id="5" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -14,7 +14,7 @@
   <email_template_modifications/>
   <optiongroups>
     <group group_id="monolog" display_order="4000" debug_only="0"/>
-    <option option_id="monologDefaultChannel" edit_format="textbox" data_type="string" can_backup="1" validation_class="hgEmailDigest_Option_Channel" validation_method="verifyOption">
+    <option option_id="monologDefaultChannel" edit_format="textbox" data_type="string" can_backup="1" validation_class="Monolog_Option_Channel" validation_method="verifyOption">
       <default_value>default</default_value>
       <edit_format_params></edit_format_params>
       <sub_options></sub_options>
