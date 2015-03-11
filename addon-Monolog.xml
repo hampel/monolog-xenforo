@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<addon addon_id="Monolog" title="Monolog for XenForo" version_string="1.0.0" version_id="5" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
+<addon addon_id="Monolog" title="Monolog Logging Service" version_string="1.0.1" version_id="6" url="" install_callback_class="" install_callback_method="" uninstall_callback_class="" uninstall_callback_method="">
   <admin_navigation/>
   <admin_permissions/>
   <admin_style_properties/>
@@ -43,7 +43,7 @@
     <phrase title="monolog_loglevel_notice" version_id="1" version_string="0.1.0"><![CDATA[Notice]]></phrase>
     <phrase title="monolog_loglevel_warning" version_id="1" version_string="0.1.0"><![CDATA[Warning]]></phrase>
     <phrase title="option_group_monolog" version_id="1" version_string="0.1.0"><![CDATA[Monolog]]></phrase>
-    <phrase title="option_group_monolog_description" version_id="1" version_string="0.1.0"><![CDATA[Monolog logging]]></phrase>
+    <phrase title="option_group_monolog_description" version_id="5" version_string="1.0.0"><![CDATA[Monolog Logging Service]]></phrase>
     <phrase title="option_monologDefaultChannel" version_id="1" version_string="0.1.0"><![CDATA[Default Channel Name]]></phrase>
     <phrase title="option_monologDefaultChannel_explain" version_id="1" version_string="0.1.0"><![CDATA[The name of the default channel to use when a channel isn't explicitly specified (letters numbers, dashes or underscores only - no spaces or other punctuation)]]></phrase>
     <phrase title="option_monologLogLevel" version_id="1" version_string="0.1.0"><![CDATA[Log Level]]></phrase>

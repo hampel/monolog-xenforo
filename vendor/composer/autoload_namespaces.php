@@ -7,5 +7,4 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Psr\\Log\\' => array($vendorDir . '/psr/log'),
-    'Monolog_' => array($baseDir . '/src'),
 );
