@@ -12,4 +12,3 @@ class Monolog_Addon
 		return __DIR__;
 	}
 }
- 
