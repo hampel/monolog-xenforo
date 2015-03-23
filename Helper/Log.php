@@ -5,6 +5,15 @@ use Monolog\Handler\HandlerInterface;
 
 class Monolog_Helper_Log
 {
+	const DEBUG = Logger::DEBUG;
+	const INFO = Logger::INFO;
+	const NOTICE = Logger::NOTICE;
+	const WARNING = Logger::WARNING;
+	const ERROR = Logger::ERROR;
+	const CRITICAL = Logger::CRITICAL;
+	const ALERT = Logger::ALERT;
+	const EMERGENCY = Logger::EMERGENCY;
+
 	/**
 	 * Create a new monolog instance
 	 *
@@ -37,17 +46,26 @@ class Monolog_Helper_Log
 	 */
 	public static function get($name = "")
 	{
+		if (!self::isRegistered($name))
+		{
+			XenForo_Error::logError('Monolog channel [{$index}] is not registered');
+			return;
+		}
+
+		return XenForo_Application::get(self::getChannelName($name));
+	}
+
+	public static function isRegistered($name = "")
+	{
+		return XenForo_Application::isRegistered(self::getChannelName($name));
+	}
+
+	public static function getChannelName($name = "")
+	{
 		// if no name specified, get the name of the default channel instead
 		if (empty($name)) $name = Monolog_Option_Channel::getDefault();
 
-		$index = "monolog-channel-{$name}";
-
-		if (!XenForo_Application::isRegistered($index))
-		{
-			throw new XenForo_Exception('Monolog channel not registered: ' . $index);
-		}
-
-		return XenForo_Application::get($index);
+		return "monolog-channel-{$name}";
 	}
 
 	/**
