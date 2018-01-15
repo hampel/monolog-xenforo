@@ -1,6 +1,6 @@
 {
-    "name": "hampel/monolog-xenforo",
-    "description": "Monolog implementation for XenForo",
+    "name": "Monolog",
+    "description": "Monolog implementation for XenForo 2.0",
     "license": "MIT",
     "authors": [
         {
@@ -9,7 +9,7 @@
         }
     ],
 	"require": {
-		"php": ">=5.4.0",
-		"monolog/monolog": "~1.11"
+		"php": "^7.0",
+		"monolog/monolog": "^1.23"
 	}
 }

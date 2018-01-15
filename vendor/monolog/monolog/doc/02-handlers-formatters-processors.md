@@ -1,110 +1,17 @@
-Monolog - Logging for PHP 5.3+ [![Build Status](https://secure.travis-ci.org/Seldaek/monolog.png)](http://travis-ci.org/Seldaek/monolog)
-==============================
+# Handlers, Formatters and Processors
 
-[![Total Downloads](https://poser.pugx.org/monolog/monolog/downloads.png)](https://packagist.org/packages/monolog/monolog)
-[![Latest Stable Version](https://poser.pugx.org/monolog/monolog/v/stable.png)](https://packagist.org/packages/monolog/monolog)
-[![Reference Status](https://www.versioneye.com/php/monolog:monolog/reference_badge.svg)](https://www.versioneye.com/php/monolog:monolog/references)
+- [Handlers](#handlers)
+  - [Log to files and syslog](#log-to-files-and-syslog)
+  - [Send alerts and emails](#send-alerts-and-emails)
+  - [Log specific servers and networked logging](#log-specific-servers-and-networked-logging)
+  - [Logging in development](#logging-in-development)
+  - [Log to databases](#log-to-databases)
+  - [Wrappers / Special Handlers](#wrappers--special-handlers)
+- [Formatters](#formatters)
+- [Processors](#processors)
+- [Third Party Packages](#third-party-packages)
 
-
-Monolog sends your logs to files, sockets, inboxes, databases and various
-web services. See the complete list of handlers below. Special handlers
-allow you to build advanced logging strategies.
-
-This library implements the [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
-interface that you can type-hint against in your own libraries to keep
-a maximum of interoperability. You can also use it in your applications to
-make sure you can always use another compatible logger at a later time.
-As of 1.11.0 Monolog public APIs will also accept PSR-3 log levels.
-Internally Monolog still uses its own level scheme since it predates PSR-3.
-
-Usage
------
-
-Install the latest version with `composer require monolog/monolog`
-
-```php
-<?php
-
-use Monolog\Logger;
-use Monolog\Handler\StreamHandler;
-
-// create a log channel
-$log = new Logger('name');
-$log->pushHandler(new StreamHandler('path/to/your.log', Logger::WARNING));
-
-// add records to the log
-$log->addWarning('Foo');
-$log->addError('Bar');
-```
-
-Core Concepts
--------------
-
-Every `Logger` instance has a channel (name) and a stack of handlers. Whenever
-you add a record to the logger, it traverses the handler stack. Each handler
-decides whether it fully handled the record, and if so, the propagation of the
-record ends there.
-
-This allows for flexible logging setups, for example having a `StreamHandler` at
-the bottom of the stack that will log anything to disk, and on top of that add
-a `MailHandler` that will send emails only when an error message is logged.
-Handlers also have a `$bubble` property which defines whether they block the
-record or not if they handled it. In this example, setting the `MailHandler`'s
-`$bubble` argument to false means that records handled by the `MailHandler` will
-not propagate to the `StreamHandler` anymore.
-
-You can create many `Logger`s, each defining a channel (e.g.: db, request,
-router, ..) and each of them combining various handlers, which can be shared
-or not. The channel is reflected in the logs and allows you to easily see or
-filter records.
-
-Each Handler also has a Formatter, a default one with settings that make sense
-will be created if you don't set one. The formatters normalize and format
-incoming records so that they can be used by the handlers to output useful
-information.
-
-Custom severity levels are not available. Only the eight
-[RFC 5424](http://tools.ietf.org/html/rfc5424) levels (debug, info, notice,
-warning, error, critical, alert, emergency) are present for basic filtering
-purposes, but for sorting and other use cases that would require
-flexibility, you should add Processors to the Logger that can add extra
-information (tags, user ip, ..) to the records before they are handled.
-
-Log Levels
-----------
-
-Monolog supports the logging levels described by [RFC 5424](http://tools.ietf.org/html/rfc5424).
-
-- **DEBUG** (100): Detailed debug information.
-
-- **INFO** (200): Interesting events. Examples: User logs in, SQL logs.
-
-- **NOTICE** (250): Normal but significant events.
-
-- **WARNING** (300): Exceptional occurrences that are not errors. Examples:
-  Use of deprecated APIs, poor use of an API, undesirable things that are not
-  necessarily wrong.
-
-- **ERROR** (400): Runtime errors that do not require immediate action but
-  should typically be logged and monitored.
-
-- **CRITICAL** (500): Critical conditions. Example: Application component
-  unavailable, unexpected exception.
-
-- **ALERT** (550): Action must be taken immediately. Example: Entire website
-  down, database unavailable, etc. This should trigger the SMS alerts and wake
-  you up.
-
-- **EMERGENCY** (600): Emergency: system is unusable.
-
-Docs
-====
-
-**See the `doc` directory for more detailed documentation.
-The following is only a list of all parts that come with Monolog.**
-
-Handlers
---------
+## Handlers
 
 ### Log to files and syslog
 
@@ -125,14 +32,17 @@ Handlers
 - _PushoverHandler_: Sends mobile notifications via the [Pushover](https://www.pushover.net/) API.
 - _HipChatHandler_: Logs records to a [HipChat](http://hipchat.com) chat room using its API.
 - _FlowdockHandler_: Logs records to a [Flowdock](https://www.flowdock.com/) account.
-- _SlackHandler_: Logs records to a [Slack](https://www.slack.com/) account.
+- _SlackHandler_: Logs records to a [Slack](https://www.slack.com/) account using the Slack API.
+- _SlackbotHandler_: Logs records to a [Slack](https://www.slack.com/) account using the Slackbot incoming hook.
+- _SlackWebhookHandler_: Logs records to a [Slack](https://www.slack.com/) account using Slack Webhooks.
 - _MandrillHandler_: Sends emails via the Mandrill API using a [`Swift_Message`](http://swiftmailer.org/) instance.
 - _FleepHookHandler_: Logs records to a [Fleep](https://fleep.io/) conversation using Webhooks.
+- _IFTTTHandler_: Notifies an [IFTTT](https://ifttt.com/maker) trigger with the log channel, level name and message.
 
 ### Log specific servers and networked logging
 
 - _SocketHandler_: Logs records to [sockets](http://php.net/fsockopen), use this
-  for UNIX and TCP sockets. See an [example](https://github.com/Seldaek/monolog/blob/master/doc/sockets.md).
+  for UNIX and TCP sockets. See an [example](sockets.md).
 - _AmqpHandler_: Logs records to an [amqp](http://www.amqp.org/) compatible
   server. Requires the [php-amqp](http://pecl.php.net/package/amqp) extension (1.0+).
 - _GelfHandler_: Logs records to a [Graylog2](http://www.graylog2.org) server.
@@ -154,6 +64,8 @@ Handlers
   inline `console` messages within Chrome.
 - _BrowserConsoleHandler_: Handler to send logs to browser's Javascript `console` with
   no browser extension required. Most browsers supporting `console` API are supported.
+- _PHPConsoleHandler_: Handler for [PHP Console](https://chrome.google.com/webstore/detail/php-console/nfhmhhlpfleoednkpnnnkolmclajemef), providing
+  inline `console` and notification popup messages within Chrome.
 
 ### Log to databases
 
@@ -175,6 +87,16 @@ Handlers
   when it happens you will have the full information, including debug and info
   records. This provides you with all the information you need, but only when
   you need it.
+- _DeduplicationHandler_: Useful if you are sending notifications or emails
+  when critical errors occur. It takes a logger as parameter and will
+  accumulate log records of all levels until the end of the request (or
+  `flush()` is called). At that point it delivers all records to the handler
+  it wraps, but only if the records are unique over a given time period
+  (60seconds by default). If the records are duplicates they are simply
+  discarded. The main use of this is in case of critical failure like if your
+  database is unreachable for example all your requests will fail and that
+  can result in a lot of notifications being sent. Adding this handler reduces
+  the amount of notifications to a manageable level.
 - _WhatFailureGroupHandler_: This handler extends the _GroupHandler_ ignoring
    exceptions raised by each child handler. This allows you to ignore issues
    where a remote tcp connection may have died but you do not want your entire
@@ -195,9 +117,10 @@ Handlers
 - _PsrHandler_: Can be used to forward log records to an existing PSR-3 logger
 - _TestHandler_: Used for testing, it records everything that is sent to it and
   has accessors to read out the information.
+- _HandlerWrapper_: A simple handler wrapper you can inherit from to create
+ your own wrappers easily.
 
-Formatters
-----------
+## Formatters
 
 - _LineFormatter_: Formats a log record into a one-line string.
 - _HtmlFormatter_: Used to format log records into a human readable html table, mainly suitable for emails.
@@ -213,9 +136,9 @@ Formatters
 - _FlowdockFormatter_: Used to format log records into Flowdock messages, only useful for the FlowdockHandler.
 - _MongoDBFormatter_: Converts \DateTime instances to \MongoDate and objects recursively to arrays, only useful with the MongoDBHandler.
 
-Processors
-----------
+## Processors
 
+- _PsrLogMessageProcessor_: Processes a log record's message according to PSR-3 rules, replacing `{foo}` with the value from `$context['foo']`.
 - _IntrospectionProcessor_: Adds the line/file/class/method from which the log call originated.
 - _WebProcessor_: Adds the current request URI, request method and client IP to a log record.
 - _MemoryUsageProcessor_: Adds the current memory usage to a log record.
@@ -225,68 +148,10 @@ Processors
 - _GitProcessor_: Adds the current git branch and commit to a log record.
 - _TagProcessor_: Adds an array of predefined tags to a log record.
 
-Utilities
----------
-
-- _Registry_: The `Monolog\Registry` class lets you configure global loggers that you
-  can then statically access from anywhere. It is not really a best practice but can
-  help in some older codebases or for ease of use.
-- _ErrorHandler_: The `Monolog\ErrorHandler` class allows you to easily register
-  a Logger instance as an exception handler, error handler or fatal error handler.
-- _ErrorLevelActivationStrategy_: Activates a FingersCrossedHandler when a certain log
-  level is reached.
-- _ChannelLevelActivationStrategy_: Activates a FingersCrossedHandler when a certain
-  log level is reached, depending on which channel received the log record.
-
-Third Party Packages
---------------------
+## Third Party Packages
 
 Third party handlers, formatters and processors are
 [listed in the wiki](https://github.com/Seldaek/monolog/wiki/Third-Party-Packages). You
 can also add your own there if you publish one.
 
-About
-=====
-
-Requirements
-------------
-
-- Monolog works with PHP 5.3 or above, and is also tested to work with HHVM.
-
-Submitting bugs and feature requests
-------------------------------------
-
-Bugs and feature request are tracked on [GitHub](https://github.com/Seldaek/monolog/issues)
-
-Frameworks Integration
-----------------------
-
-- Frameworks and libraries using [PSR-3](https://github.com/php-fig/fig-standards/blob/master/accepted/PSR-3-logger-interface.md)
-  can be used very easily with Monolog since it implements the interface.
-- [Symfony2](http://symfony.com) comes out of the box with Monolog.
-- [Silex](http://silex.sensiolabs.org/) comes out of the box with Monolog.
-- [Laravel 4 & 5](http://laravel.com/) come out of the box with Monolog.
-- [PPI](http://www.ppi.io/) comes out of the box with Monolog.
-- [CakePHP](http://cakephp.org/) is usable with Monolog via the [cakephp-monolog](https://github.com/jadb/cakephp-monolog) plugin.
-- [Slim](http://www.slimframework.com/) is usable with Monolog via the [Slim-Monolog](https://github.com/Flynsarmy/Slim-Monolog) log writer.
-- [XOOPS 2.6](http://xoops.org/) comes out of the box with Monolog.
-- [Aura.Web_Project](https://github.com/auraphp/Aura.Web_Project) comes out of the box with Monolog.
-- [Nette Framework](http://nette.org/en/) can be used with Monolog via [Kdyby/Monolog](https://github.com/Kdyby/Monolog) extension.
-- [Proton Micro Framework](https://github.com/alexbilbie/Proton) comes out of the box with Monolog. 
-
-Author
-------
-
-Jordi Boggiano - <j.boggiano@seld.be> - <http://twitter.com/seldaek><br />
-See also the list of [contributors](https://github.com/Seldaek/monolog/contributors) which participated in this project.
-
-License
--------
-
-Monolog is licensed under the MIT License - see the `LICENSE` file for details
-
-Acknowledgements
-----------------
-
-This library is heavily inspired by Python's [Logbook](http://packages.python.org/Logbook/)
-library, although most concepts have been adjusted to fit to the PHP world.
+&larr; [Usage](01-usage.md) |  [Utility classes](03-utilities.md) &rarr;
