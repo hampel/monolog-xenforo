@@ -2,8 +2,8 @@
     "legacy_addon_id": "Monolog",
     "title": "Monolog Logging Service",
     "description": "Monolog logger implementation for XenForo 2.0",
-    "version_id": 1,
-    "version_string": "0.1.0",
+    "version_id": 2,
+    "version_string": "2.0.0",
     "dev": "Simon Hampel",
     "dev_url": "https://bitbucket.org/hampel/",
     "faq_url": "",
@@ -18,5 +18,5 @@
             "PHP 7.0.0+"
         ]
     },
-    "icon": "file-text-o"
+    "icon": "fa-file-text-o"
 }
