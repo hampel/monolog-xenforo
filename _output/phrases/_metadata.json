@@ -1,0 +1,50 @@
+{
+    "admin_navigation.testMonolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "08d584eb08793f685e8bedf7b97f4a31"
+    },
+    "monolog_all_tests_passed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e55222a4cbb7e5dcf5e9eec80a96b78b"
+    },
+    "monolog_log_could_not_be_processed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "585eb1061415bb18d7f40cfda82061fa"
+    },
+    "monolog_log_successfully_processed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "6b7e76a3253d913174290c6418d4a899"
+    },
+    "monolog_test.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "0cbc6611f5540bd0809a388dc95a615b"
+    },
+    "monolog_test_logger.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "0b3540e5c7024aa94f39e95c15cb0ebf"
+    },
+    "monolog_test_monolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "08d584eb08793f685e8bedf7b97f4a31"
+    },
+    "monolog_this_test_could_not_be_run.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "92c98cc7ec1bbafc0a4a4a64c4125870"
+    }
+}
