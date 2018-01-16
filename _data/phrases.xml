@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phrases>
+  <phrase title="admin_navigation.testMonolog" version_id="2" version_string="2.0.0"><![CDATA[Test Monolog]]></phrase>
+  <phrase title="monolog_all_tests_passed" version_id="2" version_string="2.0.0"><![CDATA[All tests passed]]></phrase>
+  <phrase title="monolog_log_could_not_be_processed" version_id="2" version_string="2.0.0"><![CDATA[Log could not be processed]]></phrase>
+  <phrase title="monolog_log_successfully_processed" version_id="2" version_string="2.0.0"><![CDATA[Log successfully processed]]></phrase>
+  <phrase title="monolog_test" version_id="2" version_string="2.0.0"><![CDATA[Test]]></phrase>
+  <phrase title="monolog_test_logger" version_id="2" version_string="2.0.0"><![CDATA[Logger test]]></phrase>
+  <phrase title="monolog_test_monolog" version_id="2" version_string="2.0.0"><![CDATA[Test Monolog]]></phrase>
+  <phrase title="monolog_this_test_could_not_be_run" version_id="2" version_string="2.0.0"><![CDATA[This test could not be run]]></phrase>
+</phrases>

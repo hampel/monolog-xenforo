@@ -1,4 +1,6 @@
-<xf:title>{{ phrase('monolog_test_monolog') }}</xf:title>
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
+  <template type="admin" title="monolog_tools_test_monolog" version_id="2" version_string="2.0.0"><![CDATA[<xf:title>{{ phrase('monolog_test_monolog') }}</xf:title>
 
 <xf:if is="$messages">
 	<xf:foreach loop="$messages" value="$message">
@@ -15,4 +17,5 @@
 		<xf:submitrow submit="{{ phrase('monolog_test') }}" />
 	</div>
 	<xf:hiddenval name="test">Monolog:LoggerTest</xf:hiddenval>
-</xf:form>
+</xf:form>]]></template>
+</templates>
