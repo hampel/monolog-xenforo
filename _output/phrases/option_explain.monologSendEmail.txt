@@ -1,0 +1,1 @@
+Send an email containing log messages. Enter the recipient address for log messages, or leave blank to use the board Contact email address.

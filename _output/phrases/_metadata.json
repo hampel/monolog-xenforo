@@ -93,13 +93,13 @@
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
-        "hash": "e0d50d706a7e4202e44a2b0be7f57853"
+        "hash": "4bf2f0af2e40060db1666e3d23cd3565"
     },
     "option.monologSendEmail.txt": {
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
-        "hash": "c9f8da277cc33b904b2147a6d9c29ef5"
+        "hash": "86250c63885f24ad76cbec3c22fa2307"
     },
     "option_explain.monologAddVisitorExtra.txt": {
         "global_cache": false,
@@ -141,7 +141,7 @@
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
-        "hash": "825ac8ae74e6129e56ffefc47e620e28"
+        "hash": "f5eb49684c3009b9ef48a9d4b1f0dece"
     },
     "option_explain.monologSendEmail.txt": {
         "global_cache": false,
