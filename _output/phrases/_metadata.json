@@ -65,6 +65,12 @@
         "version_string": "2.0.0",
         "hash": "3fdf0b06860a8e8c04c90bacbb6bee9e"
     },
+    "option.monologEmailDeduplicationTimeout.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "401cf9fd0c175e0fd37b345ddc9b6abc"
+    },
     "option.monologEmailMinimumLogLevel.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -106,6 +112,12 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "c78b3df001e6943e3567932a4bba17be"
+    },
+    "option_explain.monologEmailDeduplicationTimeout.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "8fc81957c7987e149bbac8414a41e1d5"
     },
     "option_explain.monologEmailMinimumLogLevel.txt": {
         "global_cache": false,

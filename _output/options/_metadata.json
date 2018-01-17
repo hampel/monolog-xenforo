@@ -5,6 +5,9 @@
     "monologAddWebExtra.json": {
         "hash": "d77da0f0acb1597db467fbca58dd131b"
     },
+    "monologEmailDeduplicationTimeout.json": {
+        "hash": "7200b8b80fb48f585b7ca6dc1b3da823"
+    },
     "monologEmailMinimumLogLevel.json": {
         "hash": "7b0c7cf27f1547e24467e2b93af33f34"
     },
