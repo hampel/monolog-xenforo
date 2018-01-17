@@ -1,5 +1,6 @@
 <?php namespace Monolog\XF\SubContainer;
 
+use Monolog\Option\EmailMinimumLogLevel;
 use Monolog\Option\EmailSubject;
 use Monolog\Option\SendEmail;
 use XF\Tfa\Email;
@@ -42,13 +43,16 @@ class MonologApi extends AbstractSubContainer
 			$tempDir = File::getTempDir();
 			$subject = EmailSubject::get();
 			$sendTo = SendEmail::getAddress();
+			$logLevel = EmailMinimumLogLevel::get();
 
 			$message = $this->getSwiftMessage($subject, $sendTo);
 			$swiftmailer = \Swift_Mailer::newInstance($this->app->mailer()->getDefaultTransport());
 
-			$handler = new SwiftMailerHandler($swiftmailer, $message, Logger::ERROR);
+			// TODO: add minimum log level option for emails
+			// TODO: add log level dedup timeout for emails
+			$handler = new SwiftMailerHandler($swiftmailer, $message, $logLevel);
 
-			return new DeduplicationHandler($handler, $tempDir.'/monolog-dedup-swiftmailer.log', Logger::ERROR, 300);
+			return new DeduplicationHandler($handler, $tempDir.'/monolog-dedup-swiftmailer.log', $logLevel, 300);
 		};
 
 		$container['processor.visitor'] = function ($c)
