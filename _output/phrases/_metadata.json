@@ -46,5 +46,65 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "92c98cc7ec1bbafc0a4a4a64c4125870"
+    },
+    "option.monologAddVisitorExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "48fae0f564be4306abbbcdbf5a3c30d6"
+    },
+    "option.monologAddWebExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "3fdf0b06860a8e8c04c90bacbb6bee9e"
+    },
+    "option.monologFileMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "ecfcd79e08ddc5c6168ca4b720412279"
+    },
+    "option.monologLogFile.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e0d50d706a7e4202e44a2b0be7f57853"
+    },
+    "option_explain.monologAddVisitorExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "37f488e5206187055a9f03c9471494e6"
+    },
+    "option_explain.monologAddWebExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "c78b3df001e6943e3567932a4bba17be"
+    },
+    "option_explain.monologFileMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e896bca993113bb8d774fb5fa409e613"
+    },
+    "option_explain.monologLogFile.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "825ac8ae74e6129e56ffefc47e620e28"
+    },
+    "option_group.monolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "779e44f1339b9ebee928932e4e80729c"
+    },
+    "option_group_description.monolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "f6766561edba60672ff0a855a6976b59"
     }
 }

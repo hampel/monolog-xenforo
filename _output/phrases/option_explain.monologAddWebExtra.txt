@@ -1,0 +1,1 @@
+Add extra data to log entries containing the current request URI, request method and client IP

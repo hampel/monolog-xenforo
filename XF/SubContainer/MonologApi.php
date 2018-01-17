@@ -1,9 +1,13 @@
 <?php namespace Monolog\XF\SubContainer;
 
+use Monolog\Option\AddWebExtra;
 use XF\Util\File;
 use Monolog\Logger;
+use Monolog\Option\LogFile;
 use Monolog\Handler\StreamHandler;
+use Monolog\Option\AddVisitorExtra;
 use Monolog\Processor\WebProcessor;
+use Monolog\Option\FileMinimumLogLevel;
 use XF\SubContainer\AbstractSubContainer;
 
 class MonologApi extends AbstractSubContainer
@@ -17,8 +21,13 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handler.stream'] = function($c)
 		{
+			$logpath = LogFile::get();
+			if (empty($logpath)) return false;
+
+			$minimumLogLevel = FileMinimumLogLevel::get();
+
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
-			$handler = new StreamHandler($internalDataDir.'/monolog.log', Logger::DEBUG);
+			$handler = new StreamHandler("{$internalDataDir}/{$logpath}", $minimumLogLevel);
 			return $handler;
 		};
 
@@ -40,9 +49,18 @@ class MonologApi extends AbstractSubContainer
 		$container['logger.default'] = function($c)
 		{
 			$logger = new Logger('xenforo');
-			$logger->pushHandler($c['handler.stream']);
-			$logger->pushProcessor($c['processor.visitor']);
-			$logger->pushProcessor(new WebProcessor());
+			if ($c['handler.stream'] !== false)
+			{
+				$logger->pushHandler($c['handler.stream']);
+			}
+			if (AddVisitorExtra::get())
+			{
+				$logger->pushProcessor($c['processor.visitor']);
+			}
+			if (AddWebExtra::get())
+			{
+				$logger->pushProcessor(new WebProcessor());
+			}
 			return $logger;
 		};
 	}
