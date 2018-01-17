@@ -1,6 +1,14 @@
 CHANGELOG
 =========
 
+2.1.0 (2018-01-17)
+------------------
+
+* added helper class for logging
+* added support for emailing log messages
+* added configuration options
+* simplified logger test
+
 2.0.0 (2018-01-16)
 ------------------
 
