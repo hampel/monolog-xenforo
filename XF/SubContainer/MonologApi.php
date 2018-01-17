@@ -50,7 +50,7 @@ class MonologApi extends AbstractSubContainer
 
 			$handler = new SwiftMailerHandler($swiftmailer, $message, $logLevel);
 
-			return new DeduplicationHandler($handler, $tempDir.'/monolog-dedup-swiftmailer.log', $logLevel, $dedupTimeout);
+			return new DeduplicationHandler($handler, "{$tempDir}/monolog-dedup-swiftmailer.log", $logLevel, $dedupTimeout);
 		};
 
 		$container['processor.visitor'] = function ($c)
