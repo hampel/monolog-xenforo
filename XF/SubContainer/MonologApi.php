@@ -1,22 +1,20 @@
 <?php namespace Monolog\XF\SubContainer;
 
-use Monolog\Option\EmailDeduplicationTimeout;
-use Monolog\Option\EmailMinimumLogLevel;
-use Monolog\Option\EmailSubject;
-use Monolog\Option\SendEmail;
-use XF\Tfa\Email;
 use XF\Util\File;
 use Monolog\Logger;
 use Monolog\Option\LogFile;
+use Monolog\Option\SendEmail;
 use Monolog\Option\AddWebExtra;
+use Monolog\Option\EmailSubject;
 use Monolog\Handler\StreamHandler;
 use Monolog\Option\AddVisitorExtra;
 use Monolog\Processor\WebProcessor;
 use Monolog\Option\FileMinimumLogLevel;
+use Monolog\Option\EmailMinimumLogLevel;
 use Monolog\Handler\SwiftMailerHandler;
 use Monolog\Handler\DeduplicationHandler;
 use XF\SubContainer\AbstractSubContainer;
-use Zend\Validator\EmailAddress;
+use Monolog\Option\EmailDeduplicationTimeout;
 
 class MonologApi extends AbstractSubContainer
 {
