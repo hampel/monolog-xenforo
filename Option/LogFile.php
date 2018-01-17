@@ -4,8 +4,16 @@ use XF\Option\AbstractOption;
 
 class LogFile extends AbstractOption
 {
-	public static function get()
+	public static function isEnabled()
 	{
-		return \XF::options()->monologLogFile;
+		return \XF::options()->monologLogFile['enabled'] !== false;
+	}
+
+
+	public static function getLogFile()
+	{
+		if (!self::isEnabled()) return '';
+
+		return \XF::options()->monologLogFile['logfile'];
 	}
 }

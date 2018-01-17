@@ -27,13 +27,11 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handler.stream'] = function($c)
 		{
-			$logpath = LogFile::get();
-			if (empty($logpath)) return false;
-
-			$minimumLogLevel = FileMinimumLogLevel::get();
+			$logfile = LogFile::getLogFile();
+			$logLevel = FileMinimumLogLevel::get();
 
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
-			$handler = new StreamHandler("{$internalDataDir}/{$logpath}", $minimumLogLevel);
+			$handler = new StreamHandler("{$internalDataDir}/{$logfile}", $logLevel);
 			return $handler;
 		};
 
@@ -71,7 +69,7 @@ class MonologApi extends AbstractSubContainer
 		$container['logger.default'] = function($c)
 		{
 			$logger = new Logger('xenforo');
-			if ($c['handler.stream'] !== false)
+			if (LogFile::isEnabled() && LogFile::getLogFile() !== '')
 			{
 				$logger->pushHandler($c['handler.stream']);
 			}
