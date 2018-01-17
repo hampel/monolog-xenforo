@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<options>
+  <option option_id="monologAddVisitorExtra" edit_format="onoff" data_type="boolean">
+    <default_value>true</default_value>
+    <relation group_id="monolog" display_order="1001"/>
+  </option>
+  <option option_id="monologAddWebExtra" edit_format="onoff" data_type="boolean">
+    <default_value>0</default_value>
+    <relation group_id="monolog" display_order="1002"/>
+  </option>
+  <option option_id="monologEmailDeduplicationTimeout" edit_format="spinbox" data_type="unsigned_integer">
+    <default_value>300</default_value>
+    <relation group_id="monolog" display_order="104"/>
+  </option>
+  <option option_id="monologEmailMinimumLogLevel" edit_format="callback" data_type="unsigned_integer">
+    <default_value>400</default_value>
+    <edit_format_params>Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
+    <relation group_id="monolog" display_order="103"/>
+  </option>
+  <option option_id="monologEmailSubject" edit_format="textbox" data_type="string">
+    <default_value>Monolog [{board}]</default_value>
+    <relation group_id="monolog" display_order="102"/>
+  </option>
+  <option option_id="monologFileMinimumLogLevel" edit_format="callback" data_type="unsigned_integer">
+    <default_value>300</default_value>
+    <edit_format_params>Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
+    <relation group_id="monolog" display_order="2"/>
+  </option>
+  <option option_id="monologLogFile" edit_format="onofftextbox" data_type="array">
+    <default_value>{"enabled":"1","logfile":"monolog.log"}</default_value>
+    <edit_format_params>onoff=enabled
+value=logfile
+type=textbox
+default=monolog.log</edit_format_params>
+    <sub_options>enabled
+logfile</sub_options>
+    <relation group_id="monolog" display_order="1"/>
+  </option>
+  <option option_id="monologSendEmail" edit_format="onofftextbox" data_type="array">
+    <default_value>{"enabled":"0","email":""}</default_value>
+    <edit_format_params>onoff=enabled
+value=email
+type=textbox
+placeholder={{ phrase('monolog_enter_recipient_email...') }}</edit_format_params>
+    <sub_options>enabled
+email</sub_options>
+    <relation group_id="monolog" display_order="101"/>
+  </option>
+</options>

@@ -2,10 +2,31 @@
 <phrases>
   <phrase title="admin_navigation.testMonolog" version_id="2" version_string="2.0.0"><![CDATA[Test Monolog]]></phrase>
   <phrase title="monolog_all_tests_passed" version_id="2" version_string="2.0.0"><![CDATA[All tests passed]]></phrase>
+  <phrase title="monolog_enter_recipient_email" version_id="2" version_string="2.0.0"><![CDATA[Enter recipient email]]></phrase>
   <phrase title="monolog_log_could_not_be_processed" version_id="2" version_string="2.0.0"><![CDATA[Log could not be processed]]></phrase>
   <phrase title="monolog_log_successfully_processed" version_id="2" version_string="2.0.0"><![CDATA[Log successfully processed]]></phrase>
   <phrase title="monolog_test" version_id="2" version_string="2.0.0"><![CDATA[Test]]></phrase>
   <phrase title="monolog_test_logger" version_id="2" version_string="2.0.0"><![CDATA[Logger test]]></phrase>
   <phrase title="monolog_test_monolog" version_id="2" version_string="2.0.0"><![CDATA[Test Monolog]]></phrase>
   <phrase title="monolog_this_test_could_not_be_run" version_id="2" version_string="2.0.0"><![CDATA[This test could not be run]]></phrase>
+  <phrase title="option.monologAddVisitorExtra" version_id="2" version_string="2.0.0"><![CDATA[Add Visitor Extra Data]]></phrase>
+  <phrase title="option.monologAddWebExtra" version_id="2" version_string="2.0.0"><![CDATA[Add Web Extra Data]]></phrase>
+  <phrase title="option.monologEmailDeduplicationTimeout" version_id="2" version_string="2.0.0"><![CDATA[Email Deduplication Timeout]]></phrase>
+  <phrase title="option.monologEmailMinimumLogLevel" version_id="2" version_string="2.0.0"><![CDATA[Email Minimum Log Level]]></phrase>
+  <phrase title="option.monologEmailSubject" version_id="2" version_string="2.0.0"><![CDATA[Email Subject]]></phrase>
+  <phrase title="option.monologFileMinimumLogLevel" version_id="2" version_string="2.0.0"><![CDATA[Log File Minimum Log Level]]></phrase>
+  <phrase title="option.monologLogFile" version_id="2" version_string="2.0.0"><![CDATA[Send Logs to File]]></phrase>
+  <phrase title="option.monologSendEmail" version_id="2" version_string="2.0.0"><![CDATA[Send Logs via Email]]></phrase>
+  <phrase title="option_explain.monologAddVisitorExtra" version_id="2" version_string="2.0.0"><![CDATA[Add extra data to log entries containing visitor information user_id and username]]></phrase>
+  <phrase title="option_explain.monologAddWebExtra" version_id="2" version_string="2.0.0"><![CDATA[Add extra data to log entries containing the current request URI, request method and client IP]]></phrase>
+  <phrase title="option_explain.monologEmailDeduplicationTimeout" version_id="2" version_string="2.0.0"><![CDATA[Time period (in seconds) for which to not send duplicate log messages. The email log delivery system checks for duplicate log messages and discards duplicates received within the specified time period to prevent a flood of emails in the case of a critical failure.]]></phrase>
+  <phrase title="option_explain.monologEmailMinimumLogLevel" version_id="2" version_string="2.0.0"><![CDATA[The minimum log level that will be included in emails - refer to <a href="https://github.com/Seldaek/monolog/blob/master/doc/01-usage.md#log-levels" target="_blank">Log Levels</a> for more information.]]></phrase>
+  <phrase title="option_explain.monologEmailSubject" version_id="2" version_string="2.0.0"><![CDATA[The subject line that log emails should use.<br />
+<br />
+Use the textbox to specify a format for the subject line. <b>{board}</b> will be replaced with the board title.]]></phrase>
+  <phrase title="option_explain.monologFileMinimumLogLevel" version_id="2" version_string="2.0.0"><![CDATA[The minimum log level that will be included in the log file - refer to <a href="https://github.com/Seldaek/monolog/blob/master/doc/01-usage.md#log-levels" target="_blank">Log Levels</a> for more information.]]></phrase>
+  <phrase title="option_explain.monologLogFile" version_id="2" version_string="2.0.0"><![CDATA[Store logs in a file. Enter the relative path for the log file. Paths should be relative to the internal_data directory and must be writable by the server.]]></phrase>
+  <phrase title="option_explain.monologSendEmail" version_id="2" version_string="2.0.0"><![CDATA[Send an email containing log messages. Enter the recipient address for log messages, or leave blank to use the board Contact email address.]]></phrase>
+  <phrase title="option_group.monolog" version_id="2" version_string="2.0.0"><![CDATA[Monolog]]></phrase>
+  <phrase title="option_group_description.monolog" version_id="2" version_string="2.0.0"><![CDATA[Monolog Llogging Service]]></phrase>
 </phrases>
