@@ -11,6 +11,12 @@
         "version_string": "2.0.0",
         "hash": "e55222a4cbb7e5dcf5e9eec80a96b78b"
     },
+    "monolog_enter_recipient_email.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
+    },
     "monolog_log_could_not_be_processed.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -59,6 +65,12 @@
         "version_string": "2.0.0",
         "hash": "3fdf0b06860a8e8c04c90bacbb6bee9e"
     },
+    "option.monologEmailSubject.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e3868f7e6e90b6b55f60ac7d71dcb8ce"
+    },
     "option.monologFileMinimumLogLevel.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -70,6 +82,12 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "e0d50d706a7e4202e44a2b0be7f57853"
+    },
+    "option.monologSendEmail.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "c9f8da277cc33b904b2147a6d9c29ef5"
     },
     "option_explain.monologAddVisitorExtra.txt": {
         "global_cache": false,
@@ -83,6 +101,12 @@
         "version_string": "2.0.0",
         "hash": "c78b3df001e6943e3567932a4bba17be"
     },
+    "option_explain.monologEmailSubject.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "5c84ca3fc5e704cf6dcbff8685bcf7bc"
+    },
     "option_explain.monologFileMinimumLogLevel.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -94,6 +118,12 @@
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "825ac8ae74e6129e56ffefc47e620e28"
+    },
+    "option_explain.monologSendEmail.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "f29d53dd4212127c26363fc575e4c34a"
     },
     "option_group.monolog.txt": {
         "global_cache": false,

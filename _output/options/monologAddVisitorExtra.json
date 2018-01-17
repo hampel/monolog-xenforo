@@ -7,6 +7,6 @@
     "validation_method": "",
     "default_value": "true",
     "relations": {
-        "monolog": 3
+        "monolog": 1001
     }
 }

@@ -1,14 +1,20 @@
 <?php namespace Monolog\XF\SubContainer;
 
-use Monolog\Option\AddWebExtra;
+use Monolog\Option\EmailSubject;
+use Monolog\Option\SendEmail;
+use XF\Tfa\Email;
 use XF\Util\File;
 use Monolog\Logger;
 use Monolog\Option\LogFile;
+use Monolog\Option\AddWebExtra;
 use Monolog\Handler\StreamHandler;
 use Monolog\Option\AddVisitorExtra;
 use Monolog\Processor\WebProcessor;
 use Monolog\Option\FileMinimumLogLevel;
+use Monolog\Handler\SwiftMailerHandler;
+use Monolog\Handler\DeduplicationHandler;
 use XF\SubContainer\AbstractSubContainer;
+use Zend\Validator\EmailAddress;
 
 class MonologApi extends AbstractSubContainer
 {
@@ -29,6 +35,20 @@ class MonologApi extends AbstractSubContainer
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
 			$handler = new StreamHandler("{$internalDataDir}/{$logpath}", $minimumLogLevel);
 			return $handler;
+		};
+
+		$container['handler.swiftmailer'] = function($c)
+		{
+			$tempDir = File::getTempDir();
+			$subject = EmailSubject::get();
+			$sendTo = SendEmail::getAddress();
+
+			$message = $this->getSwiftMessage($subject, $sendTo);
+			$swiftmailer = \Swift_Mailer::newInstance($this->app->mailer()->getDefaultTransport());
+
+			$handler = new SwiftMailerHandler($swiftmailer, $message, Logger::ERROR);
+
+			return new DeduplicationHandler($handler, $tempDir.'/monolog-dedup-swiftmailer.log', Logger::ERROR, 300);
 		};
 
 		$container['processor.visitor'] = function ($c)
@@ -52,6 +72,10 @@ class MonologApi extends AbstractSubContainer
 			if ($c['handler.stream'] !== false)
 			{
 				$logger->pushHandler($c['handler.stream']);
+			}
+			if (SendEmail::isEnabled())
+			{
+				$logger->pushHandler($c['handler.swiftmailer']);
 			}
 			if (AddVisitorExtra::get())
 			{
@@ -85,5 +109,14 @@ class MonologApi extends AbstractSubContainer
 	public function visitor()
 	{
 		return $this->container('processor.visitor');
+	}
+
+	public function getSwiftMessage($subject, $to = "", $from = "")
+	{
+		$message = new \Swift_Message($subject);
+		$message->setTo(!empty($to) ? $to : $this->parent['options']['contactEmailAddress']);
+		$message->setFrom(!empty($from) ? $from : $this->parent['options']['defaultEmailAddress']);
+
+		return $message;
 	}
 }

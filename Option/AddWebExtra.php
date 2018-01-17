@@ -1,6 +1,8 @@
 <?php namespace Monolog\Option;
 
-class AddWebExtra
+use XF\Option\AbstractOption;
+
+class AddWebExtra extends AbstractOption
 {
 	public static function get()
 	{

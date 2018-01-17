@@ -1,14 +1,20 @@
 {
     "monologAddVisitorExtra.json": {
-        "hash": "f09f915aafeb792acda1e9bc6053c9a4"
+        "hash": "eb83e901b5a8330afbf5929e6c6ac309"
     },
     "monologAddWebExtra.json": {
-        "hash": "d0a81ddbe624a89e3f2be3019a0235d3"
+        "hash": "d77da0f0acb1597db467fbca58dd131b"
+    },
+    "monologEmailSubject.json": {
+        "hash": "ced648f4184a72a36477669e2d3e3e46"
     },
     "monologFileMinimumLogLevel.json": {
         "hash": "170c140fffe709589477c75c0154528c"
     },
     "monologLogFile.json": {
         "hash": "e6f44ae0f05ea1727de3bf24d92ff360"
+    },
+    "monologSendEmail.json": {
+        "hash": "361df0a79b88fd02285c08c4b6ae3cf2"
     }
 }

@@ -1,6 +1,8 @@
 <?php namespace Monolog\Option;
 
-class AddVisitorExtra
+use XF\Option\AbstractOption;
+
+class AddVisitorExtra extends AbstractOption
 {
 	public static function get()
 	{
