@@ -1,24 +1,21 @@
 <?php namespace Monolog\Test;
 
-use Monolog\Logger;
+use Monolog\Helper\Log;
 
 class LoggerTest extends AbstractTest
 {
 	public function run()
 	{
-		/** @var Logger $logger */
-		$logger = $this->app['monolog']->default();
-
 		$context = ['a' => 'foo', 'b' => 'bar', 'c' => 'baz'];
 
-		$logger->debug('this is a debug message', $context);
-		$logger->info('this is an info message');
-		$logger->notice('this is a notice message');
-		$logger->warning('this is a warning message');
-		$logger->error('this is an error message');
-		$logger->critical('this is a critical message');
-		$logger->alert('this is an alert message');
-		$logger->emergency('this is an emergency message');
+		Log::debug('this is a debug message', $context);
+		Log::info('this is an info message');
+		Log::notice('this is a notice message');
+		Log::warning('this is a warning message');
+		Log::error('this is an error message');
+		Log::critical('this is a critical message');
+		Log::alert('this is an alert message');
+		Log::emergency('this is an emergency message');
 
 		return true;
 	}
