@@ -1,4 +1,4 @@
-<?php namespace Monolog\XF\SubContainer;
+<?php namespace Monolog\SubContainer;
 
 use XF\Util\File;
 use Monolog\Logger;
