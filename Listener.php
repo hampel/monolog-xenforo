@@ -2,7 +2,7 @@
 
 use XF\App;
 use XF\Container;
-use Monolog\XF\SubContainer\MonologApi;
+use Monolog\SubContainer\MonologApi;
 
 class Listener
 {

@@ -1,6 +1,13 @@
 CHANGELOG
 =========
 
+2.1.1 (2018-06-05)
+------------------
+
+* bump version_id to 2004 to avoid conflicts with XF 1.x compatible releases
+* move subcontainer out of XF namespace
+* bugfix - was using the wrong subcontainer name
+
 2.1.0 (2018-01-17)
 ------------------
 

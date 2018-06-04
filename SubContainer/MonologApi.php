@@ -1,4 +1,4 @@
-<?php namespace Monolog\XF\SubContainer;
+<?php namespace Monolog\SubContainer;
 
 use XF\Util\File;
 use Monolog\Logger;
@@ -91,8 +91,7 @@ class MonologApi extends AbstractSubContainer
 
 	public function newChannel($channel)
 	{
-		$mono = $this->container['default'];
-		return $mono->withName($channel);
+		return $this->default()->withName($channel);
 	}
 
 	/** Logger */
