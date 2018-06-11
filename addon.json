@@ -10,12 +10,13 @@
     "support_url": "https://bitbucket.org/hampel/monolog-xenforo/issues",
     "extra_urls": {
         "Git Repository": "https://bitbucket.org/hampel/monolog-xenforo",
-        "Twitter": "https://twitter.com/SimonHampel"
+        "Twitter": "https://twitter.com/SimonHampel",
+        "Monolog": "https://github.com/Seldaek/monolog"
     },
     "require": {
         "php": [
             "7.0",
-            "PHP 7.0.0+"
+            "PHP 7.0+"
         ]
     },
     "icon": "fa-file-text-o"
