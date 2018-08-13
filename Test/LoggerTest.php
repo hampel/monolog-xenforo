@@ -1,11 +1,19 @@
-<?php namespace Monolog\Test;
+<?php namespace Hampel\Monolog\Test;
 
-use Monolog\Helper\Log;
+use Hampel\Monolog\Helper\Log;
+use Hampel\Monolog\SubContainer\MonologApi;
 
 class LoggerTest extends AbstractTest
 {
 	public function run()
 	{
+		/** @var MonologApi $monolog */
+		$monolog = $this->app->container('monolog');
+		$logger = $monolog->logger('monolog-test');
+		$stream = $monolog->stream();
+		$logger->pushHandler($stream);
+		$logger->info('this is an info message on the monolog-test channel');
+
 		$context = ['a' => 'foo', 'b' => 'bar', 'c' => 'baz'];
 
 		Log::debug('this is a debug message', $context);

@@ -1,41 +1,34 @@
-<?php namespace Monolog\SubContainer;
+<?php namespace Hampel\Monolog\SubContainer;
 
 use XF\Util\File;
-use Monolog\Logger;
-use Monolog\Option\LogFile;
-use Monolog\Option\SendEmail;
-use Monolog\Option\AddWebExtra;
-use Monolog\Option\EmailSubject;
-use Monolog\Handler\StreamHandler;
-use Monolog\Option\AddVisitorExtra;
-use Monolog\Processor\WebProcessor;
-use Monolog\Option\FileMinimumLogLevel;
-use Monolog\Handler\SwiftMailerHandler;
-use Monolog\Option\EmailMinimumLogLevel;
-use Monolog\Handler\DeduplicationHandler;
+use XF\Container;
+use Hampel\Monolog\Option\LogFile;
+use Hampel\Monolog\Option\SendEmail;
+use Hampel\Monolog\Option\AddWebExtra;
+use Hampel\Monolog\Option\EmailSubject;
 use XF\SubContainer\AbstractSubContainer;
-use Monolog\Option\EmailDeduplicationTimeout;
+use Hampel\Monolog\Option\AddVisitorExtra;
+use Hampel\Monolog\Option\FileMinimumLogLevel;
+use Hampel\Monolog\Option\EmailMinimumLogLevel;
+use Hampel\Monolog\Option\EmailDeduplicationTimeout;
 
 class MonologApi extends AbstractSubContainer
 {
-	/** @var Logger */
-	protected $monolog;
-
 	public function initialize()
 	{
 		$container = $this->container;
 
-		$container['handler.stream'] = function($c)
+		$container['handler.stream'] = function(Container $c)
 		{
 			$logfile = LogFile::getLogFile();
 			$logLevel = FileMinimumLogLevel::get();
 
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
-			$handler = new StreamHandler("{$internalDataDir}/{$logfile}", $logLevel);
+			$handler = new \Monolog\Handler\StreamHandler("{$internalDataDir}/{$logfile}", $logLevel);
 			return $handler;
 		};
 
-		$container['handler.swiftmailer'] = function($c)
+		$container['handler.swiftmailer'] = function(Container $c)
 		{
 			$tempDir = File::getTempDir();
 			$subject = EmailSubject::get();
@@ -46,12 +39,12 @@ class MonologApi extends AbstractSubContainer
 			$message = $this->getSwiftMessage($subject, $sendTo);
 			$swiftmailer = \Swift_Mailer::newInstance($this->app->mailer()->getDefaultTransport());
 
-			$handler = new SwiftMailerHandler($swiftmailer, $message, $logLevel);
+			$handler = new \Monolog\Handler\SwiftMailerHandler($swiftmailer, $message, $logLevel);
 
-			return new DeduplicationHandler($handler, "{$tempDir}/monolog-dedup-swiftmailer.log", $logLevel, $dedupTimeout);
+			return new \Monolog\Handler\DeduplicationHandler($handler, "{$tempDir}/monolog-dedup-swiftmailer.log", $logLevel, $dedupTimeout);
 		};
 
-		$container['processor.visitor'] = function ($c)
+		$container['processor.visitor'] = function (Container $c)
 		{
 			return function($record)
 			{
@@ -66,9 +59,14 @@ class MonologApi extends AbstractSubContainer
 			};
 		};
 
-		$container['logger.default'] = function($c)
+		$container['logger'] = function(Container $c)
 		{
-			$logger = new Logger('xenforo');
+			return new \Monolog\Logger('xenforo');
+		};
+
+		$container['logger.default'] = function(Container $c)
+		{
+			$logger = $c['logger'];
 			if (LogFile::isEnabled() && LogFile::getLogFile() !== '')
 			{
 				$logger->pushHandler($c['handler.stream']);
@@ -83,10 +81,21 @@ class MonologApi extends AbstractSubContainer
 			}
 			if (AddWebExtra::get())
 			{
-				$logger->pushProcessor(new WebProcessor());
+				$logger->pushProcessor(new \Monolog\Processor\WebProcessor());
 			}
 			return $logger;
 		};
+	}
+
+	public function logger($name = '')
+	{
+		/** @var \Monolog\Logger $logger */
+		$logger = $this->container('logger');
+		if (!empty($name))
+		{
+			return $logger->withName($name);
+		}
+		return $logger;
 	}
 
 	public function newChannel($channel)

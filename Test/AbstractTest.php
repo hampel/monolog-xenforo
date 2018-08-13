@@ -1,9 +1,6 @@
 <?php
 
-namespace Monolog\Test;
-
-use XF\App;
-use XF\Admin\Controller\AbstractController;
+namespace Hampel\Monolog\Test;
 
 abstract class AbstractTest
 {
@@ -15,7 +12,11 @@ abstract class AbstractTest
 
 	abstract public function run();
 
-	public function __construct(App $app, AbstractController $controller, array $data = [])
+	public function __construct(
+		\XF\App $app,
+		\XF\Admin\Controller\AbstractController $controller,
+		array $data = []
+	)
 	{
 		$this->app = $app;
 		$this->controller = $controller;

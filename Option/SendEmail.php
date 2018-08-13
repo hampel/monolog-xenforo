@@ -1,4 +1,4 @@
-<?php namespace Monolog\Option;
+<?php namespace Hampel\Monolog\Option;
 
 use XF\Option\AbstractOption;
 

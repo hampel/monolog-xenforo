@@ -1,7 +1,7 @@
 {
     "event_id": "app_setup",
     "execute_order": 10,
-    "callback_class": "Monolog\\Listener",
+    "callback_class": "Hampel\\Monolog\\Listener",
     "callback_method": "appSetup",
     "active": true,
     "hint": "",

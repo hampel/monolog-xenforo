@@ -1,6 +1,6 @@
 {
     "edit_format": "callback",
-    "edit_format_params": "Monolog\\Option\\FileMinimumLogLevel::renderSelect",
+    "edit_format_params": "Hampel\\Monolog\\Option\\FileMinimumLogLevel::renderSelect",
     "data_type": "unsigned_integer",
     "sub_options": [],
     "validation_class": "",

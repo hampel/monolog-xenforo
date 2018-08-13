@@ -29,7 +29,7 @@ By default, this addon will log events to a file called `internal_data/monolog.l
 To use the default logging facility, do the following in your addon code:
 
 	:::php
-	use Monolog\Helper\Log;
+	use Hampel\Monolog\Helper\Log;
 	Log::info('an info message', ['context' => 'foo']);
 	Log::error('an error message', ['data' => 'bar']);
 
@@ -48,11 +48,11 @@ You can create your own handler stack to customise how things are logged:
 	use Monolog\Logger;
 	
 	$monolog = \XF::app()->get('monolog');
-	$streamhandler = $monolog->stream(); // return our default stream handler for logging to a file 
-										 //(or create your own!)
+	$streamhandler = $monolog->stream(); 	// return our default stream handler for logging to a file 
+										 		  			// (or create your own!)
 	
-	/** @var Monolog\Logger $logger */
-	$logger = new Logger('myaddon');
+	/** @var \Monolog\Logger $logger */
+	$logger = $monolog->logger('myaddon');
 	$logger->pushHandler($streamhandler); // push our stream handler onto the handler stack
 	// you can apply any other customisations you like here as well by adding custom handlers, formatters or processors
 	

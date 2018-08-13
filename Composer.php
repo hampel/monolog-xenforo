@@ -1,4 +1,4 @@
-<?php namespace Monolog;
+<?php namespace Hampel\Monolog;
 
 class Composer
 {
