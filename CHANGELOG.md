@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+3.0.0 (2018-08-13)
+------------------
+
+* change addon_id to Hampel/Monolog and add Hampel namespace to all classes
+
 2.1.1 (2018-06-05)
 ------------------
 

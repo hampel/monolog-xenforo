@@ -1,4 +1,4 @@
-<?php namespace Monolog\XF\Admin\Controller;
+<?php namespace Hampel\Monolog\XF\Admin\Controller;
 
 class Tools extends XFCP_Tools
 {

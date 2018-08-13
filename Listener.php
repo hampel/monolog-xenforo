@@ -1,8 +1,8 @@
-<?php namespace Monolog;
+<?php namespace Hampel\Monolog;
 
 use XF\App;
 use XF\Container;
-use Monolog\SubContainer\MonologApi;
+use Hampel\Monolog\SubContainer\MonologApi;
 
 class Listener
 {

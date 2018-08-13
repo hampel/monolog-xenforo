@@ -1,4 +1,4 @@
-<?php namespace Monolog\Helper;
+<?php namespace Hampel\Monolog\Helper;
 
 class Log
 {

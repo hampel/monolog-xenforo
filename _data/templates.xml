@@ -1,6 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<templates>
-  <template type="admin" title="monolog_tools_test_monolog" version_id="2" version_string="2.0.0"><![CDATA[<xf:title>{{ phrase('monolog_test_monolog') }}</xf:title>
+<xf:title>{{ phrase('monolog_test_monolog') }}</xf:title>
 
 <xf:if is="$messages">
 	<xf:foreach loop="$messages" value="$message">
@@ -16,6 +14,5 @@
 		<h2 class="block-header">{{ phrase('monolog_test_logger') }}</h2>
 		<xf:submitrow submit="{{ phrase('monolog_test') }}" />
 	</div>
-	<xf:hiddenval name="test">Monolog:LoggerTest</xf:hiddenval>
-</xf:form>]]></template>
-</templates>
+	<xf:hiddenval name="test">Hampel\Monolog:LoggerTest</xf:hiddenval>
+</xf:form>
