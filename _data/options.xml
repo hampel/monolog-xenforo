@@ -14,7 +14,7 @@
   </option>
   <option option_id="monologEmailMinimumLogLevel" edit_format="callback" data_type="unsigned_integer">
     <default_value>400</default_value>
-    <edit_format_params>Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
+    <edit_format_params>Hampel\Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
     <relation group_id="monolog" display_order="103"/>
   </option>
   <option option_id="monologEmailSubject" edit_format="textbox" data_type="string">
@@ -23,7 +23,7 @@
   </option>
   <option option_id="monologFileMinimumLogLevel" edit_format="callback" data_type="unsigned_integer">
     <default_value>300</default_value>
-    <edit_format_params>Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
+    <edit_format_params>Hampel\Monolog\Option\FileMinimumLogLevel::renderSelect</edit_format_params>
     <relation group_id="monolog" display_order="2"/>
   </option>
   <option option_id="monologLogFile" edit_format="onofftextbox" data_type="array">
