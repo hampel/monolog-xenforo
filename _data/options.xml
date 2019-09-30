@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <options>
   <option option_id="monologAddVisitorExtra" edit_format="onoff" data_type="boolean">
-    <default_value>true</default_value>
+    <default_value>1</default_value>
     <relation group_id="monolog" display_order="1001"/>
   </option>
   <option option_id="monologAddWebExtra" edit_format="onoff" data_type="boolean">
