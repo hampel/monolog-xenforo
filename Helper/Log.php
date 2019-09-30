@@ -2,6 +2,8 @@
 
 class Log
 {
+	// TODO: turn this into a service?
+
 	public static function emergency($message, array $context = array())
 	{
 		return self::getMonolog()->emergency($message, $context);
