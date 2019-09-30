@@ -8,11 +8,6 @@ class Listener
 {
 	public static function appSetup(App $app)
 	{
-		Composer::autoloadNamespaces($app, true);
-		Composer::autoloadPsr4($app, true);
-		Composer::autoloadClassmap($app);
-		Composer::autoloadFiles($app);
-
 		$container = $app->container();
 
 		$container['monolog'] = function(Container $c) use ($app)

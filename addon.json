@@ -1,7 +1,7 @@
 {
     "legacy_addon_id": "Monolog",
     "title": "Monolog Logging Service",
-    "description": "Monolog logger implementation for XenForo 2.0",
+    "description": "Monolog logger implementation",
     "version_id": 3000070,
     "version_string": "3.0.0",
     "dev": "Simon Hampel",
@@ -17,7 +17,12 @@
         "php": [
             "7.0",
             "PHP 7.0+"
+        ],
+        "XF": [
+            "2010070",
+            "XenForo 2.1.0+"
         ]
     },
-    "icon": "fa-file-text-o"
+    "composer_autoload": "vendor/composer",
+    "icon": "fa-file-alt"
 }
