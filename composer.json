@@ -1,15 +1,5 @@
 {
-    "name": "Monolog",
-    "description": "Monolog implementation for XenForo 2.0",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Simon Hampel",
-            "email": "simon@hampelgroup.com"
-        }
-    ],
 	"require": {
-		"php": "^7.0",
-		"monolog/monolog": "^1.23"
+		"monolog/monolog": "^1"
 	}
 }
