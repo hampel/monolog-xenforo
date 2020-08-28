@@ -37,7 +37,7 @@ class MonologApi extends AbstractSubContainer
 			$dedupTimeout = EmailDeduplicationTimeout::get();
 
 			$message = $this->getSwiftMessage($subject, $sendTo);
-			$swiftmailer = \Swift_Mailer::newInstance($this->app->mailer()->getDefaultTransport());
+			$swiftmailer = new \Swift_Mailer($this->app->mailer()->getDefaultTransport());
 
 			$handler = new \Monolog\Handler\SwiftMailerHandler($swiftmailer, $message, $logLevel);
 
