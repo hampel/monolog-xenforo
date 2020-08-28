@@ -1,0 +1,1 @@
+Time period (in seconds) for which to not send duplicate log messages. The email log delivery system checks for duplicate log messages and discards duplicates received within the specified time period to prevent a flood of emails in the case of a critical failure.

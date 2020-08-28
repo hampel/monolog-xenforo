@@ -1,0 +1,1 @@
+Add extra data to log entries containing visitor information user_id and username

@@ -1,0 +1,1 @@
+Store logs in a file. Enter the relative path for the log file. Paths should be relative to the internal_data directory and must be writable by the server.

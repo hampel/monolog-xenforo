@@ -1,0 +1,1 @@
+The minimum log level that will be included in emails - refer to <a href="https://github.com/Seldaek/monolog/blob/master/doc/01-usage.md#log-levels" target="_blank">Log Levels</a> for more information.

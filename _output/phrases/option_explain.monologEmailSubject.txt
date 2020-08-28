@@ -1,0 +1,3 @@
+The subject line that log emails should use.<br />
+<br />
+Use the textbox to specify a format for the subject line. <b>{board}</b> will be replaced with the board title.

@@ -1,0 +1,164 @@
+{
+    "admin_navigation.testMonolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "08d584eb08793f685e8bedf7b97f4a31"
+    },
+    "monolog_all_tests_passed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e55222a4cbb7e5dcf5e9eec80a96b78b"
+    },
+    "monolog_enter_recipient_email.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
+    },
+    "monolog_log_could_not_be_processed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "585eb1061415bb18d7f40cfda82061fa"
+    },
+    "monolog_log_successfully_processed.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "6b7e76a3253d913174290c6418d4a899"
+    },
+    "monolog_test.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "0cbc6611f5540bd0809a388dc95a615b"
+    },
+    "monolog_test_logger.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "0b3540e5c7024aa94f39e95c15cb0ebf"
+    },
+    "monolog_test_monolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "08d584eb08793f685e8bedf7b97f4a31"
+    },
+    "monolog_this_test_could_not_be_run.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "92c98cc7ec1bbafc0a4a4a64c4125870"
+    },
+    "option.monologAddVisitorExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "48fae0f564be4306abbbcdbf5a3c30d6"
+    },
+    "option.monologAddWebExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "3fdf0b06860a8e8c04c90bacbb6bee9e"
+    },
+    "option.monologEmailDeduplicationTimeout.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "401cf9fd0c175e0fd37b345ddc9b6abc"
+    },
+    "option.monologEmailMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "b8b088db246099736641b3729af283a5"
+    },
+    "option.monologEmailSubject.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e3868f7e6e90b6b55f60ac7d71dcb8ce"
+    },
+    "option.monologFileMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "ecfcd79e08ddc5c6168ca4b720412279"
+    },
+    "option.monologLogFile.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "4bf2f0af2e40060db1666e3d23cd3565"
+    },
+    "option.monologSendEmail.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "86250c63885f24ad76cbec3c22fa2307"
+    },
+    "option_explain.monologAddVisitorExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "37f488e5206187055a9f03c9471494e6"
+    },
+    "option_explain.monologAddWebExtra.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "c78b3df001e6943e3567932a4bba17be"
+    },
+    "option_explain.monologEmailDeduplicationTimeout.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "8fc81957c7987e149bbac8414a41e1d5"
+    },
+    "option_explain.monologEmailMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "8348bbfa3a1bf15e72c86a8d40204f7d"
+    },
+    "option_explain.monologEmailSubject.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "5c84ca3fc5e704cf6dcbff8685bcf7bc"
+    },
+    "option_explain.monologFileMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "e896bca993113bb8d774fb5fa409e613"
+    },
+    "option_explain.monologLogFile.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "f5eb49684c3009b9ef48a9d4b1f0dece"
+    },
+    "option_explain.monologSendEmail.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "f29d53dd4212127c26363fc575e4c34a"
+    },
+    "option_group.monolog.txt": {
+        "global_cache": false,
+        "version_id": 2,
+        "version_string": "2.0.0",
+        "hash": "779e44f1339b9ebee928932e4e80729c"
+    },
+    "option_group_description.monolog.txt": {
+        "global_cache": false,
+        "version_id": 3010070,
+        "version_string": "3.1.0",
+        "hash": "263fb39a392aad9aa657288769900f98"
+    }
+}

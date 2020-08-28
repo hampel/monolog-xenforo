@@ -1,0 +1,18 @@
+<xf:title>{{ phrase('monolog_test_monolog') }}</xf:title>
+
+<xf:if is="$messages">
+	<xf:foreach loop="$messages" value="$message">
+		<div class="blockMessage blockMessage--{$message.type}">{{ $test }} - {{ $message.message }}</div>
+	</xf:foreach>
+</xf:if>
+<xf:if is="$results">
+	<div class="blockMessage blockMessage--success">{{ $test }} - {{ phrase('monolog_all_tests_passed') }}</div>
+</xf:if>
+
+<xf:form action="{{ link('tools/test-monolog') }}" class="block">
+	<div class="block-container">
+		<h2 class="block-header">{{ phrase('monolog_test_logger') }}</h2>
+		<xf:submitrow submit="{{ phrase('monolog_test') }}" />
+	</div>
+	<xf:hiddenval name="test">Hampel\Monolog:LoggerTest</xf:hiddenval>
+</xf:form>

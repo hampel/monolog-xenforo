@@ -1,0 +1,15 @@
+{
+    "edit_format": "onofftextbox",
+    "edit_format_params": "onoff=enabled\nvalue=logfile\ntype=textbox\ndefault=monolog.log",
+    "data_type": "array",
+    "sub_options": [
+        "enabled",
+        "logfile"
+    ],
+    "validation_class": "",
+    "validation_method": "",
+    "default_value": "{\"enabled\":\"1\",\"logfile\":\"monolog.log\"}",
+    "relations": {
+        "monolog": 1
+    }
+}
