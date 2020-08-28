@@ -1,6 +1,12 @@
 CHANGELOG
 =========
 
+3.1.1 (2020-08-29)
+------------------
+
+* removed call to \Swift_Mailer::newInstance for compatibility with Swiftmailer 6
+* check that vendor folder exists to prevent breaking forum if we somehow didn't run composer install
+
 3.1.0 (2019-09-30)
 ------------------
 
