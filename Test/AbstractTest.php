@@ -52,7 +52,7 @@ abstract class AbstractTest
 		});
 	}
 
-	protected function message($type = 'none', $message)
+	protected function message($type, $message)
 	{
 		$this->messages[] = compact('type', 'message');
 	}
