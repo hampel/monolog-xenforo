@@ -1,14 +1,14 @@
-Monolog logging implementation for XenForo 2.1
+Monolog logging implementation for XenForo 2.x
 ==============================================
 
-This XenForo 2.1 addon adds logging functionality using the Monolog library from https://github.com/Seldaek/monolog
+This XenForo 2.x addon adds logging functionality using the Monolog library from https://github.com/Seldaek/monolog
 
 By [Simon Hampel](https://twitter.com/SimonHampel).
 
 Requirements
 ------------
 
-This addon requires XenForo 2.1
+This addon requires XenForo 2.1 or higher
 
 Installation
 ------------
