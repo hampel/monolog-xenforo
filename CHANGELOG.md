@@ -1,6 +1,11 @@
 CHANGELOG
 =========
 
+4.0.0 (2021-09-23)
+------------------
+
+* implement Monolog v2 and reset default date format back to what v1 used
+
 3.1.1 (2020-08-29)
 ------------------
 
