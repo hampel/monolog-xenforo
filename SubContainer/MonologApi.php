@@ -1,5 +1,6 @@
 <?php namespace Hampel\Monolog\SubContainer;
 
+use Monolog\Formatter\LineFormatter;
 use XF\Util\File;
 use XF\Container;
 use Hampel\Monolog\Option\LogFile;
@@ -20,11 +21,16 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handler.stream'] = function(Container $c)
 		{
+			// default date format has changed in Monolog 2
+			$dateFormat = "Y-m-d H:i:s";
+			$formatter = new LineFormatter(null, $dateFormat);
+
 			$logfile = LogFile::getLogFile();
 			$logLevel = FileMinimumLogLevel::get();
 
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
 			$handler = new \Monolog\Handler\StreamHandler("{$internalDataDir}/{$logfile}", $logLevel);
+			$handler->setFormatter($formatter);
 			return $handler;
 		};
 
