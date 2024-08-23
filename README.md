@@ -3,7 +3,7 @@ Monolog logging implementation for XenForo 2.x
 
 This XenForo 2.x addon adds logging functionality using the Monolog library from https://github.com/Seldaek/monolog
 
-By [Simon Hampel](https://twitter.com/SimonHampel).
+By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
 Requirements
 ------------

@@ -5,12 +5,12 @@
     "version_id": 4000070,
     "version_string": "4.0.0",
     "dev": "Simon Hampel",
-    "dev_url": "https://bitbucket.org/hampel/",
+    "dev_url": "https://xenforo.com/community/members/sim.4264/",
     "faq_url": "",
-    "support_url": "https://bitbucket.org/hampel/monolog-xenforo/issues",
+    "support_url": "https://xenforo.com/community/threads/monolog-logging-service.141187/",
     "extra_urls": {
-        "Git Repository": "https://bitbucket.org/hampel/monolog-xenforo",
-        "Twitter": "https://twitter.com/SimonHampel",
+        "Addon": "https://xenforo.com/community/resources/monolog-logging-service.6080/",
+        "Git Repository": "https://github.com/hampel/monolog-xenforo",
         "Monolog": "https://github.com/Seldaek/monolog"
     },
     "require": {
