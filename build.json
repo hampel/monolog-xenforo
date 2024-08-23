@@ -2,6 +2,7 @@
 	"exec": [
 		"composer install --working-dir=_build/upload/src/addons/{addon_id}/ --no-dev --optimize-autoloader",
 		"composer install --no-dev --optimize-autoloader",
+		"rm -v _build/upload/src/addons/{addon_id}/TESTING.md",
 		"mv -v _build/upload/src/addons/{addon_id}/*.md _build/"
 	]
 }
