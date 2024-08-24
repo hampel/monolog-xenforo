@@ -5,6 +5,9 @@ This XenForo 2.x addon adds logging functionality using the Monolog library from
 
 By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
+* [Addon: Monolog](https://xenforo.com/community/resources/monolog-logging-service.6080/)
+* [Discussion and support: Monolog](https://xenforo.com/community/threads/monolog-logging-service.141187/)
+
 Requirements
 ------------
 
