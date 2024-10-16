@@ -5,6 +5,7 @@ class Tools extends XFCP_Tools
 	public function actionTestMonolog()
 	{
 		$this->setSectionContext('testMonolog');
+        $this->assertAdminPermission('option');
 
 		$messages = [];
 		$results = false;
