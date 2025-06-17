@@ -15,6 +15,11 @@ class Setup extends AbstractSetup
 		// Nothing to do
 	}
 
+    public function postUpgrade($previousVersion, array &$stateChanges)
+    {
+        $this->enqueuePostUpgradeCleanUp();
+    }
+
 	public function uninstall(array $stepParams = [])
 	{
 		// Nothing to do
