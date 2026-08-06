@@ -20,6 +20,9 @@ use Hampel\Monolog\Option\EmailDeduplicationTimeout;
 
 class MonologApi extends AbstractSubContainer
 {
+    // TODO: upgrade to Monolog v3
+    // TODO: add support for logging XenForo operations, registrations, threads, posts, likes, emails sent, etc
+
 	public function initialize()
 	{
 		$container = $this->container;
