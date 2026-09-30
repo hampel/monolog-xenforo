@@ -27,41 +27,35 @@ your configuration settings.
 Usage
 -----
 
-By default, this addon will log events to a file called `internal_data/monolog.log` - this is configurable.
+By default, this addon logs to a file called `internal_data/monolog.log` - this is configurable.
+It can also email records at or above a chosen level.
 
-To use the default logging facility, do the following in your addon code:
+Ask for a channel named for your addon. You get a PSR-3 logger:
 
-	:::php
-	use Hampel\Monolog\Helper\Log;
-	Log::info('an info message', ['context' => 'foo']);
-	Log::error('an error message', ['data' => 'bar']);
+```php
+$logger = \XF::app()->get('monolog')->channel('myaddon');
+$logger->warning('a warning message', ['context' => 'foo']);
+```
 
-However, it is recommended that you create your own channel for your addon to make it easier to filter log entries:
+Type against `Psr\Log\LoggerInterface`, not a Monolog class - the Monolog version is an internal
+detail of this addon. That also means the logger can be handed straight to any Composer package
+that accepts a PSR-3 logger.
 
-	:::php
-	$logger = \XF::app()->get('monolog')->newChannel('myaddon');
-	$logger->warning('a warning message', ['context' => 'foo']);
+This addon is usually an optional dependency, so fall back to a null logger when it is not
+installed - `Psr\Log\NullLogger` ships with XenForo:
 
-Refer to the documentation for more detailed
-[usage instructions for Monolog](https://github.com/Seldaek/monolog/blob/master/doc/01-usage.md).
+```php
+$container['myaddon.log'] = function (\XF\Container $c)
+{
+    return $c->offsetExists('monolog')
+        ? $c['monolog']->channel('myaddon')
+        : new \Psr\Log\NullLogger();
+};
+```
 
-You can create your own handler stack to customise how things are logged:
+### Upgrading from 4.x
 
-	:::php
-	use Monolog\Logger;
-	
-	$monolog = \XF::app()->get('monolog');
-	$streamhandler = $monolog->stream(); 	// return our default stream handler for logging to a file 
-										 		  			// (or create your own!)
-	
-	/** @var \Monolog\Logger $logger */
-	$logger = $monolog->logger('myaddon');
-	$logger->pushHandler($streamhandler); // push our stream handler onto the handler stack
-	// you can apply any other customisations you like here as well by adding custom handlers, formatters or processors
-	
-	$logger->critical('a critical message', ['context' => 'foo']);
-
-Refer to
-[Handlers, Formatters and Processors](https://github.com/Seldaek/monolog/blob/master/doc/02-handlers-formatters-processors.md)
-for more information.
-
+- `newChannel()` still works, as an alias for `channel()`. It is deprecated.
+- `Hampel\Monolog\Helper\Log` still works, logging to the `xenforo` channel. It is deprecated.
+- `logger()`, `default()`, `stream()` and `visitor()` have been removed. Custom handler stacks
+  built from them are replaced by an extension point in a later 5.0 release.

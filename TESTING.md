@@ -15,13 +15,20 @@ Check the exit code with the command unpiped: `vendor/bin/phpunit >/dev/null 2>&
 
 ## What the suite covers
 
-- **`tests/Feature/NewChannelTest.php`** — the `monolog` container key and `newChannel()`, which
-  is what consuming add-ons call: records reach the log file under the channel's name, the file
-  level and file options are respected, and the visitor processor follows its option.
-- **`tests/Feature/HelperLogTest.php`** — the `Helper\Log` static facade, every level.
-- **`tests/Feature/EmailTest.php`** — the email handler: level, recipient and its fallback,
-  subject, one email per request, and deduplication across requests.
-- **`tests/Unit/OptionTest.php`** — the option getters' fallbacks and the `{board}` token.
+- **`tests/Feature/ChannelTest.php`** — `channel()`, the 5.0 API: a PSR-3 logger, cached by name,
+  and every record written exactly once however many channels came before it.
+- **`tests/Feature/NewChannelTest.php`** — the 4.x contract consuming add-ons still use: the
+  `monolog` container key and `newChannel()`, the file level and file options, and the visitor
+  processor.
+- **`tests/Feature/HelperLogTest.php`** — the deprecated `Helper\Log` facade, every level.
+- **`tests/Feature/EmailTest.php`** — the email stack: level, recipient and its fallback, subject,
+  one email per request, and deduplication across requests.
+- **`tests/Feature/LazyMailTest.php`** — that neither creating a channel nor writing below the email
+  level builds XenForo's mailer.
+- **`tests/Unit/XenForoMailHandlerTest.php`** — the mail handler alone, including its guard against
+  a transport that logs while sending.
+- **`tests/Unit/OptionTest.php`** — the option getters' fallbacks, the `{board}` token, and the
+  string `"0"` a fresh install stores for a disabled option.
 
 **Each test points `internalDataPath` at a directory of its own.** The log file lives there, and so
 does XenForo's temp directory, which holds the email deduplication store. A shared store would
@@ -29,9 +36,10 @@ make an email test fail because an earlier test or run had already sent the same
 
 ## What it cannot cover
 
-- **The XenForo 2.2 email path.** `fakesMail()` swaps in a Symfony Mailer transport, which only
-  XenForo 2.3 uses, so the suite exercises 2.3 alone. Check 2.2 by hand: enable email on a 2.2
-  forum, write an `ERROR` record, and confirm one email arrives.
+- **Email on XenForo 2.2.** `XenForoMailHandler` goes through XF's `Mail` on both versions, but
+  underneath it is SwiftMailer on 2.2 and Symfony Mailer on 2.3, and `fakesMail()` swaps in a
+  Symfony Mailer transport — so the suite exercises 2.3 alone. Check 2.2 by hand: enable email
+  on a 2.2 forum, write an `ERROR` record, and confirm one email arrives.
 - **The ACP test page** — *Tools > Checks and tests > Test Monolog*. Run it and read the log.
 - **The declared PHP floor.** Nothing here runs PHP below 8.3; lint the release zip on a PHP 7.4
   instance.
@@ -40,6 +48,9 @@ make an email test fail because an earlier test or run had already sent the same
 
 - **Email is sent when the handlers close**, at the end of the request, not when the record is
   written. A test, or any code, that never closes the logger sends nothing.
-- **Building a channel builds the email handler, which calls `XF\App::mailer()`.** An add-on whose
-  mail transport logs to a channel while being constructed recurses; SparkPostMail works around
-  this with a lazy logger.
+- **Nothing may build the mailer while a channel is being created.** A mail add-on that asks for a
+  channel from `mailer_transport_setup` recursed in 4.x. `LazyMailTest` fails if the email handler
+  is ever built eagerly again.
+- **A fresh install stores on/off options as the strings `"1"` and `"0"`**, until an admin saves the
+  options page. An `isEnabled()` that tests `!== false` treats `"0"` as on; 4.x shipped exactly
+  that, and emailed errors from every fresh install.

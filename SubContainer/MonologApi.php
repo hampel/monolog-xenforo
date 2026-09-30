@@ -1,179 +1,148 @@
 <?php namespace Hampel\Monolog\SubContainer;
 
+use Hampel\Monolog\Handler\LazyHandler;
+use Hampel\Monolog\Handler\XenForoMailHandler;
+use Hampel\Monolog\Option\AddVisitorExtra;
+use Hampel\Monolog\Option\AddWebExtra;
+use Hampel\Monolog\Option\EmailDeduplicationTimeout;
+use Hampel\Monolog\Option\EmailMinimumLogLevel;
+use Hampel\Monolog\Option\EmailSubject;
+use Hampel\Monolog\Option\FileMinimumLogLevel;
+use Hampel\Monolog\Option\LogFile;
+use Hampel\Monolog\Option\SendEmail;
+use Hampel\Monolog\Processor\VisitorProcessor;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
 use Monolog\Handler\StreamHandler;
-use Monolog\Handler\SwiftMailerHandler;
-use Monolog\Handler\SymfonyMailerHandler;
+use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
-use XF\Util\File;
+use Psr\Log\LoggerInterface;
 use XF\Container;
-use Hampel\Monolog\Option\LogFile;
-use Hampel\Monolog\Option\SendEmail;
-use Hampel\Monolog\Option\AddWebExtra;
-use Hampel\Monolog\Option\EmailSubject;
 use XF\SubContainer\AbstractSubContainer;
-use Hampel\Monolog\Option\AddVisitorExtra;
-use Hampel\Monolog\Option\FileMinimumLogLevel;
-use Hampel\Monolog\Option\EmailMinimumLogLevel;
-use Hampel\Monolog\Option\EmailDeduplicationTimeout;
+use XF\Util\File;
 
+/**
+ * The `monolog` service. Consumers ask it for a channel and get a PSR-3 logger:
+ *
+ *     $logger = \XF::app()->get('monolog')->channel('myaddon');
+ *
+ * Every channel shares one set of handlers and processors, built once from the options into a
+ * base logger that is never modified afterwards. A channel is that logger under another name.
+ */
 class MonologApi extends AbstractSubContainer
 {
-    // TODO: upgrade to Monolog v3
-    // TODO: add support for logging XenForo operations, registrations, threads, posts, likes, emails sent, etc
+	/** @var LoggerInterface[] channels already handed out, by name */
+	private array $channels = [];
 
 	public function initialize()
 	{
 		$container = $this->container;
 
-		$container['handler.stream'] = function(Container $c)
+		$container['handler.file'] = function (Container $c)
 		{
-			// default date format has changed in Monolog 2
-			$dateFormat = "Y-m-d H:i:s";
-			$formatter = new LineFormatter(null, $dateFormat);
-
-			$logfile = LogFile::getLogFile();
-			$logLevel = FileMinimumLogLevel::get();
+			if (!LogFile::isEnabled() || LogFile::getLogFile() === '')
+			{
+				return null;
+			}
 
 			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
-			$handler = new StreamHandler("{$internalDataDir}/{$logfile}", $logLevel);
-			$handler->setFormatter($formatter);
+
+			$handler = new StreamHandler(
+				$internalDataDir . '/' . LogFile::getLogFile(),
+				FileMinimumLogLevel::get()
+			);
+			// Monolog 2 changed the default date format; this is the one 1.x wrote, and the one
+			// anything parsing these files already expects
+			$handler->setFormatter(new LineFormatter(null, 'Y-m-d H:i:s'));
+
 			return $handler;
 		};
 
-        $container['handler.swiftmailer'] = function(Container $c)
-        {
-            $tempDir = File::getTempDir();
-            $subject = EmailSubject::get();
-            $sendTo = SendEmail::getAddress();
-            $logLevel = EmailMinimumLogLevel::get();
-            $dedupTimeout = EmailDeduplicationTimeout::get();
-
-            $message = $this->getSwiftMessage($subject, $sendTo);
-            $swiftmailer = new \Swift_Mailer($this->app->mailer()->getDefaultTransport());
-
-            $handler = new SwiftMailerHandler($swiftmailer, $message, $logLevel);
-
-            return new DeduplicationHandler($handler, "{$tempDir}/monolog-dedup-swiftmailer.log", $logLevel, $dedupTimeout);
-        };
-
-		$container['handler.symfonymailer'] = function(Container $c)
+		$container['handler.email'] = function (Container $c)
 		{
-			$tempDir = File::getTempDir();
-			$subject = EmailSubject::get();
-			$sendTo = SendEmail::getAddress();
-			$logLevel = EmailMinimumLogLevel::get();
-			$dedupTimeout = EmailDeduplicationTimeout::get();
-
-			$message = $this->getMessage($sendTo)->subject($subject);
-
-			$symfonymailer = $this->app->mailer()->getDefaultTransport();
-
-            $handler = new SymfonyMailerHandler($symfonymailer, $message, $logLevel);
-
-			return new DeduplicationHandler($handler, "{$tempDir}/monolog-dedup-symfonymailer.log", $logLevel, $dedupTimeout);
-		};
-
-		$container['processor.visitor'] = function (Container $c)
-		{
-			return function($record)
+			if (!SendEmail::isEnabled())
 			{
-				$visitor = \XF::visitor();
-
-				$record['extra']['visitor'] = [
-					'userid' => $visitor->user_id,
-					'username' => $visitor->username,
-				];
-
-				return $record;
-			};
-		};
-
-		$container['logger'] = function(Container $c)
-		{
-			return new \Monolog\Logger('xenforo');
-		};
-
-		$container['logger.default'] = function(Container $c)
-		{
-			$logger = $c['logger'];
-			if (LogFile::isEnabled() && LogFile::getLogFile() !== '')
-			{
-				$logger->pushHandler($c['handler.stream']);
+				return null;
 			}
-			if (SendEmail::isEnabled())
-			{
-                if (\XF::$versionId >= 2030000)
-                {
-                    $logger->pushHandler($c['handler.symfonymailer']);
-                }
-                else
-                {
-                    $logger->pushHandler($c['handler.swiftmailer']);
-                }
 
+			$level = EmailMinimumLogLevel::get();
+
+			// built on the first record at $level, never when a channel is created - see LazyHandler
+			return new LazyHandler(function () use ($level)
+			{
+				$handler = new XenForoMailHandler(
+					$this->app->mailer(),
+					SendEmail::getAddress(),
+					EmailSubject::get(),
+					$level
+				);
+
+				// buffers the request's records into one email, sent at shutdown, and skips any
+				// already sent within the timeout
+				return new DeduplicationHandler(
+					$handler,
+					File::getTempDir() . '/monolog-dedup-email.log',
+					$level,
+					EmailDeduplicationTimeout::get()
+				);
+			}, $level);
+		};
+
+		$container['handlers'] = function (Container $c)
+		{
+			return array_values(array_filter([$c['handler.file'], $c['handler.email']]));
+		};
+
+		$container['processors'] = function (Container $c)
+		{
+			$processors = [];
+
+			// Monolog runs processors in array order
+			if (AddWebExtra::get())
+			{
+				$processors[] = new WebProcessor();
 			}
 			if (AddVisitorExtra::get())
 			{
-				$logger->pushProcessor($c['processor.visitor']);
+				$processors[] = new VisitorProcessor();
 			}
-			if (AddWebExtra::get())
-			{
-				$logger->pushProcessor(new WebProcessor());
-			}
-			return $logger;
+
+			return $processors;
+		};
+
+		$container['logger'] = function (Container $c)
+		{
+			return new Logger('xenforo', $c['handlers'], $c['processors']);
 		};
 	}
 
-	public function logger($name = '')
+	/**
+	 * A logger for one channel - by convention the add-on's own short name.
+	 *
+	 * The return type is the contract: type against Psr\Log\LoggerInterface, never against a
+	 * Monolog class, which is an implementation detail and will change major version.
+	 */
+	public function channel(string $name): LoggerInterface
 	{
-		/** @var \Monolog\Logger $logger */
-		$logger = $this->container('logger');
-		if (!empty($name))
+		if (!isset($this->channels[$name]))
 		{
-			return $logger->withName($name);
+			/** @var Logger $logger */
+			$logger = $this->container('logger');
+			$this->channels[$name] = $logger->withName($name);
 		}
-		return $logger;
+
+		return $this->channels[$name];
 	}
 
+	/**
+	 * @deprecated 5.0.0 use channel(), which this now calls
+	 *
+	 * @param string $channel
+	 *
+	 * @return LoggerInterface
+	 */
 	public function newChannel($channel)
 	{
-		return $this->default()->withName($channel);
+		return $this->channel((string) $channel);
 	}
-
-	/** Logger */
-	public function default()
-	{
-		return $this->container('logger.default');
-	}
-
-	public function stream()
-	{
-		return $this->container('handler.stream');
-	}
-
-	public function visitor()
-	{
-		return $this->container('processor.visitor');
-	}
-
-    public function getSwiftMessage($subject, $to = "", $from = "")
-    {
-        $message = new \Swift_Message($subject);
-        $message->setTo(!empty($to) ? $to : $this->parent['options']['contactEmailAddress']);
-        $message->setFrom(!empty($from) ? $from : $this->parent['options']['defaultEmailAddress']);
-
-        return $message;
-    }
-
-    public function getMessage($to = "", $from = "")
-    {
-        $message = $this->app->mailer()
-            ->newMail()
-            ->setTo(!empty($to) ? $to : $this->parent['options']['contactEmailAddress'])
-            ->setFrom(!empty($from) ? $from : $this->parent['options']['defaultEmailAddress']);
-
-        return $message->getSendableEmail();
-    }
 }

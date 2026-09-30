@@ -15,51 +15,85 @@ This file covers only what is specific to this add-on.
 ## What this add-on is
 
 **A service for other add-ons, not a feature.** It registers a `monolog` sub-container on the XF
-app so any add-on can log through Monolog v2 without bundling it, and adds nothing to the public
-side of a forum. `README.md` is the consumer-facing usage guide; read it for the three calling
-styles (`Helper\Log` statics, `newChannel()`, and building a custom handler stack).
+app so any add-on can log through Monolog without bundling it, and adds nothing to the public side
+of a forum. `README.md` is the consumer-facing guide.
+
+**The public API is one method returning a PSR-3 logger:**
+
+```php
+$logger = \XF::app()->get('monolog')->channel('myaddon');   // Psr\Log\LoggerInterface
+```
+
+**That return type is the contract, and nothing Monolog-specific is.** Consumers — and the Composer
+packages they hand the logger to — type against `Psr\Log\LoggerInterface`, so the Monolog major
+version stays an internal detail. Do not widen the API with methods that return Monolog classes.
+
+Consumers treat the add-on as optional: none names it in `addon.json` `require`. So they check
+`$container->offsetExists('monolog')` and fall back to `Psr\Log\NullLogger`, which XenForo core
+ships. Anything that breaks that pattern breaks them.
+
+Two 4.x entry points survive as deprecated shims, and `tests/` pins both:
+
+- **`newChannel($name)`** — an alias for `channel()`. Every consumer written against 4.x calls it.
+- **`Helper\Log`** — static PSR-3 methods on the `xenforo` channel, documented since 2.1.0.
 
 The moving parts, and where each is wired:
 
 | piece | registered by | does |
 |---|---|---|
-| `SubContainer/MonologApi.php` | `Listener::appSetup` (`app_setup` listener) as `$container['monolog']` | defines every handler, processor and logger as lazy container entries |
-| `Helper/Log.php` | nothing — static calls | proxies PSR-3 methods to `logger.default` |
-| `Option/*.php` | option `edit_format`/callbacks in `_output/options/` | each option has a static getter that supplies the default when unset |
-| `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page (`actionTestMonolog`) |
-| `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine the ACP test page runs |
+| `SubContainer/MonologApi.php` | `Listener::appSetup` (`app_setup`) as `$container['monolog']` | builds handlers, processors and the base logger from the options; hands out channels |
+| `Handler/LazyHandler.php` | `MonologApi`, around the email stack | defers building a handler until a record reaches its level |
+| `Handler/XenForoMailHandler.php` | inside that `LazyHandler` | sends records through XF's own `Mail`, on 2.2 and 2.3 alike |
+| `Processor/VisitorProcessor.php` | `MonologApi`, behind `monologAddVisitorExtra` | adds `extra.visitor` |
+| `Option/*.php` | option `edit_format` and callbacks in `_output/options/` | static getters that supply the default when unset |
+| `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page |
+| `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine that page runs |
 
 **`Test/` is not the PHPUnit suite.** It is the ACP diagnostic behind *Tools > Checks and tests >
 Test Monolog*, which writes one message at every level so an admin can see where they land. The
 PHPUnit suite is `tests/`; `TESTING.md` says what it covers and what it cannot.
 
-## How the default logger is assembled
+## How a channel is built
 
-**`logger.default` is built once per request from the options, then cached.** Its closure in
-`MonologApi::initialize()` pushes, in order:
+**One base logger per request, built from the options and never modified afterwards.** A channel
+is `withName()` of it — a clone sharing the same handler and processor objects — cached by name, so
+asking twice returns the same logger and every channel writes through one file handle and one
+email buffer.
 
-- the stream handler, if `monologLogFile` is enabled with a non-empty filename — the path is
-  relative to `internalDataPath`, the date format is forced back to Monolog v1's `Y-m-d H:i:s`,
-  and the level comes from `monologFileMinimumLogLevel` (default `WARNING`);
-- a mailer handler wrapped in a `DeduplicationHandler`, if `monologSendEmail` is enabled;
-- the visitor processor (`extra.visitor`) and Monolog's `WebProcessor`, each behind its own option.
+**Never push a handler or processor onto the base logger or a channel.** 4.x did exactly that,
+building its default logger by pushing handlers onto a shared instance, so whether a logger
+carried them depended on what had already been resolved in the request, and records could be
+written twice. Anything that needs to change the stack changes the list it is built from.
 
-**The mail handler forks on XF version, and both branches must keep working.** XF 2.3+ gets
-`SymfonyMailerHandler` over `$app->mailer()->getDefaultTransport()`; XF 2.2 gets
-`SwiftMailerHandler`. The same `\XF::$versionId >= 2030000` guard is in `Setup::postUpgrade()`.
-Each branch keeps its own dedup store in the XF temp directory. Recipient and sender fall back to
-the board's `contactEmailAddress` and `defaultEmailAddress`.
+The stack, from `MonologApi::initialize()`:
 
-**`logger.default` mutates the shared `logger` entry rather than cloning it.** It takes
-`$c['logger']` — the single cached `Monolog\Logger('xenforo')` — and pushes handlers onto it. So
-`MonologApi::logger($name)` returns a clean, handler-free logger only if `default()` has not yet
-been resolved in this request; afterwards, `withName()` clones a logger that already carries the
-default handlers, and a caller following the README's custom-stack example gets the stream handler
-twice. `LoggerTest` avoids it only because it calls `logger()` first.
+- **file** — a `StreamHandler` at `internalDataPath` plus the `monologLogFile` name, level from
+  `monologFileMinimumLogLevel` (default `WARNING`), date format forced back to Monolog 1's
+  `Y-m-d H:i:s` because existing parsers expect it;
+- **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
+  `monologSendEmail` is enabled. Level from `monologEmailMinimumLogLevel` (default `ERROR`); the
+  recipient falls back to the board's `contactEmailAddress`;
+- **processors** — Monolog's `WebProcessor` and `VisitorProcessor`, each behind its option.
 
-**The visitor processor treats the record as an array.** That is Monolog v2's contract; v3 passes
-an immutable `LogRecord`, so it is the first thing to rewrite when acting on the Monolog v3 TODO
-in `MonologApi`.
+**The email handler must not be built when a channel is.** Building it needs `$app->mailer()`,
+which fires `mailer_transport_setup`; a mail add-on answering that event by asking for its own
+channel re-entered channel construction and recursed until the stack ran out in 4.x.
+`LazyHandler` checks the level without building, so the mailer is touched only by a record that
+will be emailed. `LazyMailTest` pins it with `isCached('mailer')`.
+
+**The request's records go out as one email, at shutdown.** `DeduplicationHandler` is a buffer: it
+flushes when closed — `register_shutdown_function` in production, an explicit `close()` in tests —
+and skips any record already sent within `monologEmailDeduplicationTimeout`, using a store in XF's
+temp directory. A record logged *during* the send lands in a buffer that is then cleared, so it
+reaches the file but not the email.
+
+**`XenForoMailHandler` also refuses to send while it is sending.** That static guard is what stops
+a failing transport that logs its failure at `ERROR` from feeding back into itself when the handler
+is used unbuffered; `XenForoMailHandlerTest` proves it without the buffer in the way.
+
+**Records are arrays.** That is Monolog 2's contract, and every processor here assumes it. Monolog 3
+passes an immutable `LogRecord` instead — `VisitorProcessor` is the code that changes when it
+arrives.
 
 ## Composer and the version floors
 
