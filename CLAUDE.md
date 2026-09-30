@@ -73,11 +73,24 @@ XF through `addon.json`'s `composer_autoload`. After a clone, from the add-on ro
 composer install
 ```
 
-**`composer.json` pins `config.platform.php` to `7.2.0`, which is the real floor** — Monolog 2
-requires `>=7.2`. `addon.json`'s `require` still declares PHP 7.0 and XF 2.1.0, and the README says
-XF 2.1; the CHANGELOG's 4.1.0 entry is the claim actually tested, XF 2.2 and 2.3. Do not raise the
-platform pin without deciding to drop those users — it is what keeps the lock file installable on
-the oldest forum the add-on claims to support.
+**The floors are XenForo 2.2.0 and PHP 7.4, declared identically in three places** —
+`addon.json` `require`, `composer.json` `require.php`, and the README. They drift independently
+because nothing checks one against another, so change all three together or none.
+
+The PHP floor is derived, not chosen. XF 2.2 enforces 7.0, Monolog 2 requires 7.2, and 7.4 is the
+lowest PHP a XenForo instance has been built and tested on for these add-ons — declaring 7.2 would
+promise something never run. **Raising it is a support decision, not a tidy-up**: it strands users
+on older PHP at the previous major.
+
+**`config.platform.php` is the floor, as a two-part value, so Composer resolves for the oldest PHP
+the release promises** rather than for whatever PHP the developer runs. If a dev dependency ever
+needs a higher pin than the floor, keep the pin where the tooling needs it and cap the offending
+runtime packages in `require` instead — and record here why the two numbers differ, since
+`composer.json` cannot carry a comment.
+
+**Monolog 3 cannot be used while XenForo bundles psr/log 1.** XF appends add-on autoloaders after
+its own, so core's `Psr\Log\LoggerInterface` always wins, and Monolog 3's typed methods cannot
+implement v1's untyped ones — a fatal error on first use. Monolog 2 accepts psr/log 1, 2 or 3.
 
 ## Commands
 
