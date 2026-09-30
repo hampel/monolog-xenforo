@@ -29,10 +29,9 @@ The moving parts, and where each is wired:
 | `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page (`actionTestMonolog`) |
 | `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine the ACP test page runs |
 
-**`Test/` is not a PHPUnit suite.** It is the ACP diagnostic behind *Tools > Checks and tests >
-Test Monolog*, which writes one message at every level so an admin can see where they land. There
-is no automated test suite, no `phpunit.xml` and no dev dependencies; `TESTING.md` is an empty
-stub.
+**`Test/` is not the PHPUnit suite.** It is the ACP diagnostic behind *Tools > Checks and tests >
+Test Monolog*, which writes one message at every level so an admin can see where they land. The
+PHPUnit suite is `tests/`; `TESTING.md` says what it covers and what it cannot.
 
 ## How the default logger is assembled
 
@@ -82,11 +81,20 @@ lowest PHP a XenForo instance has been built and tested on for these add-ons —
 promise something never run. **Raising it is a support decision, not a tidy-up**: it strands users
 on older PHP at the previous major.
 
-**`config.platform.php` is the floor, as a two-part value, so Composer resolves for the oldest PHP
-the release promises** rather than for whatever PHP the developer runs. If a dev dependency ever
-needs a higher pin than the floor, keep the pin where the tooling needs it and cap the offending
-runtime packages in `require` instead — and record here why the two numbers differ, since
-`composer.json` cannot carry a comment.
+**`config.platform.php` is `8.3`, not the 7.4 floor, and `psr/log` is capped at `^1.1` to
+compensate.** The pin governs the whole solve, and `hampel/xenforo-test-framework` requires PHP
+8.3, so no pin at the floor can install the dev tools. So the runtime tree is constrained
+explicitly instead: `monolog/monolog` `^2` resolves to a release needing 7.2, and the `psr/log`
+cap holds it at the 1.x XenForo itself ships — without it the solve picks psr/log 3, which never
+loads (core's copy wins) but makes the lock misstate what runs. `composer.json` cannot carry a
+comment, so this paragraph is the record; after any `composer update`, re-check that every
+runtime package still accepts 7.4:
+
+```bash
+python3 -c "
+import json; l=json.load(open('composer.lock'))
+for p in l['packages']: print(f\"  {p['name']:25} {p['version']:8} {p.get('require',{}).get('php','-')}\")"
+```
 
 **Monolog 3 cannot be used while XenForo bundles psr/log 1.** XF appends add-on autoloaders after
 its own, so core's `Psr\Log\LoggerInterface` always wins, and Monolog 3's typed methods cannot
@@ -104,11 +112,25 @@ php cmd.php xf-addon:build-release Hampel/Monolog      # release zip into _relea
 Options, the option group, phrases, the admin navigation entry, the admin template, the class
 extension and both listeners all live in `_output/` and are edited there, then imported.
 
+Tests run from the add-on root, against the XenForo install around it, on
+`hampel/xenforo-test-framework`:
+
+```bash
+composer install                                  # first time; vendor/ is gitignored
+vendor/bin/phpunit                                # whole suite
+vendor/bin/phpunit --testsuite Feature            # one suite
+vendor/bin/phpunit --filter EmailTest             # one class
+```
+
+**Check the exit code unpiped** — `vendor/bin/phpunit >/dev/null 2>&1; echo $?` — because a
+pipeline reports its last command's status, and `| tail` reports 0 whatever happened.
+
 ## Release packaging
 
-**`build.json` runs `composer install --no-dev` twice** — once in `_build/upload/…`, which is what
-ships, and once in the add-on directory itself. It then `rm`s dev-only files and `mv`s every
-remaining root `*.md` to the zip root.
+**`build.json` runs `composer install --no-dev` in `_build/upload/…` only**, which strips the dev
+dependencies from what ships. It must not also run in the add-on directory itself — that would
+delete PHPUnit from the working copy on every build. It then `rm`s `phpunit.xml`, `tests/`, the
+PHPUnit cache and the dev-only markdown, and `mv`s every remaining root `*.md` to the zip root.
 
 **That `mv` promotes, it does not exclude.** Any root markdown file not removed by an earlier
 `rm -fv` step ships at the top of the release zip — which includes this file and

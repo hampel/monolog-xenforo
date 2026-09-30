@@ -1,11 +1,22 @@
 {
+	"description": "Monolog logging service for XenForo add-ons",
+	"license": "MIT",
 	"require": {
 		"php": ">=7.4",
-		"monolog/monolog": "^2"
+		"monolog/monolog": "^2",
+		"psr/log": "^1.1"
+	},
+	"require-dev": {
+		"hampel/xenforo-test-framework": "^5.5"
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"Tests\\": "tests/"
+		}
 	},
 	"config": {
 		"platform": {
-			"php": "7.4"
+			"php": "8.3"
 		}
 	}
 }
