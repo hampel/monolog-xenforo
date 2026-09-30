@@ -6,7 +6,7 @@ class SendEmail extends AbstractOption
 {
 	public static function isEnabled()
 	{
-		return \XF::options()->monologSendEmail['enabled'] !== false;
+		return !empty(\XF::options()->monologSendEmail['enabled']);
 	}
 
 	public static function getAddress()

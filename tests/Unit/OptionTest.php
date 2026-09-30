@@ -3,6 +3,7 @@
 use Hampel\Monolog\Option\EmailMinimumLogLevel;
 use Hampel\Monolog\Option\EmailSubject;
 use Hampel\Monolog\Option\FileMinimumLogLevel;
+use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\SendEmail;
 use Tests\TestCase;
 
@@ -37,6 +38,25 @@ class OptionTest extends TestCase
 		$this->setOption('monologEmailMinimumLogLevel', 0);
 
 		$this->assertSame(400, EmailMinimumLogLevel::get());
+	}
+
+	/**
+	 * A fresh install holds the option's default_value verbatim - XenForo copies it into
+	 * option_value on insert without casting - so "disabled" arrives as the string "0" until an
+	 * admin saves the options page and XenForo stores a real false.
+	 */
+	public function test_email_is_disabled_by_the_default_value_a_fresh_install_holds()
+	{
+		$this->setOption('monologSendEmail', ['enabled' => '0', 'email' => '']);
+
+		$this->assertFalse(SendEmail::isEnabled());
+	}
+
+	public function test_the_log_file_is_disabled_by_a_stored_string_zero()
+	{
+		$this->setOption('monologLogFile', ['enabled' => '0', 'logfile' => 'monolog.log']);
+
+		$this->assertFalse(LogFile::isEnabled());
 	}
 
 	public function test_the_email_address_is_empty_when_email_is_disabled()

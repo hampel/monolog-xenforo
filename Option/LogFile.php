@@ -6,7 +6,7 @@ class LogFile extends AbstractOption
 {
 	public static function isEnabled()
 	{
-		return \XF::options()->monologLogFile['enabled'] !== false;
+		return !empty(\XF::options()->monologLogFile['enabled']);
 	}
 
 
