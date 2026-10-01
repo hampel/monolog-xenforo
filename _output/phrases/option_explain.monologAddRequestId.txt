@@ -1,0 +1,1 @@
+Adds an ID to every record, the same for every record from one request, so you can find everything a request logged. Uses the web server's request ID where it provides one. JSON records always carry it.

@@ -60,6 +60,8 @@ class SetupEventTest extends TestCase
 
 	public function test_a_listener_can_add_a_processor()
 	{
+		$this->setOption('monologAddRequestId', false);
+
 		$this->app()->extension()->addListener('hampel_monolog_setup',
 			function (\XF\App $app, array &$handlers, array &$processors)
 			{

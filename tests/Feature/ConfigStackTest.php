@@ -32,6 +32,8 @@ class ConfigStackTest extends TestCase
 
 	public function test_a_configured_processor_runs()
 	{
+		$this->setOption('monologAddRequestId', false);
+
 		$this->setConfig('monolog', ['processors' => [function ()
 		{
 			return function ($record)

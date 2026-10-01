@@ -3,6 +3,7 @@
 use Hampel\Monolog\Cli\RendersReport;
 use Hampel\Monolog\Config as MonologConfig;
 use Hampel\Monolog\Option\AbstractConfigurableOption;
+use Hampel\Monolog\Option\AddRequestId;
 use Hampel\Monolog\Option\AddVisitorExtra;
 use Hampel\Monolog\Option\AddWebExtra;
 use Hampel\Monolog\Option\EmailDeduplicationTimeout;
@@ -78,6 +79,8 @@ class Config extends Command
 		$this->detail('deduplication', EmailDeduplicationTimeout::get() . ' seconds' . $this->source(EmailDeduplicationTimeout::class));
 
 		$this->heading('Records');
+		$this->detail('request id', $this->yesNo(LogFormat::get() === 'json' || AddRequestId::get())
+			. $this->source(AddRequestId::class) . (LogFormat::get() === 'json' ? ' - JSON records always carry it' : ''));
 		$this->detail('visitor', $this->yesNo(AddVisitorExtra::get()) . $this->source(AddVisitorExtra::class));
 		$this->detail('web request', $this->yesNo(AddWebExtra::get()) . $this->source(AddWebExtra::class));
 		$siteSource = Site::isLocked() ? self::FROM_CONFIG

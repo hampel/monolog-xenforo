@@ -46,6 +46,10 @@ field to change it.
   emailed — but on a busy forum it doubles the mail.
 - **Email Deduplication Timeout** — a message already emailed within this many seconds is not sent
   again. Each request's messages arrive as one email.
+- **Add Request ID** — adds an id to every record, the same for every record from one request, so
+  everything a request logged can be found from any one of its lines. Uses the web server's request
+  id where it provides one — Apache's `UNIQUE_ID`, or an `X-Request-ID` header from a proxy — so a
+  line can be matched to the access log. On by default; JSON records always carry it.
 - **Add Visitor Extra Data** — adds the user id and name to every message. On by default.
 - **Add Web Extra Data** — adds the URL, IP address, HTTP method, server name, referrer and user
   agent. Off by default.
@@ -71,6 +75,7 @@ $config['monolog'] = [
         'subject' => 'Errors on {board}',
         'dedup' => 300,                         // seconds
     ],
+    'request_id' => true,
     'visitor' => true,
     'web' => false,
     'site' => 'myforum',

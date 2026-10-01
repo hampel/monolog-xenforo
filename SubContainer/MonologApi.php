@@ -3,6 +3,7 @@
 use Hampel\Monolog\Config;
 use Hampel\Monolog\Handler\LazyHandler;
 use Hampel\Monolog\Handler\XenForoMailHandler;
+use Hampel\Monolog\Option\AddRequestId;
 use Hampel\Monolog\Option\AddVisitorExtra;
 use Hampel\Monolog\Option\AddWebExtra;
 use Hampel\Monolog\Option\EmailDeduplicationTimeout;
@@ -14,6 +15,7 @@ use Hampel\Monolog\Option\LogFormat;
 use Hampel\Monolog\Option\SendEmail;
 use Hampel\Monolog\Option\Site;
 use Hampel\Monolog\Processor\ContextProcessor;
+use Hampel\Monolog\Processor\RequestIdProcessor;
 use Hampel\Monolog\Processor\VisitorProcessor;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\JsonFormatter;
@@ -145,6 +147,12 @@ class MonologApi extends AbstractSubContainer
 				$site = Site::get();
 
 				$processors[] = new ContextProcessor($site);
+			}
+
+			// JSON always carries it; a line log only when the option says so
+			if (LogFormat::get() === 'json' || AddRequestId::get())
+			{
+				$processors[] = new RequestIdProcessor();
 			}
 
 			// Monolog runs processors in array order

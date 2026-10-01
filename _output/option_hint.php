@@ -11,6 +11,7 @@
 namespace XF;
 
 /**
+ * @property bool|null $monologAddRequestId Add Request ID
  * @property bool|null $monologAddVisitorExtra Add Visitor Extra Data
  * @property bool|null $monologAddWebExtra Add Web Extra Data
  * @property non-negative-int|null $monologEmailDeduplicationTimeout Email Deduplication Timeout

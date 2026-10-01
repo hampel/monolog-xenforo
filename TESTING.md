@@ -107,6 +107,8 @@ What the suite covers:
   entry skipped and reported rather than thrown.
 - **`tests/Feature/ContextProcessorTest.php`** — `extra.schema`, `site` and `app` on JSON records
   only, the configured site, each app type, and a running job.
+- **`tests/Feature/RequestIdTest.php`** — one id per request, the web server's where it is shaped
+  like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared
   logger is built, and able to add or remove handlers and processors.
 - **`tests/Feature/ToolsControllerTest.php`** — the ACP *Test Monolog* page: its permission, its

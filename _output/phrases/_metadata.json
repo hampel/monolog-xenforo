@@ -89,6 +89,12 @@
         "version_string": "2.0.0",
         "hash": "92c98cc7ec1bbafc0a4a4a64c4125870"
     },
+    "option.monologAddRequestId.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "5b6d39656d01eb3400c6f5760ff69c47"
+    },
     "option.monologAddVisitorExtra.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -148,6 +154,12 @@
         "version_id": 5000033,
         "version_string": "5.0.0b3",
         "hash": "668445f09da337d276dc852bb6a0dbb3"
+    },
+    "option_explain.monologAddRequestId.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "ec9a69ded2a51571ec34a4857f9bb4d5"
     },
     "option_explain.monologAddVisitorExtra.txt": {
         "global_cache": false,

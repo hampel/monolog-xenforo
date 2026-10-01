@@ -64,6 +64,8 @@ class ContextProcessorTest extends TestCase
 
 	public function test_line_records_are_unchanged()
 	{
+		$this->setOption('monologAddRequestId', false);
+
 		$this->app()['monolog']->channel('myaddon')->error('as before');
 
 		$this->assertStringEndsWith('myaddon.ERROR: as before [] []', $this->logLines()[0]);

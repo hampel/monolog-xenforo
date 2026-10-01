@@ -17,6 +17,7 @@ class HelperLogTest extends TestCase
 		$this->useTemporaryInternalData();
 		$this->setOptions([
 			'monologAddVisitorExtra' => false,
+			'monologAddRequestId' => false,
 			'monologFileMinimumLogLevel' => 100, // DEBUG
 		]);
 	}

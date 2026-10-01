@@ -18,6 +18,7 @@ use Hampel\Monolog\Option\FileMinimumLogLevel;
  *             'subject' => 'Errors on {board}',
  *             'dedup' => 300,
  *         ],
+ *         'request_id' => true,
  *         'visitor' => true,
  *         'web' => false,
  *         'site' => 'myforum',

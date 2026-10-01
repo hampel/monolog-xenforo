@@ -15,7 +15,7 @@ class NewChannelTest extends TestCase
 		parent::setUp();
 
 		$this->useTemporaryInternalData();
-		$this->setOption('monologAddVisitorExtra', false);
+		$this->setOptions(['monologAddVisitorExtra' => false, 'monologAddRequestId' => false]);
 	}
 
 	public function test_the_monolog_container_key_exists_when_the_addon_is_loaded()

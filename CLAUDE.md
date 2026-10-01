@@ -88,8 +88,10 @@ The stack, from `MonologApi::initialize()`:
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
   `SendEmail::isEnabled()`. Level from `EmailMinimumLogLevel::get()` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
-- **processors** — `ContextProcessor` when the format is `json`, then Monolog's `WebProcessor`
-  and `VisitorProcessor`, each behind its option.
+- **processors** — `ContextProcessor` when the format is `json`; `RequestIdProcessor` when the
+  format is `json` or *Add Request ID* is on; then Monolog's `WebProcessor` and `VisitorProcessor`,
+  each behind its option. **A server-supplied request id is trusted only if it is shaped like an
+  id** — a header value lands in the log, so a newline in one would forge a line.
 
 **`ContextProcessor` runs for JSON output only, deliberately.** Its fields exist for a log store
 holding several forums; a line log is one forum's file read by a person, where all three are
