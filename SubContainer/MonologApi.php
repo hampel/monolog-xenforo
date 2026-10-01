@@ -10,6 +10,7 @@ use Hampel\Monolog\Option\EmailSubject;
 use Hampel\Monolog\Option\FileMinimumLogLevel;
 use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\SendEmail;
+use Hampel\Monolog\Processor\ContextProcessor;
 use Hampel\Monolog\Processor\VisitorProcessor;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
@@ -106,6 +107,17 @@ class MonologApi extends AbstractSubContainer
 		{
 			$processors = [];
 
+			// for a log store holding several forums - so with the format meant for one
+			if (($this->config()['format'] ?? 'line') === 'json')
+			{
+				$config = $this->config();
+				$site = isset($config['site']) && is_string($config['site']) && $config['site'] !== ''
+					? $config['site']
+					: ContextProcessor::siteFromBoardUrl((string) \XF::options()->boardUrl);
+
+				$processors[] = new ContextProcessor($site);
+			}
+
 			// Monolog runs processors in array order
 			if (AddWebExtra::get())
 			{
@@ -132,7 +144,9 @@ class MonologApi extends AbstractSubContainer
 	 * - `file`: the log file. Absolute (or a stream such as `php://stderr`) is used as given;
 	 *   relative is inside internal_data; `false` turns file logging off. Unset, the
 	 *   `monologLogFile` option decides.
-	 * - `format`: `line` (the default) or `json`, one Monolog JSON record per line.
+	 * - `format`: `line` (the default) or `json`, one Monolog JSON record per line, with
+ *   `extra.schema`, `extra.site` and `extra.app` added - see ContextProcessor.
+ * - `site`: the name `extra.site` carries; defaults to the board URL's host.
 	 */
 	protected function config(): array
 	{

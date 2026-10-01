@@ -45,6 +45,7 @@ The moving parts, and where each is wired:
 | `Handler/LazyHandler.php` | `MonologApi`, around the email stack | defers building a handler until a record reaches its level |
 | `Handler/XenForoMailHandler.php` | inside that `LazyHandler` | sends records through XF's own `Mail`, on 2.2 and 2.3 alike |
 | `Processor/VisitorProcessor.php` | `MonologApi`, behind `monologAddVisitorExtra` | adds `extra.visitor` |
+| `Processor/ContextProcessor.php` | `MonologApi`, when the format is `json` | adds `extra.schema`, `extra.site` and `extra.app` |
 | `Option/*.php` | option `edit_format` and callbacks in `_output/options/` | static getters that supply the default when unset |
 | `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page |
 | `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine that page runs |
@@ -75,11 +76,20 @@ The stack, from `MonologApi::initialize()`:
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
   `monologSendEmail` is enabled. Level from `monologEmailMinimumLogLevel` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
-- **processors** — Monolog's `WebProcessor` and `VisitorProcessor`, each behind its option.
+- **processors** — `ContextProcessor` when the format is `json`, then Monolog's `WebProcessor`
+  and `VisitorProcessor`, each behind its option.
+
+**`ContextProcessor` runs for JSON output only, deliberately.** Its fields exist for a log store
+holding several forums; a line log is one forum's file read by a person, where all three are
+implied, and adding them would change every line existing readers parse. `extra.app` reports
+`job` whenever `Job\Manager` is running one — read from its protected `runningJob` through a bound
+closure, and only if something already built the manager. **Bump `ContextProcessor::SCHEMA` when
+the meaning of an existing field changes**; adding a field does not need it.
 
 **`$config['monolog']` in `config.php` wins over the options.** `MonologApi::config()` reads it;
 `file` (absolute, relative to `internal_data`, or `false`) overrides the `monologLogFile` option,
-and `format` picks `line` or `json`. The README documents it for users.
+`format` picks `line` or `json`, and `site` names the forum in JSON records. The README documents
+it for users.
 
 **The log file option must stay inside `internal_data`.** Any admin with option permission can
 set it, and the file receives log lines that can carry user-supplied text — so a path into the

@@ -53,6 +53,18 @@ $container['myaddon.log'] = function (\XF\Container $c)
 };
 ```
 
+### Naming events
+
+Put what happened in the context as `event`, a stable name, and keep the message for people:
+
+```php
+$logger->info('Newsletter sent', ['event' => 'newsletter.sent', 'newsletter_id' => 12, 'count' => 340]);
+```
+
+The message can be reworded freely; the event name is what a search, dashboard or alert matches
+on, so treat it as fixed once it ships. Use `noun.verb`, lowercase. Put identifiers in the context
+too, never interpolated into the message, so each one can be searched on its own.
+
 ### Configuring in config.php
 
 The options in the admin control panel cover most forums. A server owner can override the log
@@ -62,6 +74,7 @@ file, or switch to JSON, in `src/config.php`:
 $config['monolog'] = [
     'file' => '/var/log/xenforo/forum.log',   // absolute, relative to internal_data, or false
     'format' => 'json',                        // 'line' (the default) or 'json'
+    'site' => 'myforum',                       // names this forum in JSON records
 ];
 ```
 
@@ -71,7 +84,9 @@ $config['monolog'] = [
 - The log file option itself only accepts a path inside `internal_data`, because any admin who can
   edit options can change it. Paths anywhere else belong here.
 - `json` writes one Monolog JSON record per line, with stack traces for exceptions - suitable for
-  shipping to a log collector.
+  shipping to a log collector. Each record also carries `extra.site`, `extra.app` (`web`, `admin`,
+  `api`, `cli` or `job`) and `extra.schema`, so a store holding several forums can tell them apart.
+- `site` is what `extra.site` says. It defaults to the board URL's host; set it if that may change.
 
 ### Upgrading from 4.x
 
