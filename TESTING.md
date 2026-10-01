@@ -98,8 +98,9 @@ What the suite covers:
   own controller leaving a locked option's stored value untouched.
 - **`tests/Feature/CommandsTest.php`** — `monolog:config` and `monolog:validate`: both load as
   valid XenForo commands; config shows each source and writes nothing; `--unattended` sends
-  nothing; the sweep's file count follows the level; and an unwritable path, a bad factory and a
-  probe that throws each exit 1 without ending the run.
+  nothing; the sweep's file count follows the level, counting only its own records when another
+  record quotes one (a mail transport logging what it sent); a wrong count prints the lines; and an
+  unwritable path, a bad factory and a probe that throws each exit 1 without ending the run.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.

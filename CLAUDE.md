@@ -242,10 +242,16 @@ vendor/bin/phpunit --filter EmailTest             # one class
 for `app:config` and `app:validate`: config reads and prints, validate exercises the real thing,
 four outcomes (`[ ok ]`, `[warn]`, `[fail]`, and a blank `[    ]` for a check that did not apply),
 exit 1 only on a failure, no check may end the run, and `--unattended` skips only the sends — the
-level sweep — while the checks that are facts about the configuration run above it. **Extend
-`monolog:validate` whenever logging gains a new dependency on the environment.** The rendering is
-`Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout, because that package needs PHP
-8.3 and XenForo ships its own `symfony/console`.
+level sweep — while the checks that are facts about the configuration run above it.
+
+**The sweep counts only its own records** — `monolog-validate` channel, exact message, in the line
+or JSON layout — because another record can quote one. A mail transport that logs its
+transmissions writes the emailed copy, run id and all, into the same file; on a production forum
+that read as "9 of 8". A line that mentions the run is reported, and a wrong count prints them.
+
+**Extend `monolog:validate` whenever logging gains a new dependency on the environment.** The
+rendering is `Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout, because that
+package needs PHP 8.3 and XenForo ships its own `symfony/console`.
 
 **Two traps, both hit writing them, both fatal for every command in `cmd.php`, not only these.**
 XenForo loads every add-on's command classes to list them, so a class that cannot load stops the

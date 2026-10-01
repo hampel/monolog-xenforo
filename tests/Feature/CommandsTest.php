@@ -85,6 +85,79 @@ class CommandsTest extends TestCase
 		$this->assertCount(5, $this->logLines());
 	}
 
+	public static function formats(): array
+	{
+		return ['line' => ['line'], 'json' => ['json']];
+	}
+
+	/**
+	 * What a mail transport logging its transmissions does: during the sweep, another record in the
+	 * same file quotes one of the sweep's - the emailed copy - so it mentions the run id too. Only
+	 * the sweep's own records are counted, and the other line is reported rather than counted.
+	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('formats')]
+	public function test_another_record_quoting_the_sweep_is_not_counted($format)
+	{
+		$this->setOption('monologFileMinimumLogLevel', 100);
+		$this->setConfig('monolog', [
+			'file' => ['format' => $format],
+			'handlers' => [function ()
+			{
+				return new class extends \Monolog\Handler\AbstractHandler
+				{
+					public function handle($record): bool
+					{
+						if ($record['level'] === 400)
+						{
+							\XF::app()->get('monolog')->channel('mailer')->debug('Transmission', ['content' => $record['message']]);
+						}
+
+						return false;
+					}
+				};
+			}],
+		]);
+
+		[$code, $output] = $this->runCommand(new Validate());
+
+		$this->assertSame(0, $code, $output);
+		$this->assertStringContainsString('8 of 8 written, as expected at Debug', $output);
+		$this->assertStringContainsString('1 other line mentions this run', $output);
+		$this->assertCount(9, $this->logLines(), 'the quoting record really is in the file');
+	}
+
+	public function test_a_wrong_count_shows_the_lines_that_do_not_fit()
+	{
+		$this->setOption('monologFileMinimumLogLevel', 100);
+		$this->setConfig('monolog', ['handlers' => [function ()
+		{
+			// a second handler on the same file: every record is written twice
+			return new \Monolog\Handler\StreamHandler(\Hampel\Monolog\Option\LogFile::path(), 400);
+		}]]);
+
+		[$code, $output] = $this->runCommand(new Validate());
+
+		$this->assertSame(1, $code);
+		$this->assertStringContainsString('12 of 8 written, but 8 were expected at Debug', $output);
+		$this->assertMatchesRegularExpression('/monolog-validate\.ERROR: monolog:validate [0-9a-f]+: error/', $output,
+			'a line that does not fit is shown');
+	}
+
+	public function test_a_custom_formatter_falls_back_to_counting_mentions()
+	{
+		$this->setOption('monologFileMinimumLogLevel', 100);
+		$this->setConfig('monolog', ['file' => ['formatter' => function ()
+		{
+			return new \Monolog\Formatter\LineFormatter("%message%\n");
+		}]]);
+
+		[$code, $output] = $this->runCommand(new Validate());
+
+		$this->assertSame(0, $code, $output);
+		$this->assertStringContainsString('8 of 8 written, as expected at Debug', $output);
+		$this->assertStringContainsString('custom formatter', $output);
+	}
+
 	public function test_the_sweep_sends_one_email_when_email_is_on()
 	{
 		$this->setOption('monologSendEmail', ['enabled' => true, 'email' => 'logs@example.com']);

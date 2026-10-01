@@ -281,12 +281,34 @@ class Validate extends Command
 		{
 			$fileLevel = FileMinimumLogLevel::get();
 			$expected = $this->atOrAbove($fileLevel);
-			$written = is_file($path) ? $this->countRun($path, $offset, $run) : 0;
+			[$own, $others] = is_file($path) ? $this->sweepLines($path, $offset, $run) : [[], []];
+			$written = count($own);
 			$at = FileMinimumLogLevel::LEVELS[$fileLevel] ?? $fileLevel;
 
-			$written === $expected
-				? $this->checkOk('log file', "{$written} of 8 written, as expected at {$at}")
-				: $this->checkFail('log file', "{$written} of 8 written, but {$expected} were expected at {$at}");
+			$notes = [];
+			if (MonologConfig::get('file', 'formatter') !== null)
+			{
+				$notes[] = 'custom formatter - every line mentioning this run was counted';
+			}
+			if ($others)
+			{
+				$notes[] = count($others) . ' other line' . (count($others) === 1 ? ' mentions' : 's mention')
+					. ' this run - another record quoting it, such as a logged copy of the email - not counted';
+			}
+			$note = $notes ? ' (' . implode('; ', $notes) . ')' : '';
+
+			if ($written === $expected)
+			{
+				$this->checkOk('log file', "{$written} of 8 written, as expected at {$at}{$note}");
+			}
+			else
+			{
+				$this->checkFail('log file', "{$written} of 8 written, but {$expected} were expected at {$at}{$note}");
+				foreach (array_slice(array_merge($own, $others), 0, 12) AS $line)
+				{
+					$this->report->writeln('         ' . mb_substr(rtrim($line), 0, 160));
+				}
+			}
 		}
 
 		if (SendEmail::isEnabled())
@@ -316,25 +338,58 @@ class Validate extends Command
 	}
 
 	/**
-	 * Lines carrying this run's id, from where the file ended before the sweep: anything else on
-	 * the forum logging at the same moment is not counted.
+	 * The lines from where the file ended before the sweep that carry this run's id, split into the
+	 * sweep's own records and anything else mentioning it. A record elsewhere can quote the sweep -
+	 * a mail transport logging the email it sent, say - and must not be counted as one of its eight.
+	 *
+	 * @return array{0: string[], 1: string[]} [own records, other lines mentioning the run]
 	 */
-	private function countRun(string $path, int $offset, string $run): int
+	private function sweepLines(string $path, int $offset, string $run): array
 	{
 		clearstatcache(true, $path);
+		$prefix = "monolog:validate {$run}: ";
+		$custom = MonologConfig::get('file', 'formatter') !== null;
+
+		$own = [];
+		$others = [];
 		$handle = fopen($path, 'r');
 		fseek($handle, $offset);
-		$count = 0;
 		while (($line = fgets($handle)) !== false)
 		{
-			if (strpos($line, "monolog:validate {$run}") !== false)
+			if (strpos($line, "monolog:validate {$run}") === false)
 			{
-				$count++;
+				continue;
+			}
+
+			if ($custom || $this->isSweepRecord($line, $prefix))
+			{
+				$own[] = $line;
+			}
+			else
+			{
+				$others[] = $line;
 			}
 		}
 		fclose($handle);
 
-		return $count;
+		return [$own, $others];
+	}
+
+	/**
+	 * One of the sweep's own records, in either built-in format: on the monolog-validate channel,
+	 * with a message that starts with the sweep's. A custom formatter's layout is unknown, so the
+	 * caller counts mentions instead and says so.
+	 */
+	private function isSweepRecord(string $line, string $prefix): bool
+	{
+		$json = json_decode(trim($line), true);
+		if (is_array($json))
+		{
+			return ($json['channel'] ?? '') === 'monolog-validate'
+				&& strpos((string) ($json['message'] ?? ''), $prefix) === 0;
+		}
+
+		return (bool) preg_match('/^\[[^\]]*\] monolog-validate\.[A-Z]+: ' . preg_quote($prefix, '/') . '/', $line);
 	}
 
 	/**
