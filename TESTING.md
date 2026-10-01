@@ -37,6 +37,8 @@ loaded Monolog 3 and psr/log 3.
   only, the configured site, each app type, and a running job.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared
   logger is built, and able to add or remove handlers and processors.
+- **`tests/Feature/ToolsControllerTest.php`** — the ACP *Test Monolog* page: its permission, its
+  rendering, and one message written at every level.
 - **`tests/Feature/HelperLogTest.php`** — the deprecated `Helper\Log` facade, every level.
 - **`tests/Feature/EmailTest.php`** — the email stack: level, recipient and its fallback, subject,
   one email per request, and deduplication across requests.
@@ -58,7 +60,6 @@ make an email test fail because an earlier test or run had already sent the same
   underneath it is SwiftMailer on 2.2 and Symfony Mailer on 2.3, and `fakesMail()` swaps in a
   Symfony Mailer transport — so the suite exercises 2.3 alone. Check 2.2 by hand: enable email
   on a 2.2 forum, write an `ERROR` record, and confirm one email arrives.
-- **The ACP test page** — *Tools > Checks and tests > Test Monolog*. Run it and read the log.
 - **The declared PHP floor.** Nothing here runs PHP below 8.3; lint the release zip on a PHP 7.4
   instance.
 
