@@ -13,6 +13,17 @@ vendor/bin/phpunit
 
 Check the exit code with the command unpiped: `vendor/bin/phpunit >/dev/null 2>&1; echo $?`.
 
+**Then run it again against Monolog 3**, which XenForo 2.4 bundles and loads ahead of this
+add-on's own copy:
+
+```bash
+composer install -d tests/monolog3
+MONOLOG3=1 vendor/bin/phpunit
+```
+
+Both runs must pass. `tests/Feature/Monolog3SimulationTest.php` proves the second one really
+loaded Monolog 3 and psr/log 3.
+
 ## What the suite covers
 
 - **`tests/Feature/ChannelTest.php`** — `channel()`, the 5.0 API: a PSR-3 logger, cached by name,

@@ -4,3 +4,4 @@ vendor/
 CLAUDE.local.md
 .phpunit.cache/
 .phpunit.result.cache
+tests/monolog3/vendor/

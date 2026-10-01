@@ -1,0 +1,12 @@
+{
+	"description": "Monolog 3 and psr/log 3, loaded ahead of XenForo's copies to simulate XenForo 2.4 - see TESTING.md",
+	"require": {
+		"monolog/monolog": "^3",
+		"psr/log": "^3"
+	},
+	"config": {
+		"platform": {
+			"php": "8.3"
+		}
+	}
+}

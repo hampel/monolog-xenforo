@@ -141,12 +141,13 @@ class MonologApi extends AbstractSubContainer
 	}
 
 	/**
-	 * Whether this release can log on the running XenForo.
+	 * Whether this release logs on the running XenForo.
 	 *
-	 * XenForo 2.4 bundles Monolog 3, and its autoloader is registered ahead of every add-on's, so
+	 * XenForo 2.4 bundles Monolog 3, and its class loader is consulted before any add-on's, so
 	 * there every Monolog class this add-on names resolves to core's v3. The handlers and
-	 * processors here are written against v2's array records and would fail on first use - so on
-	 * 2.4, channels log nothing until a release that delegates to core's own logger.
+	 * processors are written to run on both, and `MONOLOG3=1 vendor/bin/phpunit` proves it - but
+	 * nothing has run on XenForo 2.4 itself, so on 2.4 channels log nothing until a release that
+	 * has.
 	 */
 	public static function supportsThisXenForo(): bool
 	{

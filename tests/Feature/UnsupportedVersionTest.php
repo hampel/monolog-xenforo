@@ -5,9 +5,9 @@ use Psr\Log\NullLogger;
 use Tests\TestCase;
 
 /**
- * XenForo 2.4 bundles Monolog 3, and its autoloader wins - so on 2.4 every Monolog class this
- * add-on uses resolves to core's v3, which this release's v2-shaped code cannot run against.
- * Until a 2.4-aware release exists, channels there log nothing rather than take the forum down.
+ * XenForo 2.4 is untested: the code runs on the Monolog 3 it bundles (the MONOLOG3=1 run proves
+ * that), but nothing has run on 2.4 itself. Until a release that has, channels there log nothing
+ * rather than risk the forum.
  */
 class UnsupportedVersionTest extends TestCase
 {

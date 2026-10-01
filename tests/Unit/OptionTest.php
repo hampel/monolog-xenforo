@@ -60,12 +60,23 @@ class OptionTest extends TestCase
 	}
 
 	/**
-	 * The table replaces Logger::getLevels(), gone in Monolog 3. Checked against Monolog 2's own
-	 * list while that is what the add-on bundles, so the two cannot drift.
+	 * The table replaces Logger::getLevels(), gone in Monolog 3. Checked against whichever
+	 * Monolog is loaded - v2's list, or v3's Level enum - so neither can drift from it.
 	 */
 	public function test_the_level_table_matches_monolog()
 	{
-		$fromMonolog = array_map('ucfirst', array_map('strtolower', array_flip(\Monolog\Logger::getLevels())));
+		if (method_exists(\Monolog\Logger::class, 'getLevels'))
+		{
+			$fromMonolog = array_map('ucfirst', array_map('strtolower', array_flip(\Monolog\Logger::getLevels())));
+		}
+		else
+		{
+			$fromMonolog = [];
+			foreach (\Monolog\Level::cases() AS $level)
+			{
+				$fromMonolog[$level->value] = $level->name;
+			}
+		}
 
 		$this->assertSame($fromMonolog, FileMinimumLogLevel::LEVELS);
 	}

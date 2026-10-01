@@ -23,6 +23,38 @@ abstract class TestCase extends BaseTestCase
 	private $internalDataPath;
 
 	/**
+	 * With MONOLOG3=1, resolve Monolog and psr/log from tests/monolog3 instead of this add-on's
+	 * vendor tree and XenForo's - which is what XenForo 2.4 does, since it bundles Monolog 3 and
+	 * its class loader is consulted before any add-on's. So the suite runs against the classes
+	 * this add-on will actually get on 2.4.
+	 */
+	public function createApplication()
+	{
+		$app = parent::createApplication();
+
+		if (self::simulatingMonolog3())
+		{
+			$vendor = __DIR__ . '/monolog3/vendor';
+			if (!is_dir($vendor))
+			{
+				throw new \LogicException('MONOLOG3=1 needs: composer install -d tests/monolog3');
+			}
+
+			// setPsr4 replaces every path for the prefix, including the ones XenForo just added
+			// for this add-on's own vendor tree
+			\XF::$autoLoader->setPsr4('Monolog\\', [$vendor . '/monolog/monolog/src/Monolog']);
+			\XF::$autoLoader->setPsr4('Psr\\Log\\', [$vendor . '/psr/log/src']);
+		}
+
+		return $app;
+	}
+
+	public static function simulatingMonolog3(): bool
+	{
+		return (bool) getenv('MONOLOG3');
+	}
+
+	/**
 	 * Point internal_data at a directory unique to this test.
 	 *
 	 * The log file lives there, and so does XenForo's temp directory - which holds the email

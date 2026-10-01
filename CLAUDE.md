@@ -91,9 +91,28 @@ reaches the file but not the email.
 a failing transport that logs its failure at `ERROR` from feeding back into itself when the handler
 is used unbuffered; `XenForoMailHandlerTest` proves it without the buffer in the way.
 
-**Records are arrays.** That is Monolog 2's contract, and every processor here assumes it. Monolog 3
-passes an immutable `LogRecord` instead — `VisitorProcessor` is the code that changes when it
-arrives.
+**Every handler and processor here must run on Monolog 2 and Monolog 3.** XenForo 2.4 bundles
+Monolog 3, and its class loader is consulted before any add-on's, so on 2.4 every `Monolog\` and
+`Psr\Log\` class resolves to core's copy whatever this add-on bundles. Monolog 2 passes records as
+arrays and Monolog 3 as `LogRecord` objects, so:
+
+- **leave record parameters untyped** — an untyped parameter satisfies both `array $record` and
+  `LogRecord $record`; either type alone is a fatal declaration error under the other version;
+- **read and assign `extra` whole** (`$extra = $record['extra']; … $record['extra'] = $extra;`) —
+  `LogRecord` allows setting `extra`, but most of its fields are read-only;
+- **use nothing Monolog 3 removed** — `Logger::getLevels()` is gone, which is why the level select
+  carries its own table.
+
+**Run the suite against Monolog 3 before committing any change to a handler or processor:**
+
+```bash
+composer install -d tests/monolog3      # first time; its vendor/ is gitignored
+MONOLOG3=1 vendor/bin/phpunit
+```
+
+`tests/TestCase.php` repoints XenForo's own class loader at `tests/monolog3/vendor` for that run,
+which is the order 2.4 will load them in. `Monolog3SimulationTest` fails if the switch is set and
+the classes still come from anywhere else, so a green run is not a silent fallback to v2.
 
 ## Composer and the version floors
 

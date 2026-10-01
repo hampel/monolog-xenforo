@@ -10,6 +10,10 @@ use Monolog\Handler\HandlerInterface;
  * by asking for a log channel, re-entering the construction of this one. Wrapping the handler
  * defers all of that until a record actually reaches its level, so creating a channel, or writing
  * below that level, costs nothing.
+ *
+ * Records are untyped on purpose: Monolog 2 passes an array and Monolog 3 a LogRecord, and an
+ * untyped parameter satisfies both interfaces. XenForo 2.4 bundles Monolog 3 and its copy wins,
+ * so this class meets both; `MONOLOG3=1 vendor/bin/phpunit` runs the suite against v3.
  */
 class LazyHandler implements HandlerInterface
 {
@@ -30,12 +34,12 @@ class LazyHandler implements HandlerInterface
 		$this->level = $level;
 	}
 
-	public function isHandling(array $record): bool
+	public function isHandling($record): bool
 	{
 		return $record['level'] >= $this->level;
 	}
 
-	public function handle(array $record): bool
+	public function handle($record): bool
 	{
 		if (!$this->isHandling($record))
 		{
