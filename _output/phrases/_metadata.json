@@ -41,6 +41,12 @@
         "version_string": "2.0.0",
         "hash": "08d584eb08793f685e8bedf7b97f4a31"
     },
+    "monolog_test_monolog_explain.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "d4e00efe28838405e4b0f971c48372a8"
+    },
     "monolog_this_test_could_not_be_run.txt": {
         "global_cache": false,
         "version_id": 2,

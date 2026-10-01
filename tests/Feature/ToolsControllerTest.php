@@ -36,6 +36,7 @@ class ToolsControllerTest extends TestCase
 		$this->assertReplyTemplate($reply, 'monolog_tools_test_monolog');
 
 		$html = $this->renderReply($reply);
+		$this->assertSeeText($html, 'Writes one test message at each log level');
 		$this->assertNoUnresolvedPhrases($html, 'monolog_');
 		$this->assertNoTemplateErrors();
 	}

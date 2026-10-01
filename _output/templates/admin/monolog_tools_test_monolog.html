@@ -12,6 +12,9 @@
 <xf:form action="{{ link('tools/test-monolog') }}" class="block">
 	<div class="block-container">
 		<h2 class="block-header">{{ phrase('monolog_test_logger') }}</h2>
+		<div class="block-body">
+			<div class="block-row">{{ phrase('monolog_test_monolog_explain') }}</div>
+		</div>
 		<xf:submitrow submit="{{ phrase('monolog_test') }}" />
 	</div>
 	<xf:hiddenval name="test">Hampel\Monolog:LoggerTest</xf:hiddenval>
