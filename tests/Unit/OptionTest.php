@@ -59,6 +59,37 @@ class OptionTest extends TestCase
 		$this->assertFalse(LogFile::isEnabled());
 	}
 
+	/**
+	 * The table replaces Logger::getLevels(), gone in Monolog 3. Checked against Monolog 2's own
+	 * list while that is what the add-on bundles, so the two cannot drift.
+	 */
+	public function test_the_level_table_matches_monolog()
+	{
+		$fromMonolog = array_map('ucfirst', array_map('strtolower', array_flip(\Monolog\Logger::getLevels())));
+
+		$this->assertSame($fromMonolog, FileMinimumLogLevel::LEVELS);
+	}
+
+	public function test_the_level_select_offers_every_level()
+	{
+		$option = $this->app()->finder('XF:Option')->whereId('monologFileMinimumLogLevel')->fetchOne();
+
+		$html = FileMinimumLogLevel::renderSelect($option, [
+			'inputName' => 'options[monologFileMinimumLogLevel]',
+			'inputType' => 'select',
+			'listedHtml' => '',
+			'explainHtml' => '',
+			'hintHtml' => '',
+			'editLink' => '',
+			'title' => 'Level',
+		]);
+
+		foreach (FileMinimumLogLevel::LEVELS AS $level => $label)
+		{
+			$this->assertStringContainsString("value=\"{$level}\"", (string) $html);
+		}
+	}
+
 	public function test_the_email_address_is_empty_when_email_is_disabled()
 	{
 		$this->setOption('monologSendEmail', ['enabled' => false, 'email' => 'logs@example.com']);

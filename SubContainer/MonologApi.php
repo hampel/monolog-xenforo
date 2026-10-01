@@ -17,6 +17,7 @@ use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
 use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use XF\Container;
 use XF\SubContainer\AbstractSubContainer;
 use XF\Util\File;
@@ -124,6 +125,11 @@ class MonologApi extends AbstractSubContainer
 	 */
 	public function channel(string $name): LoggerInterface
 	{
+		if (!self::supportsThisXenForo())
+		{
+			return new NullLogger();
+		}
+
 		if (!isset($this->channels[$name]))
 		{
 			/** @var Logger $logger */
@@ -132,6 +138,19 @@ class MonologApi extends AbstractSubContainer
 		}
 
 		return $this->channels[$name];
+	}
+
+	/**
+	 * Whether this release can log on the running XenForo.
+	 *
+	 * XenForo 2.4 bundles Monolog 3, and its autoloader is registered ahead of every add-on's, so
+	 * there every Monolog class this add-on names resolves to core's v3. The handlers and
+	 * processors here are written against v2's array records and would fail on first use - so on
+	 * 2.4, channels log nothing until a release that delegates to core's own logger.
+	 */
+	public static function supportsThisXenForo(): bool
+	{
+		return \XF::$versionId < 2040000;
 	}
 
 	/**
