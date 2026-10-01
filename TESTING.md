@@ -80,6 +80,9 @@ What the suite covers:
   processor.
 - **`tests/Feature/ConfigTest.php`** — `$config['monolog']`: an absolute, relative or disabled
   file overriding the option, and the JSON format, one record per line with stack traces.
+- **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
+  `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
+  entry skipped and reported rather than thrown.
 - **`tests/Feature/ContextProcessorTest.php`** — `extra.schema`, `site` and `app` on JSON records
   only, the configured site, each app type, and a running job.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared

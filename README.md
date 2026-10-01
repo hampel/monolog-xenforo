@@ -64,6 +64,40 @@ $config['monolog'] = [
 **A log file outside `internal_data` can only be set here**, never in the options. Any admin who
 can edit options can change those, and a log file receives text your members can influence.
 
+#### Handlers, processors and the formatter
+
+`config.php` can also add to the stack, with no add-on — send errors to syslog, write to a log
+collector, or format the log file differently:
+
+```php
+$config['monolog'] = [
+    'handlers' => [
+        function () {
+            return new \Monolog\Handler\SyslogHandler('forum', LOG_USER, \Monolog\Logger::ERROR);
+        },
+    ],
+    'processors' => [
+        function () { return new \Monolog\Processor\UidProcessor(); },
+    ],
+    'formatter' => function () {
+        return new \Monolog\Formatter\LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n");
+    },
+];
+```
+
+- **`handlers`** and **`processors`** are lists, added to the built-in file and email handlers and
+  to the processors the options switch on.
+- **`formatter`** replaces the log file's formatter, in place of `format`.
+
+**Each entry is a function that returns the object, not the object itself** — the same as
+XenForo's own `$config['fsAdapters']`. `config.php` is read before add-on classes can load, so
+`new \Monolog\...` written directly there is a fatal error on every page. An entry that is not a
+function, or returns the wrong kind of object, is skipped and reported in the server error log.
+
+These are Monolog classes, so the same advice as for the code event applies: XenForo 2.4 loads its
+own Monolog 3 in place of this add-on's Monolog 2. Monolog's built-in handlers construct the same
+way on both; a processor of your own should leave its record parameter untyped.
+
 ## Usage
 
 Ask for a channel named for your add-on. You get a PSR-3 logger:

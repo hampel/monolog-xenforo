@@ -12,9 +12,11 @@ use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\SendEmail;
 use Hampel\Monolog\Processor\ContextProcessor;
 use Hampel\Monolog\Processor\VisitorProcessor;
+use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
+use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Monolog\Processor\WebProcessor;
@@ -56,6 +58,18 @@ class MonologApi extends AbstractSubContainer
 
 		$container['formatter.file'] = function (Container $c)
 		{
+			if (isset($this->config()['formatter']))
+			{
+				$formatter = $this->fromConfig('formatter', $this->config()['formatter'], function ($built)
+				{
+					return $built instanceof FormatterInterface;
+				});
+				if ($formatter)
+				{
+					return $formatter;
+				}
+			}
+
 			if (($this->config()['format'] ?? 'line') === 'json')
 			{
 				// one record per line, so line-oriented collectors can ship it; Monolog's own
@@ -100,7 +114,21 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handlers'] = function (Container $c)
 		{
-			return array_values(array_filter([$c['handler.file'], $c['handler.email']]));
+			$handlers = array_values(array_filter([$c['handler.file'], $c['handler.email']]));
+
+			foreach ($this->config()['handlers'] ?? [] AS $factory)
+			{
+				$handler = $this->fromConfig('handlers', $factory, function ($built)
+				{
+					return $built instanceof HandlerInterface;
+				});
+				if ($handler)
+				{
+					$handlers[] = $handler;
+				}
+			}
+
+			return $handlers;
 		};
 
 		$container['processors'] = function (Container $c)
@@ -128,6 +156,15 @@ class MonologApi extends AbstractSubContainer
 				$processors[] = new VisitorProcessor();
 			}
 
+			foreach ($this->config()['processors'] ?? [] AS $factory)
+			{
+				$processor = $this->fromConfig('processors', $factory, 'is_callable');
+				if ($processor)
+				{
+					$processors[] = $processor;
+				}
+			}
+
 			return $processors;
 		};
 
@@ -152,14 +189,52 @@ class MonologApi extends AbstractSubContainer
 	 *   relative is inside internal_data; `false` turns file logging off. Unset, the
 	 *   `monologLogFile` option decides.
 	 * - `format`: `line` (the default) or `json`, one Monolog JSON record per line, with
- *   `extra.schema`, `extra.site` and `extra.app` added - see ContextProcessor.
- * - `site`: the name `extra.site` carries; defaults to the board URL's host.
+	 *   `extra.schema`, `extra.site` and `extra.app` added - see ContextProcessor.
+	 * - `site`: the name `extra.site` carries; defaults to the board URL's host.
+	 * - `handlers` and `processors`: lists of callables, each returning one handler or processor,
+	 *   added to the built-in stack.
+	 * - `formatter`: a callable returning the log file's formatter, in place of `format`.
+	 *
+	 * Callables rather than objects, because config.php is read before this add-on's classes can
+	 * load - see fromConfig().
 	 */
 	protected function config(): array
 	{
 		$config = $this->app->config('monolog');
 
 		return is_array($config) ? $config : [];
+	}
+
+	/**
+	 * Calls one factory from $config['monolog'] and checks what it built.
+	 *
+	 * config.php is read before add-on autoloaders are registered, so it can only hold callables -
+	 * the same reason $config['fsAdapters'] does. A bad entry is skipped and reported to the server
+	 * error log rather than thrown: a config.php mistake must not take down every page that logs.
+	 *
+	 * @param callable $isValid tests the built object
+	 *
+	 * @return mixed|null what the factory built, or null if it was skipped
+	 */
+	protected function fromConfig(string $key, $factory, callable $isValid)
+	{
+		$where = "\$config['monolog']['{$key}']";
+
+		if (!is_callable($factory))
+		{
+			\XF::logError("{$where} holds an entry that is not callable; it was skipped.");
+			return null;
+		}
+
+		$built = call_user_func($factory);
+		if (!$isValid($built))
+		{
+			$type = is_object($built) ? get_class($built) : gettype($built);
+			\XF::logError("{$where} holds a factory that returned {$type}, which is not usable; it was skipped.");
+			return null;
+		}
+
+		return $built;
 	}
 
 	/**

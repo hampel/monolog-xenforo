@@ -64,12 +64,13 @@ is `withName()` of it — a clone sharing the same handler and processor objects
 asking twice returns the same logger and every channel writes through one file handle and one
 email buffer.
 
-**`hampel_monolog_setup` is the only place the stack changes.** It fires once, inside the
-`logger` container closure, before the base `Logger` is constructed, with the handler and
-processor arrays by reference — `SetupEventTest` fails if it moves after construction. The id is
-prefixed because code event ids are global and XenForo 2.4 core fires `monolog_setup`. There is
-no `xf-make` command for code events: the definition is hand-written in `_output/code_events/`,
-and `_metadata.json`'s hash is an md5 of the file.
+**The stack is assembled in one place, before the base `Logger` exists**: built-in handlers and
+processors, then `config.php`'s, then `hampel_monolog_setup`. The event fires once, inside the
+`logger` container closure, with the handler and processor arrays by reference —
+`SetupEventTest` fails if it moves after construction. The id is prefixed because code event ids
+are global and XenForo 2.4 core fires `monolog_setup`. There is no `xf-make` command for code
+events: the definition is hand-written in `_output/code_events/`, and `_metadata.json`'s hash is
+an md5 of the file.
 
 **Never push a handler or processor onto the base logger or a channel.** 4.x did exactly that,
 building its default logger by pushing handlers onto a shared instance, so whether a logger
@@ -98,8 +99,13 @@ the meaning of an existing field changes**; adding a field does not need it.
 
 **`$config['monolog']` in `config.php` wins over the options.** `MonologApi::config()` reads it;
 `file` (absolute, relative to `internal_data`, or `false`) overrides the `monologLogFile` option,
-`format` picks `line` or `json`, and `site` names the forum in JSON records. The README documents
-it for users.
+`format` picks `line` or `json`, and `site` names the forum in JSON records. `handlers`,
+`processors` and `formatter` add to the stack, as **callables** — `config.php` is read before
+`XF\App::setup()` registers this add-on's autoloader, so an object built there is a "class not
+found" fatal, which is also why `$config['fsAdapters']` takes callables. `MonologApi::fromConfig()`
+calls each one when the logger is built and skips, with `\XF::logError()`, any entry that is not
+callable or builds the wrong type, so a `config.php` mistake cannot take down every page that
+logs. The README documents all of it for users.
 
 **The log file option must stay inside `internal_data`.** Any admin with option permission can
 set it, and the file receives log lines that can carry user-supplied text — so a path into the
