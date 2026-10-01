@@ -6,7 +6,7 @@ use XF\Entity\Option;
 
 /**
  * The name JSON records carry in `extra.site` - `site` in config.php can set it. Empty means the
- * board URL's host.
+ * board URL's host, without a leading `www.`.
  */
 class Site extends AbstractConfigurableOption
 {

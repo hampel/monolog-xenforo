@@ -46,8 +46,9 @@ field to change it.
 - **Add Visitor Extra Data** — adds the user id and name to every message. On by default.
 - **Add Web Extra Data** — adds the URL, IP address, HTTP method, server name, referrer and user
   agent. Off by default.
-- **Site Name** — what JSON records carry in `extra.site`. Empty uses the board URL's host; set it
-  if that might change.
+- **Site Name** — what JSON records carry in `extra.site`. Empty uses the board URL's host without
+  a leading `www.`, so `www.example.com` becomes `example.com` and `forum.example.com` is kept. Set
+  it if the domain might change.
 
 ### Config.php
 

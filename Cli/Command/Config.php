@@ -81,7 +81,7 @@ class Config extends Command
 		$this->detail('visitor', $this->yesNo(AddVisitorExtra::get()) . $this->source(AddVisitorExtra::class));
 		$this->detail('web request', $this->yesNo(AddWebExtra::get()) . $this->source(AddWebExtra::class));
 		$siteSource = Site::isLocked() ? self::FROM_CONFIG
-			: ((string) (\XF::options()->monologSite ?? '') !== '' ? self::FROM_OPTIONS : " <fg=gray>(the board URL's host)</>");
+			: ((string) (\XF::options()->monologSite ?? '') !== '' ? self::FROM_OPTIONS : " <fg=gray>(from the board URL)</>");
 		$this->detail('site', Site::get() . $siteSource . (LogFormat::get() === 'json' ? '' : ' - only JSON records carry it'));
 
 		$this->heading('Extending');

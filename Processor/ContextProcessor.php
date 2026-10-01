@@ -7,7 +7,8 @@ use Monolog\Processor\ProcessorInterface;
  *
  * - `extra.schema` - bumped when the meaning of a field changes, so a query written against
  *   these records keeps working against later ones;
- * - `extra.site` - which forum: `$config['monolog']['site']` if set, otherwise the board URL's host;
+ * - `extra.site` - which forum: `$config['monolog']['site']` if set, otherwise the board URL's host
+ *   without a leading `www.`;
  * - `extra.app` - what kind of execution wrote it: web, admin, api, cli, or job.
  *
  * Written for Monolog 2 and 3 alike - see VisitorProcessor.
@@ -80,10 +81,14 @@ class ContextProcessor implements ProcessorInterface
 	}
 
 	/**
-	 * The site name for a board URL: its host, which is what tells forums apart in a shared store.
+	 * The site name for a board URL: its host without a leading `www.`, which is what tells forums
+	 * apart in a shared store.
 	 */
 	public static function siteFromBoardUrl(string $boardUrl): string
 	{
-		return (string) parse_url($boardUrl, PHP_URL_HOST);
+		$host = (string) parse_url($boardUrl, PHP_URL_HOST);
+
+		// www.example.com and example.com are the same forum; any other subdomain names a different one
+		return (string) preg_replace('/^www\./i', '', $host);
 	}
 }

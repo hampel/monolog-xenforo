@@ -43,6 +43,25 @@ class ContextProcessorTest extends TestCase
 		$this->assertSame('examplecom', json_decode($this->logLines()[0], true)['extra']['site']);
 	}
 
+	public static function boardUrls(): array
+	{
+		return [
+			'leading www is dropped' => ['https://www.somersoft.com/', 'somersoft.com'],
+			'any other subdomain is kept' => ['https://members.rebaa.com.au/', 'members.rebaa.com.au'],
+			'a bare domain is unchanged' => ['https://example.com/forum', 'example.com'],
+			'www in any case' => ['https://WWW.Example.com/', 'Example.com'],
+			'a port is not part of the name' => ['http://www.example.com:8080/', 'example.com'],
+			'www only as a whole label' => ['https://wwwexample.com/', 'wwwexample.com'],
+			'www further in is kept' => ['https://forum.www.example.com/', 'forum.www.example.com'],
+		];
+	}
+
+	#[DataProvider('boardUrls')]
+	public function test_the_default_site_is_the_board_host_without_a_leading_www($url, $expected)
+	{
+		$this->assertSame($expected, ContextProcessor::siteFromBoardUrl($url));
+	}
+
 	public function test_line_records_are_unchanged()
 	{
 		$this->app()['monolog']->channel('myaddon')->error('as before');

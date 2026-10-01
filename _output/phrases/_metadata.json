@@ -205,9 +205,9 @@
     },
     "option_explain.monologSite.txt": {
         "global_cache": false,
-        "version_id": 5000033,
-        "version_string": "5.0.0b3",
-        "hash": "f0c3890177c5bb25bf0d1bde3dc2cd74"
+        "version_id": 5000035,
+        "version_string": "5.0.0b5",
+        "hash": "0a11e5625a1be446aa356b2af7a13e03"
     },
     "option_group.monolog.txt": {
         "global_cache": false,
