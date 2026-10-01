@@ -150,6 +150,11 @@ and skips any record already sent within `monologEmailDeduplicationTimeout`, usi
 temp directory. A record logged *during* the send lands in a buffer that is then cleared, so it
 reaches the file but not the email.
 
+**A transport that logs every send cannot loop the email handler, for two reasons.** The buffer
+takes its batch before sending and is cleared afterwards, so the record about the log email itself
+is never emailed — at most one log email per request. And the guard below stops the loop even
+unbuffered. `LazyMailTest` covers the Debug-level case, and fails if the buffer is removed.
+
 **`XenForoMailHandler` also refuses to send while it is sending.** That static guard is what stops
 a failing transport that logs its failure at `ERROR` from feeding back into itself when the handler
 is used unbuffered; `XenForoMailHandlerTest` proves it without the buffer in the way.

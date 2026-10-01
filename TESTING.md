@@ -114,7 +114,8 @@ What the suite covers:
 - **`tests/Feature/EmailTest.php`** — the email stack: level, recipient and its fallback, subject,
   one email per request, and deduplication across requests.
 - **`tests/Feature/LazyMailTest.php`** — that neither creating a channel nor writing below the
-  email level builds XenForo's mailer.
+  email level builds XenForo's mailer; and that a transport logging every send, with email logging
+  at Debug, costs one log email per request rather than a loop.
 - **`tests/Feature/UntestedXenForoTest.php`** — that channels still log on XenForo 2.4 or later,
   and the install checks warn there.
 - **`tests/Unit/XenForoMailHandlerTest.php`** — the mail handler alone, including its guard against

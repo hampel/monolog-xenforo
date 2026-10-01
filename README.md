@@ -40,7 +40,10 @@ field to change it.
 - **Send Logs via Email** — off by default. Sends to the address given, or to the board's contact
   address if none is.
 - **Email Subject** — `{board}` is replaced with the board title.
-- **Email Minimum Log Level** — the lowest level emailed. Default: Error.
+- **Email Minimum Log Level** — the lowest level emailed. Default: Error. Keep it at Error or
+  above if another add-on logs every email it sends: below that, each request that sends mail also
+  sends one log email about it. That cannot loop — the record about the log email itself is never
+  emailed — but on a busy forum it doubles the mail.
 - **Email Deduplication Timeout** — a message already emailed within this many seconds is not sent
   again. Each request's messages arrive as one email.
 - **Add Visitor Extra Data** — adds the user id and name to every message. On by default.

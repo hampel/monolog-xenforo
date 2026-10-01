@@ -44,6 +44,65 @@ class LazyMailTest extends TestCase
 	}
 
 	/**
+	 * Email logging at Debug, with a mail transport that logs every email it sends - so each log
+	 * email produces a log record of its own. That must cost one log email per request, not a loop:
+	 * the record about the log email is logged during the send, after the deduplication handler has
+	 * taken its batch, and is cleared with the buffer. It still reaches the log file.
+	 */
+	public function test_a_transport_logging_every_send_costs_one_log_email_per_request()
+	{
+		$this->setOption('monologEmailMinimumLogLevel', 100); // Debug
+		$this->setOption('monologFileMinimumLogLevel', 100);
+		$channel = $this->app()['monolog']->channel('transport');
+
+		$transport = new class($channel) extends AbstractTransport
+		{
+			public $subjects = [];
+			private $logger;
+
+			public function __construct($logger)
+			{
+				parent::__construct();
+				$this->logger = $logger;
+			}
+
+			protected function doSend(SentMessage $message): void
+			{
+				$subject = $message->getOriginalMessage()->getSubject();
+				$this->subjects[] = $subject;
+				$this->logger->debug('Transmission sent', ['subject' => $subject]);
+			}
+
+			public function __toString(): string
+			{
+				return 'logging://';
+			}
+		};
+		$this->setConfig('enableMailQueue', false);
+		$this->swap('mailer.transport', $transport);
+		$this->app()->container()->decache('mailer');
+
+		// the forum sends three emails during the request
+		foreach ([1, 2, 3] AS $i)
+		{
+			$this->app()->mailer()->newMail()->setTo('member@example.com')->setContent("Notification {$i}", 'Body')->send();
+		}
+
+		$channel->close(); // the end of the request
+		$channel->close(); // and nothing more, however often the handlers close
+
+		$this->assertSame(['Notification 1', 'Notification 2', 'Notification 3', 'Monolog [{board}]'],
+			array_map(function ($subject)
+			{
+				return preg_replace('/\[.*\]$/', '[{board}]', $subject);
+			}, $transport->subjects));
+		$this->assertCount(4, array_filter($this->logLines(), function ($line)
+		{
+			return strpos($line, 'Transmission sent') !== false;
+		}), 'all four transmissions, including the log email, are in the log file');
+	}
+
+	/**
 	 * In the default stack the deduplication buffer absorbs a record logged during the send, so
 	 * this holds even without XenForoMailHandler's own guard - XenForoMailHandlerTest covers that,
 	 * unbuffered.
