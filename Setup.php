@@ -35,13 +35,11 @@ class Setup extends AbstractSetup
 			$errors[] = "vendor folder does not exist - cannot proceed with addon install";
 		}
 
-		// a warning rather than an error, so a forum upgraded to 2.4 can still rebuild or upgrade
-		// this add-on - channels log nothing there until a 2.4-aware release
-		if (!MonologApi::supportsThisXenForo())
+		// a warning, not an error, so a forum on a newer XenForo can still install or upgrade
+		if (!MonologApi::isTestedOnThisXenForo())
 		{
-			$warnings[] = "This version of Monolog Logging Service does not support XenForo 2.4 or later. "
-				. "Add-ons using it will keep working, but nothing will be logged until you install a "
-				. "version that supports XenForo 2.4.";
+			$warnings[] = "This version of Monolog Logging Service has not been tested on XenForo 2.4 or "
+				. "later. It is expected to work, but check for a newer version that has been.";
 		}
 	}
 }
