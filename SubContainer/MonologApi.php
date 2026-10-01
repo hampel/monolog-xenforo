@@ -133,7 +133,14 @@ class MonologApi extends AbstractSubContainer
 
 		$container['logger'] = function (Container $c)
 		{
-			return new Logger('xenforo', $c['handlers'], $c['processors']);
+			$handlers = $c['handlers'];
+			$processors = $c['processors'];
+
+			// the one place the stack can change: before the base logger exists, so no channel
+			// ever sees a different set of handlers from another
+			$this->app->fire('hampel_monolog_setup', [$this->app, &$handlers, &$processors]);
+
+			return new Logger('xenforo', $handlers, $processors);
 		};
 	}
 

@@ -37,6 +37,9 @@ Two 4.x entry points survive as deprecated shims, and `tests/` pins both:
 - **`newChannel($name)`** — an alias for `channel()`. Every consumer written against 4.x calls it.
 - **`Helper\Log`** — static PSR-3 methods on the `xenforo` channel, documented since 2.1.0.
 
+Add-ons wanting more than a logger — their own handlers or processors — use the
+`hampel_monolog_setup` code event, which is the one surface that exposes Monolog types.
+
 The moving parts, and where each is wired:
 
 | piece | registered by | does |
@@ -60,6 +63,13 @@ PHPUnit suite is `tests/`; `TESTING.md` says what it covers and what it cannot.
 is `withName()` of it — a clone sharing the same handler and processor objects — cached by name, so
 asking twice returns the same logger and every channel writes through one file handle and one
 email buffer.
+
+**`hampel_monolog_setup` is the only place the stack changes.** It fires once, inside the
+`logger` container closure, before the base `Logger` is constructed, with the handler and
+processor arrays by reference — `SetupEventTest` fails if it moves after construction. The id is
+prefixed because code event ids are global and XenForo 2.4 core fires `monolog_setup`. There is
+no `xf-make` command for code events: the definition is hand-written in `_output/code_events/`,
+and `_metadata.json`'s hash is an md5 of the file.
 
 **Never push a handler or processor onto the base logger or a channel.** 4.x did exactly that,
 building its default logger by pushing handlers onto a shared instance, so whether a logger

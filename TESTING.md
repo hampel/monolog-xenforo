@@ -35,6 +35,8 @@ loaded Monolog 3 and psr/log 3.
   file overriding the option, and the JSON format, one record per line with stack traces.
 - **`tests/Feature/ContextProcessorTest.php`** — `extra.schema`, `site` and `app` on JSON records
   only, the configured site, each app type, and a running job.
+- **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared
+  logger is built, and able to add or remove handlers and processors.
 - **`tests/Feature/HelperLogTest.php`** — the deprecated `Helper\Log` facade, every level.
 - **`tests/Feature/EmailTest.php`** — the email stack: level, recipient and its fallback, subject,
   one email per request, and deduplication across requests.

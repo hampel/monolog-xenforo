@@ -88,9 +88,26 @@ $config['monolog'] = [
   `api`, `cli` or `job`) and `extra.schema`, so a store holding several forums can tell them apart.
 - `site` is what `extra.site` says. It defaults to the board URL's host; set it if that may change.
 
+### Adding handlers and processors
+
+Listen to the `hampel_monolog_setup` code event. It fires once per request, before the logger
+every channel shares is built, with that logger's handlers and processors:
+
+```php
+public static function monologSetup(\XF\App $app, array &$handlers, array &$processors)
+{
+    $handlers[] = new \Monolog\Handler\StreamHandler('php://stderr', \Monolog\Logger::ERROR);
+}
+```
+
+These are Monolog objects rather than PSR-3 ones, so this is the one place your code depends on
+the Monolog version. XenForo 2.4 ships Monolog 3 and loads it ahead of this addon's Monolog 2: a
+custom handler or processor that should work on both leaves its record parameter untyped, and
+assigns `extra` as a whole array rather than one key at a time.
+
 ### Upgrading from 4.x
 
 - `newChannel()` still works, as an alias for `channel()`. It is deprecated.
 - `Hampel\Monolog\Helper\Log` still works, logging to the `xenforo` channel. It is deprecated.
-- `logger()`, `default()`, `stream()` and `visitor()` have been removed. Custom handler stacks
-  built from them are replaced by an extension point in a later 5.0 release.
+- `logger()`, `default()`, `stream()` and `visitor()` have been removed. Build a custom handler
+  stack with the `hampel_monolog_setup` code event instead.
