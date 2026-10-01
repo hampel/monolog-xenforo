@@ -11,6 +11,7 @@ use Hampel\Monolog\Option\FileMinimumLogLevel;
 use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\SendEmail;
 use Hampel\Monolog\Processor\VisitorProcessor;
+use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\DeduplicationHandler;
 use Monolog\Handler\StreamHandler;
@@ -40,22 +41,30 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handler.file'] = function (Container $c)
 		{
-			if (!LogFile::isEnabled() || LogFile::getLogFile() === '')
+			$file = $this->logFile();
+			if ($file === null)
 			{
 				return null;
 			}
 
-			$internalDataDir = File::canonicalizePath($this->app->config('internalDataPath'));
-
-			$handler = new StreamHandler(
-				$internalDataDir . '/' . LogFile::getLogFile(),
-				FileMinimumLogLevel::get()
-			);
-			// Monolog 2 changed the default date format; this is the one 1.x wrote, and the one
-			// anything parsing these files already expects
-			$handler->setFormatter(new LineFormatter(null, 'Y-m-d H:i:s'));
+			$handler = new StreamHandler($file, FileMinimumLogLevel::get());
+			$handler->setFormatter($c['formatter.file']);
 
 			return $handler;
+		};
+
+		$container['formatter.file'] = function (Container $c)
+		{
+			if (($this->config()['format'] ?? 'line') === 'json')
+			{
+				// one record per line, so line-oriented collectors can ship it; Monolog's own
+				// field names, so any tool can read it; and stack traces as a field
+				return new JsonFormatter(JsonFormatter::BATCH_MODE_NEWLINES, true, false, true);
+			}
+
+			// Monolog 2 changed the default date format; this is the one 1.x wrote, and the one
+			// anything parsing these files already expects
+			return new LineFormatter(null, 'Y-m-d H:i:s');
 		};
 
 		$container['handler.email'] = function (Container $c)
@@ -114,6 +123,50 @@ class MonologApi extends AbstractSubContainer
 		{
 			return new Logger('xenforo', $c['handlers'], $c['processors']);
 		};
+	}
+
+	/**
+	 * `$config['monolog']` from config.php - the server owner's settings, which win over the
+	 * options. Recognised keys:
+	 *
+	 * - `file`: the log file. Absolute (or a stream such as `php://stderr`) is used as given;
+	 *   relative is inside internal_data; `false` turns file logging off. Unset, the
+	 *   `monologLogFile` option decides.
+	 * - `format`: `line` (the default) or `json`, one Monolog JSON record per line.
+	 */
+	protected function config(): array
+	{
+		$config = $this->app->config('monolog');
+
+		return is_array($config) ? $config : [];
+	}
+
+	/**
+	 * The full path of the log file, or null for no file logging.
+	 */
+	protected function logFile(): ?string
+	{
+		$config = $this->config();
+
+		if (array_key_exists('file', $config))
+		{
+			$file = $config['file'];
+			if (!is_string($file) || $file === '')
+			{
+				return null;
+			}
+		}
+		else
+		{
+			$file = LogFile::getLogFile();
+			if ($file === '')
+			{
+				return null;
+			}
+		}
+
+		// absolute paths and stream wrappers come back unchanged
+		return File::canonicalizePath($file, File::canonicalizePath($this->app->config('internalDataPath')));
 	}
 
 	/**

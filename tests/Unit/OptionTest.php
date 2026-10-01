@@ -101,6 +101,51 @@ class OptionTest extends TestCase
 		}
 	}
 
+	public static function unsafeLogFiles(): array
+	{
+		return [
+			'absolute' => ['/var/www/html/shell.php'],
+			'parent directory' => ['../../shell.php'],
+			'parent directory inside' => ['logs/../../shell.php'],
+			'windows absolute' => ['C:\\inetpub\\shell.php'],
+			'backslash parent' => ['..\\shell.php'],
+			'stream wrapper' => ['php://output'],
+			'phar wrapper' => ['phar://internal_data/x.phar/shell.php'],
+		];
+	}
+
+	/**
+	 * The option is editable by any admin with option permission, and the file it names receives
+	 * log lines that can carry user-supplied text - so it must stay inside internal_data. An
+	 * absolute path is for config.php, which only the server owner controls.
+	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('unsafeLogFiles')]
+	public function test_the_option_refuses_a_path_outside_internal_data($file)
+	{
+		$option = $this->app()->finder('XF:Option')->whereId('monologLogFile')->fetchOne();
+		$value = ['enabled' => true, 'logfile' => $file];
+
+		$this->assertFalse(LogFile::verifyOption($value, $option));
+	}
+
+	#[\PHPUnit\Framework\Attributes\DataProvider('unsafeLogFiles')]
+	public function test_a_stored_path_outside_internal_data_is_not_used($file)
+	{
+		// a value saved before 5.0 never went through verifyOption()
+		$this->setOption('monologLogFile', ['enabled' => true, 'logfile' => $file]);
+
+		$this->assertSame('monolog.log', LogFile::getLogFile());
+	}
+
+	public function test_the_option_accepts_a_path_inside_internal_data()
+	{
+		$option = $this->app()->finder('XF:Option')->whereId('monologLogFile')->fetchOne();
+		$value = ['enabled' => true, 'logfile' => 'logs/forum.log'];
+
+		$this->assertTrue(LogFile::verifyOption($value, $option));
+		$this->assertSame('logs/forum.log', $value['logfile']);
+	}
+
 	public function test_the_email_address_is_empty_when_email_is_disabled()
 	{
 		$this->setOption('monologSendEmail', ['enabled' => false, 'email' => 'logs@example.com']);

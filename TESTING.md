@@ -31,6 +31,8 @@ loaded Monolog 3 and psr/log 3.
 - **`tests/Feature/NewChannelTest.php`** — the 4.x contract consuming add-ons still use: the
   `monolog` container key and `newChannel()`, the file level and file options, and the visitor
   processor.
+- **`tests/Feature/ConfigTest.php`** — `$config['monolog']`: an absolute, relative or disabled
+  file overriding the option, and the JSON format, one record per line with stack traces.
 - **`tests/Feature/HelperLogTest.php`** — the deprecated `Helper\Log` facade, every level.
 - **`tests/Feature/EmailTest.php`** — the email stack: level, recipient and its fallback, subject,
   one email per request, and deduplication across requests.
@@ -38,8 +40,9 @@ loaded Monolog 3 and psr/log 3.
   level builds XenForo's mailer.
 - **`tests/Unit/XenForoMailHandlerTest.php`** — the mail handler alone, including its guard against
   a transport that logs while sending.
-- **`tests/Unit/OptionTest.php`** — the option getters' fallbacks, the `{board}` token, and the
-  string `"0"` a fresh install stores for a disabled option.
+- **`tests/Unit/OptionTest.php`** — the option getters' fallbacks, the `{board}` token, the
+  string `"0"` a fresh install stores for a disabled option, and the log file option refusing any
+  path outside `internal_data`, on save and when an older stored value is read.
 
 **Each test points `internalDataPath` at a directory of its own.** The log file lives there, and so
 does XenForo's temp directory, which holds the email deduplication store. A shared store would

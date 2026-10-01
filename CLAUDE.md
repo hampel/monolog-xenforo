@@ -67,13 +67,27 @@ written twice. Anything that needs to change the stack changes the list it is bu
 
 The stack, from `MonologApi::initialize()`:
 
-- **file** — a `StreamHandler` at `internalDataPath` plus the `monologLogFile` name, level from
-  `monologFileMinimumLogLevel` (default `WARNING`), date format forced back to Monolog 1's
-  `Y-m-d H:i:s` because existing parsers expect it;
+- **file** — a `StreamHandler` at `$config['monolog']['file']` if set, otherwise
+  `internalDataPath` plus the `monologLogFile` name; level from `monologFileMinimumLogLevel`
+  (default `WARNING`). Formatted as JSON when `$config['monolog']['format']` is `json`, otherwise
+  a line with the date forced back to Monolog 1's `Y-m-d H:i:s`, because existing parsers expect
+  it;
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
   `monologSendEmail` is enabled. Level from `monologEmailMinimumLogLevel` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
 - **processors** — Monolog's `WebProcessor` and `VisitorProcessor`, each behind its option.
+
+**`$config['monolog']` in `config.php` wins over the options.** `MonologApi::config()` reads it;
+`file` (absolute, relative to `internal_data`, or `false`) overrides the `monologLogFile` option,
+and `format` picks `line` or `json`. The README documents it for users.
+
+**The log file option must stay inside `internal_data`.** Any admin with option permission can
+set it, and the file receives log lines that can carry user-supplied text — so a path into the
+web root is a way to plant a script. `LogFile::isInsideInternalData()` refuses leading slashes,
+drive letters, stream wrappers and `..` segments, both in `verifyOption()` on save and in
+`getLogFile()` on read, since a value saved before 5.0 was never checked. Anywhere else is
+`config.php`'s job, because only the server owner controls that file. Do not loosen this to make
+an absolute path work from the options page.
 
 **The email handler must not be built when a channel is.** Building it needs `$app->mailer()`,
 which fires `mailer_transport_setup`; a mail add-on answering that event by asking for its own

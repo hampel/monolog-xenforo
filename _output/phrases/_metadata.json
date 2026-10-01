@@ -23,6 +23,12 @@
         "version_string": "2.0.0",
         "hash": "585eb1061415bb18d7f40cfda82061fa"
     },
+    "monolog_log_file_must_be_inside_internal_data.txt": {
+        "global_cache": false,
+        "version_id": 5000011,
+        "version_string": "5.0.0a1",
+        "hash": "3a0271e50cfb36d1d666c231dfa4a6d4"
+    },
     "monolog_log_successfully_processed.txt": {
         "global_cache": false,
         "version_id": 2,
@@ -139,9 +145,9 @@
     },
     "option_explain.monologLogFile.txt": {
         "global_cache": false,
-        "version_id": 2,
-        "version_string": "2.0.0",
-        "hash": "f5eb49684c3009b9ef48a9d4b1f0dece"
+        "version_id": 5000011,
+        "version_string": "5.0.0a1",
+        "hash": "bff0262b0f43ced57249807ec608cba0"
     },
     "option_explain.monologSendEmail.txt": {
         "global_cache": false,

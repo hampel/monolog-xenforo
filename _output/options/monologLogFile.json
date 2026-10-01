@@ -6,8 +6,8 @@
         "enabled",
         "logfile"
     ],
-    "validation_class": "",
-    "validation_method": "",
+    "validation_class": "Hampel\\Monolog\\Option\\LogFile",
+    "validation_method": "verifyOption",
     "default_value": "{\"enabled\":\"1\",\"logfile\":\"monolog.log\"}",
     "relations": {
         "monolog": 1
