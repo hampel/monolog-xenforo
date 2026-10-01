@@ -1,5 +1,6 @@
 <?php namespace Hampel\Monolog\Cli;
 
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -20,6 +21,9 @@ trait RendersReport
 
 	protected bool $warned = false;
 
+	/** @var string|null the colour muted() uses, once known */
+	private static ?string $mutedColour = null;
+
 	protected function heading(string $title): void
 	{
 		$this->report->writeln('');
@@ -32,10 +36,34 @@ trait RendersReport
 	 */
 	protected function detail(string $label, string $value): void
 	{
-		$value = $value === '' ? '<fg=gray>not set</>' : $value;
+		$value = $value === '' ? $this->muted('not set') : $value;
 		$dots = max(2, 33 - mb_strlen($label));
 
-		$this->report->writeln("  {$label} <fg=gray>" . str_repeat('.', $dots) . "</> {$value}");
+		$this->report->writeln("  {$label} " . $this->muted(str_repeat('.', $dots)) . " {$value}");
+	}
+
+	/**
+	 * Text in grey, where the console has grey. XenForo 2.2 ships its own fork of symfony/console,
+	 * which knows only the eight basic colours and throws on `gray` - taking the command down at its
+	 * first annotation - so there it is the terminal's default colour instead. Never write a grey
+	 * foreground tag directly; CommandsTest fails if anything does.
+	 */
+	protected function muted(string $text): string
+	{
+		if (self::$mutedColour === null)
+		{
+			try
+			{
+				new OutputFormatterStyle('gray');
+				self::$mutedColour = 'gray';
+			}
+			catch (\Throwable $e)
+			{
+				self::$mutedColour = 'default';
+			}
+		}
+
+		return '<fg=' . self::$mutedColour . ">{$text}</>";
 	}
 
 	protected function checkOk(string $label, string $detail = ''): void

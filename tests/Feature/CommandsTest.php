@@ -347,6 +347,24 @@ class CommandsTest extends TestCase
 		$this->assertStringNotContainsString('secret', $output);
 	}
 
+	/**
+	 * XenForo 2.2's console fork throws on `gray`, which took monolog:config down there at its first
+	 * annotation. Grey goes through RendersReport::muted(), which falls back where it is missing.
+	 */
+	public function test_no_command_writes_grey_except_through_muted()
+	{
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(dirname(__DIR__, 2) . '/Cli')) AS $file)
+		{
+			if ($file->getExtension() !== 'php')
+			{
+				continue;
+			}
+
+			$source = file_get_contents($file->getPathname());
+			$this->assertSame(0, preg_match('/<fg=gr[ae]y/', $source), $file->getFilename() . ' writes <fg=gray> directly');
+		}
+	}
+
 	public function test_a_factory_that_builds_the_wrong_thing_fails()
 	{
 		$this->setConfig('monolog', ['handlers' => [

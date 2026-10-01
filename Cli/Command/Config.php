@@ -32,7 +32,6 @@ class Config extends Command
 	use RendersReport;
 
 	private const FROM_CONFIG = ' <fg=cyan>(config.php)</>';
-	private const FROM_OPTIONS = ' <fg=gray>(options)</>';
 
 	protected function configure()
 	{
@@ -57,7 +56,7 @@ class Config extends Command
 		$this->detail('enabled', $this->yesNo(LogFile::isEnabled()) . $this->source(LogFile::class));
 		$path = LogFile::path();
 		$this->detail('path', $path === null ? '' : $path . (MonologConfig::string('file', 'path') !== null
-			? self::FROM_CONFIG : ' <fg=gray>(options, inside internal_data)</>'));
+			? self::FROM_CONFIG : ' ' . $this->muted('(options, inside internal_data)')));
 		$this->detail('format', LogFormat::get() . $this->source(LogFormat::class));
 		$this->detail('level', $this->level(FileMinimumLogLevel::get()) . $this->source(FileMinimumLogLevel::class));
 		$this->detail('formatter', MonologConfig::get('file', 'formatter') !== null ? 'custom, from config.php' : '');
@@ -70,8 +69,8 @@ class Config extends Command
 			$to = SendEmail::getAddress();
 			$isContact = MonologConfig::string('email', 'to') === null
 				&& empty(\XF::options()->monologSendEmail['email']);
-			$this->detail('to', $to . ($isContact ? ' <fg=gray>(the board contact address)</>'
-				: (MonologConfig::string('email', 'to') !== null ? self::FROM_CONFIG : self::FROM_OPTIONS)));
+			$this->detail('to', $to . ($isContact ? ' ' . $this->muted('(the board contact address)')
+				: (MonologConfig::string('email', 'to') !== null ? self::FROM_CONFIG : $this->fromOptions())));
 		}
 		else
 		{
@@ -87,7 +86,7 @@ class Config extends Command
 		// a credential: say whether it is set, and where, never what it is
 		$this->detail('webhook', SlackWebhook::getWebhook() === '' ? '' : 'set, to '
 			. parse_url(SlackWebhook::getWebhook(), PHP_URL_HOST)
-			. (MonologConfig::string('slack', 'webhook') !== null ? self::FROM_CONFIG : self::FROM_OPTIONS));
+			. (MonologConfig::string('slack', 'webhook') !== null ? self::FROM_CONFIG : $this->fromOptions()));
 		$this->detail('level', $this->level(SlackMinimumLogLevel::get()) . $this->source(SlackMinimumLogLevel::class));
 		$slackDedup = MonologConfig::get('slack', 'dedup');
 		$this->detail('deduplication', (is_int($slackDedup) && $slackDedup >= 0
@@ -100,7 +99,7 @@ class Config extends Command
 		$this->detail('visitor', $this->yesNo(AddVisitorExtra::get()) . $this->source(AddVisitorExtra::class));
 		$this->detail('web request', $this->yesNo(AddWebExtra::get()) . $this->source(AddWebExtra::class));
 		$siteSource = Site::isLocked() ? self::FROM_CONFIG
-			: ((string) (\XF::options()->monologSite ?? '') !== '' ? self::FROM_OPTIONS : " <fg=gray>(from the board URL)</>");
+			: ((string) (\XF::options()->monologSite ?? '') !== '' ? $this->fromOptions() : ' ' . $this->muted('(from the board URL)'));
 		$this->detail('site', Site::get() . $siteSource . (LogFormat::get() === 'json' ? '' : ' - only JSON records carry it'));
 
 		$this->heading('Extending');
@@ -134,7 +133,7 @@ class Config extends Command
 	 */
 	private function source(string $optionClass): string
 	{
-		return $optionClass::isLocked() ? self::FROM_CONFIG : self::FROM_OPTIONS;
+		return $optionClass::isLocked() ? self::FROM_CONFIG : $this->fromOptions();
 	}
 
 	private function level(int $level): string
@@ -154,6 +153,11 @@ class Config extends Command
 		}
 
 		return $channels ? implode(', ', $channels) . self::FROM_CONFIG : '';
+	}
+
+	private function fromOptions(): string
+	{
+		return ' ' . $this->muted('(options)');
 	}
 
 	private function yesNo(bool $value): string
