@@ -7,6 +7,7 @@ use Monolog\Logger;
  */
 class EmailMinimumLogLevel extends FileMinimumLogLevel
 {
+	protected const DEPENDS_ON = 'email';
 	protected const SECTION = 'email';
 	protected const OPTION = 'monologEmailMinimumLogLevel';
 	protected const DEFAULT_LEVEL = Logger::ERROR;

@@ -26,6 +26,7 @@ class FileMinimumLogLevel extends AbstractConfigurableOption
 		600 => 'Emergency',
 	];
 
+	protected const DEPENDS_ON = 'file';
 	protected const SECTION = 'file';
 	protected const OPTION = 'monologFileMinimumLogLevel';
 	protected const DEFAULT_LEVEL = Logger::WARNING;

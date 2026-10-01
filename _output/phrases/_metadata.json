@@ -11,11 +11,23 @@
         "version_string": "2.0.0",
         "hash": "e55222a4cbb7e5dcf5e9eec80a96b78b"
     },
+    "monolog_email_disabled_in_config_php.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "fbf08c588b2aba75576afe1934a711b2"
+    },
     "monolog_enter_recipient_email.txt": {
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
+    },
+    "monolog_file_logging_disabled_in_config_php.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "5756720f0ebc4c1f1f922fe65cdeaba2"
     },
     "monolog_format_json.txt": {
         "global_cache": false,
@@ -34,6 +46,12 @@
         "version_id": 5000033,
         "version_string": "5.0.0b3",
         "hash": "f35b90a0a63f2b94bd41ecb1f82fe085"
+    },
+    "monolog_not_used.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "aadb3ee341867ca2327dd458d9f1e42b"
     },
     "monolog_set_in_config_php.txt": {
         "global_cache": false,

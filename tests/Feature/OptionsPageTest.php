@@ -54,7 +54,6 @@ class OptionsPageTest extends TestCase
 	{
 		return [
 			'file path' => [['file' => ['path' => '/var/log/forum.log']], 'monologLogFile', '/var/log/forum.log'],
-			'file off' => [['file' => false], 'monologLogFile', 'Disabled'],
 			'file format' => [['file' => ['format' => 'json']], 'monologLogFormat', 'JSON'],
 			'file level' => [['file' => ['level' => 'error']], 'monologFileMinimumLogLevel', 'Error'],
 			'email recipient' => [['email' => ['to' => 'a@example.com']], 'monologSendEmail', 'a@example.com'],
@@ -80,6 +79,68 @@ class OptionsPageTest extends TestCase
 		$this->assertCount(count(self::OPTIONS) - 1, array_intersect(self::OPTIONS, $this->listed($html)),
 			'every other option is still listed');
 		$this->assertNoTemplateErrors();
+	}
+
+	public static function disabledSections(): array
+	{
+		return [
+			'file off' => [
+				['file' => false],
+				['monologLogFile' => 'Disabled', 'monologLogFormat' => 'Not used', 'monologFileMinimumLogLevel' => 'Not used'],
+			],
+			'email off' => [
+				['email' => false],
+				['monologSendEmail' => 'Disabled', 'monologEmailSubject' => 'Not used',
+					'monologEmailMinimumLogLevel' => 'Not used', 'monologEmailDeduplicationTimeout' => 'Not used'],
+			],
+		];
+	}
+
+	/**
+	 * A section config.php switches off takes every option in it along: they mean nothing while it
+	 * is off, so none is offered for editing, and the rest of the page is untouched.
+	 */
+	#[DataProvider('disabledSections')]
+	public function test_a_section_config_php_switches_off_locks_every_option_in_it(array $config, array $locked)
+	{
+		$this->setConfig('monolog', $config);
+
+		$html = $this->page();
+		$listed = $this->listed($html);
+
+		foreach ($locked AS $optionId => $shown)
+		{
+			$this->assertStringNotContainsString("name=\"options[{$optionId}]", $html, $optionId);
+			$this->assertNotContains($optionId, $listed, $optionId);
+		}
+		$this->assertSame(1, substr_count($html, '<div class="formRow-value">Disabled</div>'));
+		$this->assertSame(count($locked) - 1, substr_count($html, '<div class="formRow-value">Not used</div>'));
+		$this->assertSame(
+			array_values(array_diff(self::OPTIONS, array_keys($locked))),
+			array_values(array_intersect(self::OPTIONS, $listed)),
+			'every option outside the section is still listed'
+		);
+		$this->assertNoTemplateErrors();
+	}
+
+	public function test_switching_a_section_off_on_the_options_page_locks_nothing()
+	{
+		$this->setOptions([
+			'monologLogFile' => ['enabled' => false, 'logfile' => 'monolog.log'],
+			'monologSendEmail' => ['enabled' => false, 'email' => ''],
+		]);
+
+		$this->assertSame(self::OPTIONS, array_values(array_intersect(self::OPTIONS, $this->listed($this->page()))));
+	}
+
+	public function test_a_save_from_elsewhere_keeps_an_option_in_a_switched_off_section()
+	{
+		$this->setConfig('monolog', ['email' => false]);
+		$option = $this->app()->em()->find('XF:Option', 'monologEmailSubject');
+		$value = 'Something else';
+
+		$this->assertTrue(\Hampel\Monolog\Option\EmailSubject::verifyOption($value, $option));
+		$this->assertSame($option->option_value, $value);
 	}
 
 	/**

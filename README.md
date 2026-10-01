@@ -74,8 +74,9 @@ $config['monolog'] = [
 ```
 
 - **`file.path` or `email.to` also switches that output on**, and `false` in place of the section
-  switches it off. `'file' => ['level' => 'error']` alone fixes the level and leaves the rest to
-  the options page.
+  switches it off — which also locks every option in that section on the options page, since none
+  has any effect. `'file' => ['level' => 'error']` alone fixes the level and leaves the rest to the
+  options page.
 - **Levels** are `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert` and
   `emergency`, in any case.
 - **A log file outside `internal_data`, or a stream such as `php://stderr`, can only be set here.**

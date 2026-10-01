@@ -70,6 +70,11 @@ Both runs must pass. Check the exit code with the command unpiped —
 status. `tests/Feature/Monolog3SimulationTest.php` proves the second run really loaded Monolog 3
 and psr/log 3.
 
+**Each test starts from this add-on's defaults**: `tests/TestCase.php` clears
+`$config['monolog']` and sets every Monolog option to its default value, whatever the install's own
+`config.php` and options page hold. Without it, a developer trying a setting changes what the suite
+tests — which is how this was found.
+
 **Each test points `internalDataPath` at a directory of its own.** The log file lives there, and so
 does XenForo's temp directory, which holds the email deduplication store. A shared store would
 make an email test fail because an earlier test or run had already sent the same message.
@@ -88,8 +93,9 @@ What the suite covers:
 - **`tests/Feature/ConfigPrecedenceTest.php`** — every setting: `config.php` wins over the option,
   the option decides without it, and an unusable value is ignored.
 - **`tests/Feature/OptionsPageTest.php`** — the real options page: every control rendered when
-  nothing is locked; a locked option shown with its value, no input and off the save list; and a
-  save through XenForo's own controller leaving a locked option's stored value untouched.
+  nothing is locked; a locked option shown with its value, no input and off the save list; a
+  section switched off in `config.php` locking every option in it; and a save through XenForo's
+  own controller leaving a locked option's stored value untouched.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.

@@ -8,6 +8,8 @@ use XF\Entity\Option;
  */
 class LogFormat extends AbstractConfigurableOption
 {
+	protected const DEPENDS_ON = 'file';
+
 	public const FORMATS = ['line', 'json'];
 
 	public static function get(): string

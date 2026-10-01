@@ -9,6 +9,8 @@ use XF\Entity\Option;
  */
 class EmailSubject extends AbstractConfigurableOption
 {
+	protected const DEPENDS_ON = 'email';
+
 	public static function get()
 	{
 		$subject = Config::string('email', 'subject') ?? \XF::options()->monologEmailSubject;

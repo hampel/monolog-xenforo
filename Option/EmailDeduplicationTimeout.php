@@ -8,6 +8,8 @@ use XF\Entity\Option;
  */
 class EmailDeduplicationTimeout extends AbstractConfigurableOption
 {
+	protected const DEPENDS_ON = 'email';
+
 	public static function get()
 	{
 		return self::configured() ?? \XF::options()->monologEmailDeduplicationTimeout;

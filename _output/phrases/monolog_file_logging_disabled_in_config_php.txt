@@ -1,0 +1,1 @@
+File logging is disabled in config.php, so this option has no effect.

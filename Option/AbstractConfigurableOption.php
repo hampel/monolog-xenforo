@@ -1,5 +1,6 @@
 <?php namespace Hampel\Monolog\Option;
 
+use Hampel\Monolog\Config;
 use XF\Entity\Option;
 use XF\Option\AbstractOption;
 
@@ -15,6 +16,13 @@ use XF\Option\AbstractOption;
 abstract class AbstractConfigurableOption extends AbstractOption
 {
 	/**
+	 * The config.php section this option belongs to - 'file' or 'email' - for an option that means
+	 * nothing once config.php switches that section off. Null for the section's own on/off option,
+	 * which shows the switch itself, and for options outside both sections.
+	 */
+	protected const DEPENDS_ON = null;
+
+	/**
 	 * The value config.php sets, ready to show; null when config.php does not set this option.
 	 */
 	abstract public static function lockedValue(): ?string;
@@ -24,16 +32,50 @@ abstract class AbstractConfigurableOption extends AbstractOption
 	 */
 	abstract protected static function renderControl(Option $option, array $htmlParams): string;
 
+	/**
+	 * Whether config.php switches off the section this option belongs to.
+	 */
+	public static function isSectionDisabled(): bool
+	{
+		return static::DEPENDS_ON !== null && Config::enabled(static::DEPENDS_ON) === false;
+	}
+
+	public static function isLocked(): bool
+	{
+		return static::isSectionDisabled() || static::lockedValue() !== null;
+	}
+
 	public static function renderOption(Option $option, array $htmlParams)
 	{
+		if (static::isSectionDisabled())
+		{
+			// each phrase named literally, so xf-dev:unused-phrase-finder can see it is used
+			$note = static::DEPENDS_ON === 'email'
+				? \XF::phrase('monolog_email_disabled_in_config_php')
+				: \XF::phrase('monolog_file_logging_disabled_in_config_php');
+
+			return static::lockedRow($option, $htmlParams, (string) \XF::phrase('monolog_not_used'), $note);
+		}
+
 		$locked = static::lockedValue();
 		if ($locked === null)
 		{
 			return static::renderControl($option, $htmlParams);
 		}
 
-		$html = '<div class="formRow-value">' . \XF::escapeString($locked) . '</div>'
-			. '<div class="formRow-explain">' . \XF::phrase('monolog_set_in_config_php') . '</div>';
+		return static::lockedRow($option, $htmlParams, $locked, \XF::phrase('monolog_set_in_config_php'));
+	}
+
+	/**
+	 * The value in force and why it cannot be changed here - with no input, and without the
+	 * `listedHtml` that would put the option on the save list. See the class docblock.
+	 *
+	 * @param \XF\Phrase|string $note
+	 */
+	protected static function lockedRow(Option $option, array $htmlParams, string $value, $note): string
+	{
+		$html = '<div class="formRow-value">' . \XF::escapeString($value) . '</div>'
+			. '<div class="formRow-explain">' . $note . '</div>';
 
 		return static::getTemplater()->formRow($html, [
 			'label' => $option->title,
@@ -46,7 +88,7 @@ abstract class AbstractConfigurableOption extends AbstractOption
 
 	public static function verifyOption(&$value, Option $option)
 	{
-		if (static::lockedValue() !== null)
+		if (static::isLocked())
 		{
 			$value = $option->option_value;
 
