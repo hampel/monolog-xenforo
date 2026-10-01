@@ -273,6 +273,11 @@ that read as "9 of 8". A line that mentions the run is reported, and a wrong cou
 rendering is `Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout, because that
 package needs PHP 8.3 and XenForo ships its own `symfony/console`.
 
+**XenForo 2.2's `symfony/console` is a fork that knows only the eight basic colours**, and throws
+on `gray`. `monolog:config` died at its first annotation on 2.2 from Beta 4 until a sandbox run
+found it; grey now goes only through `RendersReport::muted()`, and `CommandsTest` fails on a
+literal tag. Any new style must exist in that fork, or fall back the same way.
+
 **Two traps, both hit writing them, both fatal for every command in `cmd.php`, not only these.**
 XenForo loads every add-on's command classes to list them, so a class that cannot load stops the
 whole CLI:
