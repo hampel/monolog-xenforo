@@ -5,7 +5,8 @@
     "sub_options": [],
     "validation_class": "",
     "validation_method": "",
-    "default_value": "true",
+    "advanced": false,
+    "default_value": "1",
     "relations": {
         "monolog": 1001
     }
