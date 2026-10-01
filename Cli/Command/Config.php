@@ -14,6 +14,8 @@ use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\LogFormat;
 use Hampel\Monolog\Option\SendEmail;
 use Hampel\Monolog\Option\Site;
+use Hampel\Monolog\Option\SlackMinimumLogLevel;
+use Hampel\Monolog\Option\SlackWebhook;
 use Hampel\Monolog\SubContainer\MonologApi;
 use Monolog\Logger;
 use Symfony\Component\Console\Command\Command;
@@ -79,6 +81,18 @@ class Config extends Command
 		$this->detail('subject', EmailSubject::get() . $this->source(EmailSubject::class));
 		$this->detail('deduplication', EmailDeduplicationTimeout::get() . ' seconds' . $this->source(EmailDeduplicationTimeout::class));
 		$this->detail('channels', $this->channels('email'));
+
+		$this->heading('Slack');
+		$this->detail('enabled', $this->yesNo(SlackWebhook::isEnabled()) . $this->source(SlackWebhook::class));
+		// a credential: say whether it is set, and where, never what it is
+		$this->detail('webhook', SlackWebhook::getWebhook() === '' ? '' : 'set, to '
+			. parse_url(SlackWebhook::getWebhook(), PHP_URL_HOST)
+			. (MonologConfig::string('slack', 'webhook') !== null ? self::FROM_CONFIG : self::FROM_OPTIONS));
+		$this->detail('level', $this->level(SlackMinimumLogLevel::get()) . $this->source(SlackMinimumLogLevel::class));
+		$slackDedup = MonologConfig::get('slack', 'dedup');
+		$this->detail('deduplication', (is_int($slackDedup) && $slackDedup >= 0
+			? $slackDedup . ' seconds' . self::FROM_CONFIG : MonologApi::SLACK_DEDUP . ' seconds'));
+		$this->detail('channels', $this->channels('slack'));
 
 		$this->heading('Records');
 		$this->detail('request id', $this->yesNo(LogFormat::get() === 'json' || AddRequestId::get())

@@ -20,6 +20,12 @@ use Hampel\Monolog\Option\FileMinimumLogLevel;
  *             'dedup' => 300,
  *             'channels' => ['myaddon' => 'warning'],
  *         ],
+ *         'slack' => [                // or false to turn Slack off
+ *             'webhook' => 'https://hooks.slack.com/services/...',
+ *             'level' => 'error',
+ *             'dedup' => 300,
+ *             'channels' => ['myaddon' => 'warning'],
+ *         ],
  *         'request_id' => true,
  *         'visitor' => true,
  *         'web' => false,
@@ -42,7 +48,7 @@ class Config
 	}
 
 	/**
-	 * A top-level value, or one key within the `file` or `email` section; null if absent.
+	 * A top-level value, or one key within a section; null if absent.
 	 */
 	public static function get(string $section, ?string $key = null)
 	{
@@ -61,8 +67,8 @@ class Config
 	}
 
 	/**
-	 * Whether config.php turns the `file` or `email` section on or off, or null to leave it to the
-	 * option. `false` turns it off; `true`, or a `path` / `to`, turns it on.
+	 * Whether config.php turns the `file`, `email` or `slack` section on or off, or null to leave it
+	 * to the option. `false` turns it off; `true`, or a `path` / `to` / `webhook`, turns it on.
 	 */
 	public static function enabled(string $section): ?bool
 	{
@@ -72,7 +78,7 @@ class Config
 			return $value;
 		}
 
-		$target = $section === 'email' ? 'to' : 'path';
+		$target = ['email' => 'to', 'slack' => 'webhook'][$section] ?? 'path';
 		if (is_array($value) && is_string($value[$target] ?? null) && $value[$target] !== '')
 		{
 			return true;

@@ -278,6 +278,75 @@ class CommandsTest extends TestCase
 		$this->assertStringContainsString('8 of 8 written, as expected at Debug', $output);
 	}
 
+	public function test_config_shows_the_slack_webhooks_host_and_never_the_webhook()
+	{
+		$this->setConfig('monolog', ['slack' => ['webhook' => 'https://hooks.slack.com/services/T/B/secret']]);
+
+		[, $output] = $this->runCommand(new Config());
+
+		$this->assertMatchesRegularExpression('/webhook \.+ set, to hooks\.slack\.com \(config\.php\)/', $output);
+		$this->assertStringNotContainsString('secret', $output);
+	}
+
+	public function test_a_slack_level_below_warning_warns()
+	{
+		$this->setOptions([
+			'monologSlack' => ['enabled' => true, 'webhook' => 'https://hooks.slack.com/services/T/B/secret'],
+			'monologSlackMinimumLogLevel' => 200,
+		]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertMatchesRegularExpression('/\[warn\] slack level +Info - every record at Info or above is posted/', $output);
+		$this->assertStringNotContainsString('secret', $output);
+	}
+
+	public function test_a_slack_webhook_in_config_that_is_not_https_warns()
+	{
+		$this->setConfig('monolog', ['slack' => ['webhook' => 'http://hooks.slack.com/services/T/B/x']]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertStringContainsString('[warn] slack.webhook', $output);
+		$this->assertMatchesRegularExpression('/\[    \] slack level +Slack is off/', $output);
+	}
+
+	public function test_the_sweep_posts_one_slack_message_when_slack_is_on()
+	{
+		$this->fakesHttp([new \GuzzleHttp\Psr7\Response(200, [], 'ok')]);
+		$this->setOption('monologSlack', ['enabled' => true, 'webhook' => 'https://hooks.slack.com/services/T/B/x']);
+
+		[$code, $output] = $this->runCommand(new Validate());
+
+		$this->assertSame(0, $code);
+		$this->assertStringContainsString('4 record(s) at Error or above posted as one message', $output);
+		$this->assertHttpRequestSentTimes(1);
+	}
+
+	/**
+	 * A failed post never reaches the code that logged; it goes to the server error log, which the
+	 * sweep then reports as a failure. That last step reads xf_error_log, and XenForo writes it only
+	 * when it finds the install lock - which a temporary internal_data lacks, and which it caches for
+	 * the process - so here the fake error handler stands in, and the [fail] is proved on a real
+	 * install instead.
+	 */
+	public function test_a_failed_slack_post_reaches_the_error_log_and_not_the_output()
+	{
+		$this->fakesErrors();
+		$this->fakesHttp([new \GuzzleHttp\Psr7\Response(404, [], 'no_service')]);
+		$this->setOption('monologSlack', ['enabled' => true, 'webhook' => 'https://hooks.slack.com/services/T/B/secret']);
+
+		[, $output] = $this->runCommand(new Validate());
+
+		$errors = $this->getErrorFake()->getExceptions();
+		$this->assertCount(1, $errors);
+		$this->assertStringStartsWith('Monolog: posting to Slack failed', $errors[0]['message']);
+		$this->assertStringNotContainsString('secret', $errors[0]['message']);
+		$this->assertStringNotContainsString('secret', $output);
+	}
+
 	public function test_a_factory_that_builds_the_wrong_thing_fails()
 	{
 		$this->setConfig('monolog', ['handlers' => [

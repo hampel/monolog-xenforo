@@ -22,6 +22,8 @@ namespace XF;
  * @property string|null $monologLogFormat Log File Format
  * @property array{enabled: string, email: string}|null $monologSendEmail Send Logs via Email
  * @property string|null $monologSite Site Name
+ * @property array{enabled: string, webhook: string}|null $monologSlack Post to Slack
+ * @property non-negative-int|null $monologSlackMinimumLogLevel Slack Minimum Log Level
  */
 class Options
 {

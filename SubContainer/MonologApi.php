@@ -4,6 +4,7 @@ use Hampel\Monolog\Config;
 use Hampel\Monolog\Handler\ChannelLevelHandler;
 use Hampel\Monolog\Handler\LazyHandler;
 use Hampel\Monolog\Handler\XenForoMailHandler;
+use Hampel\Monolog\Handler\XenForoSlackHandler;
 use Hampel\Monolog\Option\AddRequestId;
 use Hampel\Monolog\Option\AddVisitorExtra;
 use Hampel\Monolog\Option\AddWebExtra;
@@ -15,6 +16,8 @@ use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\LogFormat;
 use Hampel\Monolog\Option\SendEmail;
 use Hampel\Monolog\Option\Site;
+use Hampel\Monolog\Option\SlackMinimumLogLevel;
+use Hampel\Monolog\Option\SlackWebhook;
 use Hampel\Monolog\Processor\ContextProcessor;
 use Hampel\Monolog\Processor\RequestIdProcessor;
 use Hampel\Monolog\Processor\VisitorProcessor;
@@ -41,6 +44,9 @@ use XF\Util\File;
  */
 class MonologApi extends AbstractSubContainer
 {
+	/** Seconds before Slack posts a repeated record again, unless `slack.dedup` says otherwise. */
+	public const SLACK_DEDUP = 300;
+
 	/** @var LoggerInterface[] channels already handed out, by name */
 	private array $channels = [];
 
@@ -105,9 +111,22 @@ class MonologApi extends AbstractSubContainer
 			});
 		};
 
+		$container['handler.slack'] = function (Container $c)
+		{
+			if (!SlackWebhook::isEnabled())
+			{
+				return null;
+			}
+
+			return $this->byChannel('slack', SlackMinimumLogLevel::get(), function (int $level)
+			{
+				return $this->slackHandler($level);
+			});
+		};
+
 		$container['handlers'] = function (Container $c)
 		{
-			$handlers = array_values(array_filter([$c['handler.file'], $c['handler.email']]));
+			$handlers = array_values(array_filter([$c['handler.file'], $c['handler.email'], $c['handler.slack']]));
 
 			foreach ((array) (Config::get('handlers') ?? []) AS $factory)
 			{
@@ -198,6 +217,25 @@ class MonologApi extends AbstractSubContainer
 				File::getTempDir() . '/monolog-dedup-email.log',
 				$level,
 				EmailDeduplicationTimeout::get()
+			);
+		}, $level);
+	}
+
+	/**
+	 * Slack, built on the first record at $level, and batched per request like email - so a request
+	 * that logs ten errors posts one message, and a repeat within `slack.dedup` seconds posts none.
+	 */
+	private function slackHandler(int $level): HandlerInterface
+	{
+		return new LazyHandler(function () use ($level)
+		{
+			$dedup = Config::get('slack', 'dedup');
+
+			return new DeduplicationHandler(
+				new XenForoSlackHandler(SlackWebhook::getWebhook(), Site::get(), $level),
+				File::getTempDir() . '/monolog-dedup-slack.log',
+				$level,
+				is_int($dedup) && $dedup >= 0 ? $dedup : self::SLACK_DEDUP
 			);
 		}, $level);
 	}

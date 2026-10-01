@@ -7,6 +7,8 @@ use Hampel\Monolog\Option\FileMinimumLogLevel;
 use Hampel\Monolog\Option\LogFile;
 use Hampel\Monolog\Option\LogFormat;
 use Hampel\Monolog\Option\SendEmail;
+use Hampel\Monolog\Option\SlackMinimumLogLevel;
+use Hampel\Monolog\Option\SlackWebhook;
 use Hampel\Monolog\SubContainer\MonologApi;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Handler\HandlerInterface;
@@ -56,6 +58,9 @@ class Validate extends Command
 
 		$this->heading('Email');
 		$this->emailLevel();
+
+		$this->heading('Slack');
+		$this->slackLevel();
 
 		$this->heading('Log file');
 		$path = $this->probe('log file', function ()
@@ -120,7 +125,7 @@ class Validate extends Command
 		}
 
 		$problems = 0;
-		foreach (['file', 'email'] AS $section)
+		foreach (['file', 'email', 'slack'] AS $section)
 		{
 			$value = MonologConfig::get($section, 'level');
 			if ($value !== null && MonologConfig::toLevel($value) === null)
@@ -130,7 +135,7 @@ class Validate extends Command
 			}
 		}
 
-		foreach (['file', 'email'] AS $section)
+		foreach (['file', 'email', 'slack'] AS $section)
 		{
 			$channels = MonologConfig::get($section, 'channels');
 			if ($channels !== null && !is_array($channels))
@@ -160,6 +165,21 @@ class Validate extends Command
 		{
 			$problems++;
 			$this->checkWarn('email.dedup', var_export($dedup, true) . ' is not a whole number of seconds - the option decides');
+		}
+
+		$webhook = MonologConfig::get('slack', 'webhook');
+		if ($webhook !== null && !(is_string($webhook) && SlackWebhook::isWebhookUrl($webhook)))
+		{
+			$problems++;
+			$this->checkWarn('slack.webhook', 'is not an https URL - Slack is off');
+		}
+
+		$slackDedup = MonologConfig::get('slack', 'dedup');
+		if ($slackDedup !== null && !(is_int($slackDedup) && $slackDedup >= 0))
+		{
+			$problems++;
+			$this->checkWarn('slack.dedup', var_export($slackDedup, true) . ' is not a whole number of seconds - '
+				. MonologApi::SLACK_DEDUP . ' is used');
 		}
 
 		if (!$problems)
@@ -195,6 +215,35 @@ class Validate extends Command
 			{
 				$at = FileMinimumLogLevel::LEVELS[$channelLevel];
 				$this->checkWarn('email level', "{$channel} at {$at} - every {$channel} record at {$at} or above is emailed");
+			}
+		}
+	}
+
+	/**
+	 * Slack, like email, is for alerts - and every record posted is a message in a channel people
+	 * read. The webhook is never printed: it is a credential.
+	 */
+	private function slackLevel(): void
+	{
+		if (!SlackWebhook::isEnabled())
+		{
+			$this->checkSkip('slack level', 'Slack is off');
+			return;
+		}
+
+		$level = SlackMinimumLogLevel::get();
+		$name = FileMinimumLogLevel::LEVELS[$level] ?? (string) $level;
+
+		$level < 300
+			? $this->checkWarn('slack level', "{$name} - every record at {$name} or above is posted; Error is the usual level for Slack")
+			: $this->checkOk('slack level', "{$name}, to the webhook at " . parse_url(SlackWebhook::getWebhook(), PHP_URL_HOST));
+
+		foreach (MonologConfig::channelLevels('slack') AS $channel => $channelLevel)
+		{
+			if ($channelLevel < 300)
+			{
+				$at = FileMinimumLogLevel::LEVELS[$channelLevel];
+				$this->checkWarn('slack level', "{$channel} at {$at} - every {$channel} record at {$at} or above is posted");
 			}
 		}
 	}
@@ -373,6 +422,17 @@ class Validate extends Command
 		else
 		{
 			$this->checkSkip('email', 'email is off');
+		}
+
+		if (SlackWebhook::isEnabled())
+		{
+			$slackLevel = MonologConfig::levelFor('slack', 'monolog-validate', SlackMinimumLogLevel::get());
+			$this->checkOk('slack', $this->atOrAbove($slackLevel) . ' record(s) at ' . (FileMinimumLogLevel::LEVELS[$slackLevel] ?? $slackLevel)
+				. ' or above posted as one message - a failed post shows in the server error log below');
+		}
+		else
+		{
+			$this->checkSkip('slack', 'Slack is off');
 		}
 
 		$errors = $db->fetchAll('SELECT message FROM xf_error_log WHERE error_id > ? ORDER BY error_id', $errorsBefore);

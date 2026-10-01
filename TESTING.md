@@ -110,6 +110,13 @@ What the suite covers:
   only, the configured site, each app type, and a running job.
 - **`tests/Feature/ChannelLevelsTest.php`** — a channel raised or lowered from its section's level,
   every other channel left at it, a bad entry ignored, and email taking its own `channels`.
+- **`tests/Feature/SlackTest.php`** — posted through XenForo's HTTP client with a short timeout,
+  one message per request, cut short past ten records, set or switched off from `config.php`, and
+  an unreachable, deleted or revoked webhook logged to the server error log without its URL.
+  **The sweep's `[fail] server error log` cannot be tested here**: XenForo writes `xf_error_log`
+  only when it finds the install lock, which a temporary `internal_data` lacks, and it caches that
+  answer for the process. `CommandsTest` asserts the error reaches XenForo's error handler instead,
+  and the `[fail]` was proved on a real install.
 - **`tests/Feature/RequestIdTest.php`** — one id per request, the web server's where it is shaped
   like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared

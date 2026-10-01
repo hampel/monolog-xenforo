@@ -1,0 +1,1 @@
+Posts log records to a Slack channel through an incoming webhook - one message per request, with repeats suppressed. Create the webhook in your Slack workspace (Apps, Incoming Webhooks) and paste its URL here. The URL is a credential: anyone who has it can post to that channel.

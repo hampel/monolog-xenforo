@@ -20,7 +20,8 @@ class OptionsPageTest extends TestCase
 	private const OPTIONS = [
 		'monologLogFile', 'monologLogFormat', 'monologFileMinimumLogLevel',
 		'monologSendEmail', 'monologEmailSubject', 'monologEmailMinimumLogLevel',
-		'monologEmailDeduplicationTimeout', 'monologAddVisitorExtra', 'monologAddWebExtra', 'monologSite',
+		'monologEmailDeduplicationTimeout', 'monologSlack', 'monologSlackMinimumLogLevel',
+		'monologAddRequestId', 'monologAddVisitorExtra', 'monologAddWebExtra', 'monologSite',
 	];
 
 	protected function setUp(): void
@@ -60,6 +61,9 @@ class OptionsPageTest extends TestCase
 			'email level' => [['email' => ['level' => 'alert']], 'monologEmailMinimumLogLevel', 'Alert'],
 			'email subject' => [['email' => ['subject' => 'Subject']], 'monologEmailSubject', 'Subject'],
 			'email dedup' => [['email' => ['dedup' => 60]], 'monologEmailDeduplicationTimeout', '60'],
+			'slack webhook' => [['slack' => ['webhook' => 'https://hooks.example.com/x']], 'monologSlack', 'Enabled'],
+			'slack level' => [['slack' => ['level' => 'critical']], 'monologSlackMinimumLogLevel', 'Critical'],
+			'request id' => [['request_id' => false], 'monologAddRequestId', 'Disabled'],
 			'visitor' => [['visitor' => false], 'monologAddVisitorExtra', 'Disabled'],
 			'web' => [['web' => true], 'monologAddWebExtra', 'Enabled'],
 			'site' => [['site' => 'mysite'], 'monologSite', 'mysite'],
@@ -92,6 +96,10 @@ class OptionsPageTest extends TestCase
 				['email' => false],
 				['monologSendEmail' => 'Disabled', 'monologEmailSubject' => 'Not used',
 					'monologEmailMinimumLogLevel' => 'Not used', 'monologEmailDeduplicationTimeout' => 'Not used'],
+			],
+			'slack off' => [
+				['slack' => false],
+				['monologSlack' => 'Disabled', 'monologSlackMinimumLogLevel' => 'Not used'],
 			],
 		];
 	}
@@ -128,9 +136,41 @@ class OptionsPageTest extends TestCase
 		$this->setOptions([
 			'monologLogFile' => ['enabled' => false, 'logfile' => 'monolog.log'],
 			'monologSendEmail' => ['enabled' => false, 'email' => ''],
+			'monologSlack' => ['enabled' => false, 'webhook' => ''],
 		]);
 
 		$this->assertSame(self::OPTIONS, array_values(array_intersect(self::OPTIONS, $this->listed($this->page()))));
+	}
+
+	/**
+	 * The webhook is a credential, so a locked Slack row says it is on and never what it is.
+	 */
+	public function test_a_webhook_config_php_sets_is_never_shown()
+	{
+		$this->setConfig('monolog', ['slack' => ['webhook' => 'https://hooks.slack.com/services/T/B/secret']]);
+
+		$html = $this->page();
+
+		$this->assertStringNotContainsString('secret', $html);
+		$this->assertStringNotContainsString('hooks.slack.com', $html);
+	}
+
+	public static function webhooks(): array
+	{
+		return [
+			'http' => ['http://hooks.slack.com/services/T/B/x', false],
+			'not a URL' => ['hooks.slack.com/services/T/B/x', false],
+			'https' => ['https://hooks.slack.com/services/T/B/x', true],
+		];
+	}
+
+	#[DataProvider('webhooks')]
+	public function test_enabling_slack_needs_an_https_webhook($webhook, $valid)
+	{
+		$option = $this->app()->em()->find('XF:Option', 'monologSlack');
+		$value = ['enabled' => true, 'webhook' => $webhook];
+
+		$this->assertSame($valid, \Hampel\Monolog\Option\SlackWebhook::verifyOption($value, $option));
 	}
 
 	public function test_a_save_from_elsewhere_keeps_an_option_in_a_switched_off_section()

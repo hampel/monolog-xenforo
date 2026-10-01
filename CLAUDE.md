@@ -88,6 +88,13 @@ The stack, from `MonologApi::initialize()`:
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
   `SendEmail::isEnabled()`. Level from `EmailMinimumLogLevel::get()` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
+- **slack** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoSlackHandler`, when
+  `SlackWebhook::isEnabled()` (on, and an https webhook). It posts through XenForo's HTTP client
+  with a 5-second timeout, not Monolog's `SlackWebhookHandler`, which uses raw cURL with no timeout
+  and throws after five retries — a slow Slack would hang the page and an unreachable one break the
+  caller. A failure goes to `\XF::logError()` **with the webhook replaced by `[webhook]`**: Guzzle
+  puts the URL in its messages, and the URL is the credential. Nothing prints the webhook —
+  `monolog:config` and the locked option show only that it is set;
 - **per-channel levels** — when a section's `channels` in `config.php` lists any, its handler is
   built at the lowest of them and wrapped in a `ChannelLevelHandler`, which decides each record by
   its own channel. **Its `isHandling()` must pass the lowest level when the record has no

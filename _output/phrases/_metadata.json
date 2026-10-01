@@ -23,6 +23,12 @@
         "version_string": "2.0.0",
         "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
     },
+    "monolog_enter_slack_webhook_url.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "ceff472dee0b78cc878e325e0dcd4c41"
+    },
     "monolog_file_logging_disabled_in_config_php.txt": {
         "global_cache": false,
         "version_id": 5000033,
@@ -58,6 +64,12 @@
         "version_id": 5000033,
         "version_string": "5.0.0b3",
         "hash": "1f521e695216f42c4d469d39e6f0daf7"
+    },
+    "monolog_slack_webhook_must_be_https_url.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "dbeecda90a975e64cd603db049ca3d40"
     },
     "monolog_test.txt": {
         "global_cache": false,
@@ -155,6 +167,18 @@
         "version_string": "5.0.0b3",
         "hash": "668445f09da337d276dc852bb6a0dbb3"
     },
+    "option.monologSlack.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "7ccc7b98db6c462d967ec352af655277"
+    },
+    "option.monologSlackMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "4574441cfa142f2682185ca4be070f23"
+    },
     "option_explain.monologAddRequestId.txt": {
         "global_cache": false,
         "version_id": 5000037,
@@ -220,6 +244,18 @@
         "version_id": 5000035,
         "version_string": "5.0.0b5",
         "hash": "0a11e5625a1be446aa356b2af7a13e03"
+    },
+    "option_explain.monologSlack.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "3eafbcc5dd472fc2d2cd950c09348197"
+    },
+    "option_explain.monologSlackMinimumLogLevel.txt": {
+        "global_cache": false,
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "4db55f9b5d7fa53dcd35a93fae05c0ba"
     },
     "option_group.monolog.txt": {
         "global_cache": false,

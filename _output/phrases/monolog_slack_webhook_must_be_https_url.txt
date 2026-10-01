@@ -1,0 +1,1 @@
+Please enter the incoming webhook URL from Slack. It begins with https://.

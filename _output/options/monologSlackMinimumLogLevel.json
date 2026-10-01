@@ -1,0 +1,13 @@
+{
+    "edit_format": "callback",
+    "edit_format_params": "Hampel\\Monolog\\Option\\SlackMinimumLogLevel::renderOption",
+    "data_type": "unsigned_integer",
+    "sub_options": [],
+    "validation_class": "Hampel\\Monolog\\Option\\SlackMinimumLogLevel",
+    "validation_method": "verifyOption",
+    "advanced": false,
+    "default_value": "400",
+    "relations": {
+        "monolog": 202
+    }
+}

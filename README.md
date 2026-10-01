@@ -1,8 +1,9 @@
 # Monolog logging service for XenForo add-ons
 
 Gives every XenForo add-on a PSR-3 logger, backed by [Monolog](https://github.com/Seldaek/monolog),
-writing to a log file and optionally emailing errors. It is for add-on developers who want logging
-without bundling a logging library, and for forum owners whose other add-ons ask for it.
+writing to a log file and optionally sending errors by email or to Slack. It is for add-on
+developers who want logging without bundling a logging library, and for forum owners whose other
+add-ons ask for it.
 
 By [Simon Hampel](https://xenforo.com/community/members/sim.4264/).
 
@@ -46,6 +47,13 @@ field to change it.
   emailed — but on a busy forum it doubles the mail.
 - **Email Deduplication Timeout** — a message already emailed within this many seconds is not sent
   again. Each request's messages arrive as one email.
+- **Post to Slack** — off by default. Posts to a Slack channel through an [incoming
+  webhook](https://api.slack.com/messaging/webhooks): create one in your Slack workspace and paste
+  its URL here. Each request's messages arrive as one message, and a message already posted within
+  five minutes is not posted again. **The webhook URL is a credential** — anyone holding it can
+  post to that channel — so consider setting it in `config.php` instead, which keeps it out of the
+  database and off the options page.
+- **Slack Minimum Log Level** — the lowest level posted. Default: Error.
 - **Add Request ID** — adds an id to every record, the same for every record from one request, so
   everything a request logged can be found from any one of its lines. Uses the web server's request
   id where it provides one — Apache's `UNIQUE_ID`, or an `X-Request-ID` header from a proxy — so a
@@ -77,6 +85,11 @@ $config['monolog'] = [
         'dedup' => 300,                         // seconds
         'channels' => ['myaddon' => 'warning'],
     ],
+    'slack' => [                                // false turns Slack off
+        'webhook' => 'https://hooks.slack.com/services/...',
+        'level' => 'error',
+        'dedup' => 300,                         // seconds
+    ],
     'request_id' => true,
     'visitor' => true,
     'web' => false,
@@ -84,10 +97,10 @@ $config['monolog'] = [
 ];
 ```
 
-- **`file.path` or `email.to` also switches that output on**, and `false` in place of the section
-  switches it off — which also locks every option in that section on the options page, since none
-  has any effect. `'file' => ['level' => 'error']` alone fixes the level and leaves the rest to the
-  options page.
+- **`file.path`, `email.to` or `slack.webhook` also switches that output on**, and `false` in place
+  of the section switches it off — which also locks every option in that section on the options
+  page, since none has any effect. `'file' => ['level' => 'error']` alone fixes the level and leaves
+  the rest to the options page.
 - **Levels** are `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert` and
   `emergency`, in any case.
 - **`channels` sets a level for one channel** — by convention, one add-on — raising or lowering it
@@ -122,8 +135,8 @@ $config['monolog'] = [
 ];
 ```
 
-- **`handlers`** and **`processors`** are lists, added to the built-in file and email handlers and
-  to the processors the options switch on.
+- **`handlers`** and **`processors`** are lists, added to the built-in file, email and Slack
+  handlers and to the processors the options switch on.
 - **`file.formatter`** replaces the log file's formatter, in place of `file.format`.
 
 **Each entry is a function that returns the object, not the object itself** — the same as
@@ -139,8 +152,8 @@ way on both; a processor of your own should leave its record parameter untyped.
 
 - **Log file: Warning**, the default, records what went wrong or nearly did. **Info** adds a line
   when routine work completes — useful to confirm scheduled jobs ran, at the cost of a larger file.
-- **Email: Error.** Email is for things someone should fix. Below Warning it carries routine
-  records, and every request that logs anything sends a message.
+- **Email and Slack: Error.** Both are for things someone should fix. Below Warning they carry
+  routine records, and every request that logs anything sends a message.
 - **Debug is for tracing one problem, briefly.** Turn it on, reproduce the problem, turn it back
   off.
 
@@ -167,16 +180,20 @@ php cmd.php monolog:validate --unattended    # the same, without writing or send
 ```
 
 **`monolog:config` reads and prints, and changes nothing.** It shows every setting, where each
-comes from — `config.php` or the options page — and the full path of the log file.
+comes from — `config.php` or the options page — and the full path of the log file. The Slack
+webhook is shown only as set, with its host: the URL is a credential.
 
-**`monolog:validate` exercises the real thing.** It warns if email is set below Warning, checks the
-log file can be written, builds the handlers and anything `config.php` adds, then writes one record
-at each of the eight levels to the `monolog-validate` channel. It counts what reached the log file
-against the level you set, and reports what was emailed and to whom. Each check reports `[ ok ]`,
+**`monolog:validate` exercises the real thing.** It warns if email or Slack is set below Warning,
+checks the log file can be written, builds the handlers and anything `config.php` adds, then writes
+one record at each of the eight levels to the `monolog-validate` channel. It counts what reached the
+log file against the level you set, and reports what was emailed and posted. A post Slack refuses —
+a deleted or revoked webhook — or cannot be reached appears in the server error log, and fails the
+run. Each check reports `[ ok ]`,
 `[warn]`, `[fail]`, or a blank marker for a check that did not apply. It exits 1 if anything failed
 and 0 otherwise — warnings included — so a deploy or a cron job can depend on it.
 
-**Running it writes to your log and sends email**, if email is on — that is the proof both work.
+**Running it writes to your log, sends email and posts to Slack**, for whichever is on — that is
+the proof each works.
 Use `--unattended` where nobody is watching, such as a deploy step; it skips the level sweep and
 still checks everything else.
 

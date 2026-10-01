@@ -31,5 +31,11 @@
     },
     "monologSite.json": {
         "hash": "a4d33b15cb76e291f80ed05a63322d9d"
+    },
+    "monologSlack.json": {
+        "hash": "88591e5bee343ac203267eb5e2609575"
+    },
+    "monologSlackMinimumLogLevel.json": {
+        "hash": "4d74bac00a658c1f8c293003ad9ccb50"
     }
 }
