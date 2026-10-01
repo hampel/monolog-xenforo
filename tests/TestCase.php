@@ -49,6 +49,27 @@ abstract class TestCase extends BaseTestCase
 		return $app;
 	}
 
+	/**
+	 * Every test starts from this add-on's defaults - no `$config['monolog']` and every option at
+	 * its default value - whatever the install's own config.php and options page hold. Otherwise a
+	 * developer trying a setting changes what the suite tests. A test that needs a value sets it
+	 * with setConfig() or setOption(), and the framework restores options after each test.
+	 */
+	protected function setUp(): void
+	{
+		parent::setUp();
+
+		$this->setConfig('monolog', []);
+
+		$defaults = [];
+		$options = $this->app()->finder('XF:Option')->where('addon_id', 'Hampel/Monolog')->fetch();
+		foreach ($options AS $option)
+		{
+			$defaults[$option->option_id] = $option->getDefaultValue();
+		}
+		$this->setOptions($defaults);
+	}
+
 	public static function simulatingMonolog3(): bool
 	{
 		return (bool) getenv('MONOLOG3');
