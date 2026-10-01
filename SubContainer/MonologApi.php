@@ -47,7 +47,7 @@ class MonologApi extends AbstractSubContainer
 
 		$container['handler.file'] = function (Container $c)
 		{
-			$file = $this->logFile();
+			$file = LogFile::path();
 			if ($file === null)
 			{
 				return null;
@@ -212,26 +212,6 @@ class MonologApi extends AbstractSubContainer
 		}
 
 		return $built;
-	}
-
-	/**
-	 * The full path of the log file, or null for no file logging.
-	 */
-	protected function logFile(): ?string
-	{
-		if (!LogFile::isEnabled())
-		{
-			return null;
-		}
-
-		$file = Config::string('file', 'path') ?? LogFile::getLogFile();
-		if ($file === '')
-		{
-			return null;
-		}
-
-		// absolute paths and stream wrappers come back unchanged; only config.php can set those
-		return File::canonicalizePath($file, File::canonicalizePath($this->app->config('internalDataPath')));
 	}
 
 	/**

@@ -96,6 +96,10 @@ What the suite covers:
   nothing is locked; a locked option shown with its value, no input and off the save list; a
   section switched off in `config.php` locking every option in it; and a save through XenForo's
   own controller leaving a locked option's stored value untouched.
+- **`tests/Feature/CommandsTest.php`** — `monolog:config` and `monolog:validate`: both load as
+  valid XenForo commands; config shows each source and writes nothing; `--unattended` sends
+  nothing; the sweep's file count follows the level; and an unwritable path, a bad factory and a
+  probe that throws each exit 1 without ending the run.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.
@@ -120,6 +124,9 @@ What the suite covers:
   value is read.
 
 ## Needs a human
+
+**On a forum, `php cmd.php monolog:validate` is the first check** — it settles the log file, the
+stack and the levels on that machine. What follows is what it cannot.
 
 - **Unzip the release and confirm `vendor/` holds `monolog/monolog` and `psr/log` and nothing
   else** — no PHPUnit, no Mockery. See the fragile point on `exec` steps; nothing else catches a

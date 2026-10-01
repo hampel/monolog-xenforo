@@ -2,6 +2,7 @@
 
 use Hampel\Monolog\Config;
 use XF\Entity\Option;
+use XF\Util\File;
 
 /**
  * The log file, relative to internal_data - `file.path` in config.php can set it anywhere.
@@ -30,6 +31,27 @@ class LogFile extends AbstractConfigurableOption
 		$file = (string) (\XF::options()->monologLogFile['logfile'] ?? '');
 
 		return $file !== '' && self::isInsideInternalData($file) ? $file : self::DEFAULT_FILE;
+	}
+
+	/**
+	 * The full path the log file is written to, or null when file logging is off. `file.path` in
+	 * config.php may be absolute or a stream such as php://stderr, and comes back unchanged; a
+	 * relative path, and the option's path, are inside internal_data.
+	 */
+	public static function path(): ?string
+	{
+		if (!self::isEnabled())
+		{
+			return null;
+		}
+
+		$file = Config::string('file', 'path') ?? self::getLogFile();
+		if ($file === '')
+		{
+			return null;
+		}
+
+		return File::canonicalizePath($file, File::canonicalizePath(\XF::app()->config('internalDataPath')));
 	}
 
 	public static function lockedValue(): ?string

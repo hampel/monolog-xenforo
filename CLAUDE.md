@@ -238,6 +238,25 @@ vendor/bin/phpunit --testsuite Feature            # one suite
 vendor/bin/phpunit --filter EmailTest             # one class
 ```
 
+**`monolog:config` and `monolog:validate`** (`Cli/Command/`) follow the convention the house uses
+for `app:config` and `app:validate`: config reads and prints, validate exercises the real thing,
+four outcomes (`[ ok ]`, `[warn]`, `[fail]`, and a blank `[    ]` for a check that did not apply),
+exit 1 only on a failure, no check may end the run, and `--unattended` skips only the sends — the
+level sweep — while the checks that are facts about the configuration run above it. **Extend
+`monolog:validate` whenever logging gains a new dependency on the environment.** The rendering is
+`Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout, because that package needs PHP
+8.3 and XenForo ships its own `symfony/console`.
+
+**Two traps, both hit writing them, both fatal for every command in `cmd.php`, not only these.**
+XenForo loads every add-on's command classes to list them, so a class that cannot load stops the
+whole CLI:
+
+- `xf-make:cli-command` scaffolds `extends XF\Cli\Command\AbstractCommand`, which does not exist on
+  XenForo 2.2. Extend Symfony's `Command` directly, and return `0` / `1` rather than
+  `Command::SUCCESS`, which XenForo 2.2's console fork may lack.
+- A private helper named `run()` collides with `Command::run()`, which is public. The tests load
+  both command classes through `XF\Cli\Runner::isValidCommandClass()` to catch either.
+
 **Check the exit code unpiped** — `vendor/bin/phpunit >/dev/null 2>&1; echo $?` — because a
 pipeline reports its last command's status, and `| tail` reports 0 whatever happened.
 
