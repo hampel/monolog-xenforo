@@ -51,8 +51,13 @@ class LogFormat extends AbstractConfigurableOption
 		return true;
 	}
 
+	/**
+	 * Each phrase named literally, so xf-dev:unused-phrase-finder can see it is used.
+	 */
 	private static function label(string $format): string
 	{
-		return (string) \XF::phrase('monolog_format_' . $format);
+		return $format === 'json'
+			? (string) \XF::phrase('monolog_format_json')
+			: (string) \XF::phrase('monolog_format_line');
 	}
 }
