@@ -5,5 +5,5 @@
     "callback_method": "appSetup",
     "active": true,
     "hint": "",
-    "description": "Autoload Monolog Composer packages"
+    "description": "Register the monolog service that add-ons request log channels from"
 }
