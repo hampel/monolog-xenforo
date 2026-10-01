@@ -54,6 +54,9 @@ class Validate extends Command
 		$this->heading('config.php');
 		$this->configValues();
 
+		$this->heading('Email');
+		$this->emailLevel();
+
 		$this->heading('Log file');
 		$path = $this->probe('log file', function ()
 		{
@@ -145,6 +148,28 @@ class Validate extends Command
 		{
 			$this->checkOk("\$config['monolog']", 'every value is usable');
 		}
+	}
+
+	/**
+	 * Email is for alerts. Below Warning it carries the routine records add-ons log - jobs run,
+	 * mail sent - so every request that logs anything sends one, and a mail transport that logs its
+	 * own sends adds one more. A warning, not a failure: it works, and a deliberate test at Debug
+	 * should still pass.
+	 */
+	private function emailLevel(): void
+	{
+		if (!SendEmail::isEnabled())
+		{
+			$this->checkSkip('email level', 'email is off');
+			return;
+		}
+
+		$level = EmailMinimumLogLevel::get();
+		$name = FileMinimumLogLevel::LEVELS[$level] ?? (string) $level;
+
+		$level < 300
+			? $this->checkWarn('email level', "{$name} - every record at {$name} or above is emailed; Error is the usual level for email")
+			: $this->checkOk('email level', "{$name}, to " . SendEmail::getAddress());
 	}
 
 	/**

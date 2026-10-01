@@ -183,6 +183,41 @@ class CommandsTest extends TestCase
 		$this->assertStringContainsString('Validation failed', $output);
 	}
 
+	public static function emailLevels(): array
+	{
+		return [
+			'Debug warns' => [100, '/\[warn\] email level +Debug - every record at Debug or above is emailed/'],
+			'Notice warns' => [250, '/\[warn\] email level +Notice - every record at Notice or above is emailed/'],
+			'Warning is fine' => [300, '/\[ ok \] email level +Warning, to logs@example\.com/'],
+			'Error is fine' => [400, '/\[ ok \] email level +Error, to logs@example\.com/'],
+		];
+	}
+
+	/**
+	 * A static fact about the configuration, so it reports under --unattended: the run that sends
+	 * nothing is the one that most needs to say the threshold is wrong.
+	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('emailLevels')]
+	public function test_an_email_level_below_warning_warns($level, $expected)
+	{
+		$this->setOptions([
+			'monologSendEmail' => ['enabled' => true, 'email' => 'logs@example.com'],
+			'monologEmailMinimumLogLevel' => $level,
+		]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code, 'a warning does not fail validation');
+		$this->assertMatchesRegularExpression($expected, $output);
+	}
+
+	public function test_email_off_skips_the_email_level_check()
+	{
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertMatchesRegularExpression('/\[    \] email level +email is off/', $output);
+	}
+
 	public function test_an_unusable_config_value_warns_and_still_passes()
 	{
 		$this->setConfig('monolog', ['file' => ['level' => 'loud']]);

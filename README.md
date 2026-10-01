@@ -138,12 +138,12 @@ php cmd.php monolog:validate --unattended    # the same, without writing or send
 **`monolog:config` reads and prints, and changes nothing.** It shows every setting, where each
 comes from — `config.php` or the options page — and the full path of the log file.
 
-**`monolog:validate` exercises the real thing.** It checks the log file can be written, builds the
-handlers and anything `config.php` adds, then writes one record at each of the eight levels to the
-`monolog-validate` channel. It counts what reached the log file against the level you set, and
-reports what was emailed and to whom. Each check reports `[ ok ]`, `[warn]`, `[fail]`, or a blank
-marker for a check that did not apply. It exits 1 if anything failed and 0 otherwise — warnings
-included — so a deploy or a cron job can depend on it.
+**`monolog:validate` exercises the real thing.** It warns if email is set below Warning, checks the
+log file can be written, builds the handlers and anything `config.php` adds, then writes one record
+at each of the eight levels to the `monolog-validate` channel. It counts what reached the log file
+against the level you set, and reports what was emailed and to whom. Each check reports `[ ok ]`,
+`[warn]`, `[fail]`, or a blank marker for a check that did not apply. It exits 1 if anything failed
+and 0 otherwise — warnings included — so a deploy or a cron job can depend on it.
 
 **Running it writes to your log and sends email**, if email is on — that is the proof both work.
 Use `--unattended` where nobody is watching, such as a deploy step; it skips the level sweep and
