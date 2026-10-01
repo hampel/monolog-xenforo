@@ -88,8 +88,7 @@ class Config
 	}
 
 	/**
-	 * The `level` within the `file` or `email` section, as Monolog's number; null if absent or not a
-	 * level.
+	 * The `level` within a section, as Monolog's number; null if absent or not a level.
 	 */
 	public static function level(string $section): ?int
 	{

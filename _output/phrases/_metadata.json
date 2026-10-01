@@ -91,9 +91,9 @@
     },
     "monolog_test_monolog_explain.txt": {
         "global_cache": false,
-        "version_id": 5000033,
-        "version_string": "5.0.0b3",
-        "hash": "d4e00efe28838405e4b0f971c48372a8"
+        "version_id": 5000037,
+        "version_string": "5.0.0b7",
+        "hash": "e9c6b05db1a59402f4e81610a85d7e1f"
     },
     "monolog_this_test_could_not_be_run.txt": {
         "global_cache": false,

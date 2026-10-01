@@ -16,9 +16,9 @@ use XF\Option\AbstractOption;
 abstract class AbstractConfigurableOption extends AbstractOption
 {
 	/**
-	 * The config.php section this option belongs to - 'file' or 'email' - for an option that means
-	 * nothing once config.php switches that section off. Null for the section's own on/off option,
-	 * which shows the switch itself, and for options outside both sections.
+	 * The config.php section this option belongs to - 'file', 'email' or 'slack' - for an option
+	 * that means nothing once config.php switches that section off. Null for the section's own
+	 * on/off option, which shows the switch itself, and for options outside every section.
 	 */
 	protected const DEPENDS_ON = null;
 

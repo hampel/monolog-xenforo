@@ -133,10 +133,10 @@ A new option must extend `AbstractConfigurableOption` and use the `callback` edi
 reopens the trap.
 
 **Switching a section off in `config.php` locks every option in it.** An option's `DEPENDS_ON`
-names its section, `file` or `email`; when `Config::enabled()` returns `false` for that section the
-option renders as *Not used* and is locked the same way. Only `config.php` does this — switching a
-section off on the options page leaves its options editable. A new file or email option must set
-`DEPENDS_ON`.
+names its section, `file`, `email` or `slack`; when `Config::enabled()` returns `false` for that
+section the option renders as *Not used* and is locked the same way. Only `config.php` does this —
+switching a section off on the options page leaves its options editable. A new option in one of
+those sections must set `DEPENDS_ON`.
 
 `handlers`, `processors` and `file.formatter` are **callables** — `config.php` is read before
 `XF\App::setup()` registers this add-on's autoloader, so an object built there is a "class not
