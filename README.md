@@ -125,6 +125,20 @@ These are Monolog classes, so the same advice as for the code event applies: Xen
 own Monolog 3 in place of this add-on's Monolog 2. Monolog's built-in handlers construct the same
 way on both; a processor of your own should leave its record parameter untyped.
 
+### Choosing log levels
+
+- **Log file: Warning**, the default, records what went wrong or nearly did. **Info** adds a line
+  when routine work completes — useful to confirm scheduled jobs ran, at the cost of a larger file.
+- **Email: Error.** Email is for things someone should fix. Below Warning it carries routine
+  records, and every request that logs anything sends a message.
+- **Debug is for tracing one problem, briefly.** Turn it on, reproduce the problem, turn it back
+  off.
+
+**The levels apply to every add-on that logs through this one, not only the one you are
+investigating.** At Debug, some add-ons record personal data or the content of the emails they
+send. Check what lands in the log file before leaving Debug on, and delete the file when the
+investigation is over.
+
 ## Command line
 
 Two commands, run from the XenForo root:
@@ -173,6 +187,49 @@ $container['myaddon.log'] = function (\XF\Container $c)
         : new \Psr\Log\NullLogger();
 };
 ```
+
+### Choosing a level
+
+Pick the level by what someone reading the line should do:
+
+| level | the line says | the reader should |
+|---|---|---|
+| `debug` | what happened, step by step | read it only while tracing a problem |
+| `info` | a unit of work finished, with its counts | confirm things ran |
+| `notice` | something normal but noteworthy | glance at it |
+| `warning` | something went wrong and was handled | look at it this week |
+| `error` | a unit of work failed | fix it soon |
+| `critical` | a component is unavailable — an external API, say | fix it today |
+| `alert` | the site is down, or data will be lost | act now |
+| `emergency` | the system is unusable | everyone |
+
+- **`error` is per unit of work, not per line of code.** Log a failure once, where it is handled,
+  with the exception as `['exception' => $e]`. That records its class, message, file and line, and
+  in the JSON format its stack trace too.
+- **`warning` means handled.** If the outcome is still correct, it is a warning at most; if it is
+  wrong, it is an error.
+- **Nothing per page view above `debug`.** Code on the request path runs on every request.
+  Summarise instead: one `info` line from a job, with the counts.
+
+**Never log these, at any level — `debug` included:**
+
+- passwords, API keys, tokens, session IDs, cookies and `Authorization` headers;
+- links that act as credentials — password-reset, email-confirmation, unsubscribe and login links;
+- message bodies — emails, private conversations, posts, form submissions;
+- whole request or response payloads — log the method, path, status and duration instead.
+
+Prefer an identifier to personal data: a `user_id` rather than an email address. If a line must
+carry personal data, say so in your add-on's documentation, so whoever turns its level up knows.
+Redact at the call site; nothing downstream can reliably tell a token from an ID.
+
+Before adding a log call, ask:
+
+1. What should a reader do on seeing it? That is its level.
+2. Does any value in it appear on the list above? Log its ID instead.
+3. Can it fire on every page view? Then it is `debug` at most, and probably a counter instead.
+4. Is the message a fixed string, with everything that varies in the context? See *Events*.
+5. Is an exception passed once, as `exception`, where it is handled?
+6. If it carries personal data, is that written down?
 
 ## Events
 
