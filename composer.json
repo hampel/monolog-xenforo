@@ -7,7 +7,8 @@
 		"psr/log": "^1.1"
 	},
 	"require-dev": {
-		"hampel/xenforo-test-framework": "^5.5"
+		"hampel/xenforo-test-framework": "^5.5",
+		"phpunit/phpunit": "^12.0"
 	},
 	"autoload-dev": {
 		"psr-4": {
