@@ -1,1 +1,1 @@
-Store logs in a file. Enter a path relative to the internal_data directory, which must be writable by the server. To log outside internal_data, or in JSON, set it in config.php instead - a file set there overrides this option.
+Store logs in a file. Enter a path relative to the internal_data directory, which must be writable by the server. A log file anywhere else can only be set in config.php.

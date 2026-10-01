@@ -1,0 +1,1 @@
+Line writes one readable line per record. JSON writes one Monolog JSON record per line, adding the site name, the kind of request and a schema version, for shipping to a log collector.

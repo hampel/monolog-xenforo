@@ -52,8 +52,10 @@ class ConfigStackTest extends TestCase
 	public function test_a_configured_formatter_replaces_the_log_file_format()
 	{
 		$this->setConfig('monolog', [
-			'format' => 'json',
-			'formatter' => function () { return new LineFormatter("%channel%|%message%\n"); },
+			'file' => [
+				'format' => 'json',
+				'formatter' => function () { return new LineFormatter("%channel%|%message%\n"); },
+			],
 		]);
 
 		$this->app()['monolog']->channel('myaddon')->warning('custom');
@@ -100,7 +102,7 @@ class ConfigStackTest extends TestCase
 			'not callable' => ['handlers', 'not a function'],
 			'handler factory returns the wrong type' => ['handlers', function () { return new \stdClass(); }],
 			'processor factory returns something not callable' => ['processors', function () { return 'nope'; }],
-			'formatter factory returns the wrong type' => ['formatter', function () { return null; }],
+			'formatter factory returns the wrong type' => ['file.formatter', function () { return null; }],
 		];
 	}
 
@@ -111,13 +113,14 @@ class ConfigStackTest extends TestCase
 	#[\PHPUnit\Framework\Attributes\DataProvider('badEntries')]
 	public function test_a_bad_entry_is_skipped_and_reported($key, $entry)
 	{
-		$this->setConfig('monolog', [$key => $key === 'formatter' ? $entry : [$entry]]);
+		$this->setConfig('monolog', $key === 'file.formatter' ? ['file' => ['formatter' => $entry]] : [$key => [$entry]]);
 
 		$this->app()['monolog']->channel('myaddon')->warning('still logged');
 
 		$this->assertCount(1, $this->logLines());
 		$errors = array_values($this->getErrors());
 		$this->assertCount(1, $errors);
-		$this->assertStringContainsString("\$config['monolog']['{$key}']", $errors[0]['message']);
+		$where = "\$config['monolog']['" . str_replace('.', "']['", $key) . "']";
+		$this->assertStringContainsString($where, $errors[0]['message']);
 	}
 }

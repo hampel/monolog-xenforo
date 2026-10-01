@@ -1,10 +1,10 @@
 {
-    "edit_format": "textbox",
-    "edit_format_params": "",
+    "edit_format": "callback",
+    "edit_format_params": "Hampel\\Monolog\\Option\\EmailSubject::renderOption",
     "data_type": "string",
     "sub_options": [],
-    "validation_class": "",
-    "validation_method": "",
+    "validation_class": "Hampel\\Monolog\\Option\\EmailSubject",
+    "validation_method": "verifyOption",
     "advanced": false,
     "default_value": "Monolog [{board}]",
     "relations": {

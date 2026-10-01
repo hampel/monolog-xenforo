@@ -1,9 +1,13 @@
 <?php namespace Hampel\Monolog\Option;
 
+use Hampel\Monolog\Config;
 use Monolog\Logger;
-use XF\Option\AbstractOption;
+use XF\Entity\Option;
 
-class FileMinimumLogLevel extends AbstractOption
+/**
+ * The lowest level written to the log file - `file.level` in config.php can set it.
+ */
+class FileMinimumLogLevel extends AbstractConfigurableOption
 {
 	/**
 	 * The PSR-3 levels by Monolog's numeric value, which is what the level options store.
@@ -22,37 +26,34 @@ class FileMinimumLogLevel extends AbstractOption
 		600 => 'Emergency',
 	];
 
-	/**
-	 * Renders the select for both level options, file and email.
-	 */
-	public static function renderSelect(\XF\Entity\Option $option, array $htmlParams)
-	{
-		$value = $option['option_value'];
-		if (empty($value))
-		{
-			$value = $option['default_value'];
-		}
-
-		$choices = [];
-		foreach (self::LEVELS AS $level => $label)
-		{
-			$choices[] = [
-				'_type' => 'option',
-				'label' => $label,
-				'value' => $level,
-			];
-		}
-
-		return self::getTemplater()->formSelectRow(
-			self::getControlOptions($option, $htmlParams, $value), $choices, self::getRowOptions($option, $htmlParams)
-		);
-	}
+	protected const SECTION = 'file';
+	protected const OPTION = 'monologFileMinimumLogLevel';
+	protected const DEFAULT_LEVEL = Logger::WARNING;
 
 	public static function get()
 	{
-		$logLevel = \XF::options()->monologFileMinimumLogLevel;
-		if (empty($logLevel)) $logLevel = Logger::WARNING;
+		$level = Config::level(static::SECTION);
+		if ($level !== null)
+		{
+			return $level;
+		}
 
-		return $logLevel;
+		$level = \XF::options()->{static::OPTION};
+
+		return empty($level) ? static::DEFAULT_LEVEL : $level;
+	}
+
+	public static function lockedValue(): ?string
+	{
+		$level = Config::level(static::SECTION);
+
+		return $level === null ? null : self::LEVELS[$level];
+	}
+
+	protected static function renderControl(Option $option, array $htmlParams): string
+	{
+		$value = $option->option_value ?: $option->default_value;
+
+		return static::renderSelect($option, $htmlParams, self::LEVELS, $value);
 	}
 }

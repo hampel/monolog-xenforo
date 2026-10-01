@@ -1,0 +1,1 @@
+The name JSON log records carry in extra.site, so a log store holding several forums can tell them apart. Leave empty to use the host of the board URL.

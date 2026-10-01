@@ -1,18 +1,13 @@
 <?php namespace Hampel\Monolog\Option;
 
 use Monolog\Logger;
-use XF\Option\AbstractOption;
 
 /**
- * Rendered by FileMinimumLogLevel::renderSelect(), which both level options share.
+ * The lowest level emailed - `email.level` in config.php can set it.
  */
-class EmailMinimumLogLevel extends AbstractOption
+class EmailMinimumLogLevel extends FileMinimumLogLevel
 {
-	public static function get()
-	{
-		$logLevel = \XF::options()->monologEmailMinimumLogLevel;
-		if (empty($logLevel)) $logLevel = Logger::ERROR;
-
-		return $logLevel;
-	}
+	protected const SECTION = 'email';
+	protected const OPTION = 'monologEmailMinimumLogLevel';
+	protected const DEFAULT_LEVEL = Logger::ERROR;
 }

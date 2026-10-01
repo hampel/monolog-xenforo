@@ -1,1 +1,1 @@
-The log file must be a path inside the internal_data directory. To log anywhere else, set the file in config.php.
+The log file must be a path inside the internal_data directory. A log file anywhere else can only be set in config.php.

@@ -18,7 +18,9 @@ namespace XF;
  * @property string|null $monologEmailSubject Email Subject
  * @property non-negative-int|null $monologFileMinimumLogLevel Log File Minimum Log Level
  * @property array{enabled: string, logfile: string}|null $monologLogFile Send Logs to File
+ * @property string|null $monologLogFormat Log File Format
  * @property array{enabled: string, email: string}|null $monologSendEmail Send Logs via Email
+ * @property string|null $monologSite Site Name
  */
 class Options
 {

@@ -49,7 +49,8 @@ The moving parts, and where each is wired:
 | `Handler/XenForoMailHandler.php` | inside that `LazyHandler` | sends records through XF's own `Mail`, on 2.2 and 2.3 alike |
 | `Processor/VisitorProcessor.php` | `MonologApi`, behind `monologAddVisitorExtra` | adds `extra.visitor` |
 | `Processor/ContextProcessor.php` | `MonologApi`, when the format is `json` | adds `extra.schema`, `extra.site` and `extra.app` |
-| `Option/*.php` | option `edit_format` and callbacks in `_output/options/` | static getters that supply the default when unset |
+| `Option/*.php` | the `callback` edit format and validation of every option in `_output/options/` | getters that read `config.php` first, then the option, then a default; and each option's renderer |
+| `Config.php` | nothing — static calls | reads `$config['monolog']`, including level names |
 | `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page |
 | `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine that page runs |
 
@@ -79,13 +80,13 @@ written twice. Anything that needs to change the stack changes the list it is bu
 
 The stack, from `MonologApi::initialize()`:
 
-- **file** — a `StreamHandler` at `$config['monolog']['file']` if set, otherwise
-  `internalDataPath` plus the `monologLogFile` name; level from `monologFileMinimumLogLevel`
-  (default `WARNING`). Formatted as JSON when `$config['monolog']['format']` is `json`, otherwise
-  a line with the date forced back to Monolog 1's `Y-m-d H:i:s`, because existing parsers expect
-  it;
+- **file** — a `StreamHandler` at `file.path` if `config.php` sets one, otherwise
+  `internalDataPath` plus the `monologLogFile` name; level from `FileMinimumLogLevel::get()`
+  (default `WARNING`). Formatted by `file.formatter` if set, as JSON when `LogFormat::get()` is
+  `json`, otherwise as a line with the date forced back to Monolog 1's `Y-m-d H:i:s`, because
+  existing parsers expect it;
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
-  `monologSendEmail` is enabled. Level from `monologEmailMinimumLogLevel` (default `ERROR`); the
+  `SendEmail::isEnabled()`. Level from `EmailMinimumLogLevel::get()` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
 - **processors** — `ContextProcessor` when the format is `json`, then Monolog's `WebProcessor`
   and `VisitorProcessor`, each behind its option.
@@ -97,15 +98,31 @@ implied, and adding them would change every line existing readers parse. `extra.
 closure, and only if something already built the manager. **Bump `ContextProcessor::SCHEMA` when
 the meaning of an existing field changes**; adding a field does not need it.
 
-**`$config['monolog']` in `config.php` wins over the options.** `MonologApi::config()` reads it;
-`file` (absolute, relative to `internal_data`, or `false`) overrides the `monologLogFile` option,
-`format` picks `line` or `json`, and `site` names the forum in JSON records. `handlers`,
-`processors` and `formatter` add to the stack, as **callables** — `config.php` is read before
+**`$config['monolog']` in `config.php` wins over every option, one key per option.** The
+layout is documented on `Config` and in the README: a `file` section (`path`, `format`, `level`,
+`formatter`), an `email` section (`to`, `level`, `subject`, `dedup`), and `visitor`, `web` and
+`site`, plus `handlers` and `processors`. **Read settings through the option classes' getters,
+never through `\XF::options()` directly** — the getter is what puts `config.php` first, so a
+direct read silently ignores the server owner. A value the getter cannot use is ignored, and the
+option decides.
+
+**An option `config.php` sets is locked on the options page, and the lock is a correctness
+measure, not a nicety.** `OptionController::actionUpdate()` saves `false` for every option on the
+page's `options_listed` list whose input sent nothing, so a merely disabled field would wipe the
+stored value on every save. Every option therefore renders through
+`AbstractConfigurableOption::renderOption()`: when locked it shows the value in force and *Set in
+config.php*, with no input and **without `listedHtml`**, so the option is never listed; and its
+`verifyOption()` keeps the stored value for a save that arrives some other way. `OptionsPageTest`
+has a test for each layer and a save through the real controller that needs both removed to fail.
+A new option must extend `AbstractConfigurableOption` and use the `callback` edit format, or it
+reopens the trap.
+
+`handlers`, `processors` and `file.formatter` are **callables** — `config.php` is read before
 `XF\App::setup()` registers this add-on's autoloader, so an object built there is a "class not
 found" fatal, which is also why `$config['fsAdapters']` takes callables. `MonologApi::fromConfig()`
 calls each one when the logger is built and skips, with `\XF::logError()`, any entry that is not
 callable or builds the wrong type, so a `config.php` mistake cannot take down every page that
-logs. The README documents all of it for users.
+logs.
 
 **The log file option must stay inside `internal_data`.** Any admin with option permission can
 set it, and the file receives log lines that can carry user-supplied text — so a path into the

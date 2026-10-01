@@ -24,45 +24,65 @@ your inbox depends on the options below.
 
 ## Configuration
 
-The options, under *Options > Monolog*:
+Everything can be set under *Options > Monolog*, or in `src/config.php`. **A setting in
+`config.php` wins**: the options page then shows its value, marked *Set in config.php*, with no
+field to change it.
+
+### The options
 
 - **Send Logs to File** — on by default, writing `internal_data/monolog.log`. The path must stay
-  inside `internal_data`; see below for anywhere else.
+  inside `internal_data`; anywhere else needs `config.php`.
 - **Log File Minimum Log Level** — the lowest level written to the file. Default: Warning.
+- **Log File Format** — *Line*, one readable line per record, or *JSON*, one Monolog JSON record
+  per line with stack traces for exceptions, for a log collector. JSON records also carry
+  `extra.site`, `extra.app` (`web`, `admin`, `api`, `cli` or `job`) and `extra.schema`, so a store
+  holding several forums can tell them apart.
 - **Send Logs via Email** — off by default. Sends to the address given, or to the board's contact
   address if none is.
-- **Email Minimum Log Level** — the lowest level emailed. Default: Error.
 - **Email Subject** — `{board}` is replaced with the board title.
+- **Email Minimum Log Level** — the lowest level emailed. Default: Error.
 - **Email Deduplication Timeout** — a message already emailed within this many seconds is not sent
   again. Each request's messages arrive as one email.
 - **Add Visitor Extra Data** — adds the user id and name to every message. On by default.
 - **Add Web Extra Data** — adds the URL, IP address, HTTP method, server name, referrer and user
   agent. Off by default.
+- **Site Name** — what JSON records carry in `extra.site`. Empty uses the board URL's host; set it
+  if that might change.
 
 ### Config.php
 
-A server owner can set the log file and its format in `src/config.php`. These override the
-options:
+Every option has a `config.php` equivalent. **Set only what you want to fix in place** — anything
+left out stays on the options page:
 
 ```php
 $config['monolog'] = [
-    'file' => '/var/log/xenforo/forum.log',   // absolute, relative to internal_data, or false
-    'format' => 'json',                        // 'line' (the default) or 'json'
-    'site' => 'myforum',                       // names this forum in JSON records
+    'file' => [                                 // false turns file logging off
+        'path' => '/var/log/xenforo/forum.log', // absolute, or relative to internal_data
+        'format' => 'json',                     // 'line' or 'json'
+        'level' => 'warning',                   // a level name, or Monolog's number for it
+    ],
+    'email' => [                                // false turns email off
+        'to' => 'admin@example.com',
+        'level' => 'error',
+        'subject' => 'Errors on {board}',
+        'dedup' => 300,                         // seconds
+    ],
+    'visitor' => true,
+    'web' => false,
+    'site' => 'myforum',
 ];
 ```
 
-- **`file`** wins over *Send Logs to File*. An absolute path or a stream such as `php://stderr` is
-  used as given; a relative path is inside `internal_data`; `false` turns file logging off.
-- **`format`** set to `json` writes one Monolog JSON record per line, with stack traces for
-  exceptions, ready for a log collector. Each record also carries `extra.site`, `extra.app`
-  (`web`, `admin`, `api`, `cli` or `job`) and `extra.schema`, so a store holding several forums
-  can tell them apart.
-- **`site`** is what `extra.site` says. It defaults to the board URL's host; set it if that might
-  change.
-
-**A log file outside `internal_data` can only be set here**, never in the options. Any admin who
-can edit options can change those, and a log file receives text your members can influence.
+- **`file.path` or `email.to` also switches that output on**, and `false` in place of the section
+  switches it off. `'file' => ['level' => 'error']` alone fixes the level and leaves the rest to
+  the options page.
+- **Levels** are `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert` and
+  `emergency`, in any case.
+- **A log file outside `internal_data`, or a stream such as `php://stderr`, can only be set here.**
+  Any admin who can edit options can change those, and a log file receives text your members can
+  influence.
+- **A value that cannot be used** — an unknown level or format — is ignored, and the option
+  decides.
 
 #### Handlers, processors and the formatter
 
@@ -71,6 +91,11 @@ collector, or format the log file differently:
 
 ```php
 $config['monolog'] = [
+    'file' => [
+        'formatter' => function () {
+            return new \Monolog\Formatter\LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n");
+        },
+    ],
     'handlers' => [
         function () {
             return new \Monolog\Handler\SyslogHandler('forum', LOG_USER, \Monolog\Logger::ERROR);
@@ -79,15 +104,12 @@ $config['monolog'] = [
     'processors' => [
         function () { return new \Monolog\Processor\UidProcessor(); },
     ],
-    'formatter' => function () {
-        return new \Monolog\Formatter\LineFormatter("[%datetime%] %channel%.%level_name%: %message%\n");
-    },
 ];
 ```
 
 - **`handlers`** and **`processors`** are lists, added to the built-in file and email handlers and
   to the processors the options switch on.
-- **`formatter`** replaces the log file's formatter, in place of `format`.
+- **`file.formatter`** replaces the log file's formatter, in place of `file.format`.
 
 **Each entry is a function that returns the object, not the object itself** — the same as
 XenForo's own `$config['fsAdapters']`. `config.php` is read before add-on classes can load, so

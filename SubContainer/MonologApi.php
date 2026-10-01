@@ -1,5 +1,6 @@
 <?php namespace Hampel\Monolog\SubContainer;
 
+use Hampel\Monolog\Config;
 use Hampel\Monolog\Handler\LazyHandler;
 use Hampel\Monolog\Handler\XenForoMailHandler;
 use Hampel\Monolog\Option\AddVisitorExtra;
@@ -9,7 +10,9 @@ use Hampel\Monolog\Option\EmailMinimumLogLevel;
 use Hampel\Monolog\Option\EmailSubject;
 use Hampel\Monolog\Option\FileMinimumLogLevel;
 use Hampel\Monolog\Option\LogFile;
+use Hampel\Monolog\Option\LogFormat;
 use Hampel\Monolog\Option\SendEmail;
+use Hampel\Monolog\Option\Site;
 use Hampel\Monolog\Processor\ContextProcessor;
 use Hampel\Monolog\Processor\VisitorProcessor;
 use Monolog\Formatter\FormatterInterface;
@@ -58,9 +61,10 @@ class MonologApi extends AbstractSubContainer
 
 		$container['formatter.file'] = function (Container $c)
 		{
-			if (isset($this->config()['formatter']))
+			$configured = Config::get('file', 'formatter');
+			if ($configured !== null)
 			{
-				$formatter = $this->fromConfig('formatter', $this->config()['formatter'], function ($built)
+				$formatter = $this->fromConfig('file.formatter', $configured, function ($built)
 				{
 					return $built instanceof FormatterInterface;
 				});
@@ -70,7 +74,7 @@ class MonologApi extends AbstractSubContainer
 				}
 			}
 
-			if (($this->config()['format'] ?? 'line') === 'json')
+			if (LogFormat::get() === 'json')
 			{
 				// one record per line, so line-oriented collectors can ship it; Monolog's own
 				// field names, so any tool can read it; and stack traces as a field
@@ -116,7 +120,7 @@ class MonologApi extends AbstractSubContainer
 		{
 			$handlers = array_values(array_filter([$c['handler.file'], $c['handler.email']]));
 
-			foreach ($this->config()['handlers'] ?? [] AS $factory)
+			foreach ((array) (Config::get('handlers') ?? []) AS $factory)
 			{
 				$handler = $this->fromConfig('handlers', $factory, function ($built)
 				{
@@ -136,12 +140,9 @@ class MonologApi extends AbstractSubContainer
 			$processors = [];
 
 			// for a log store holding several forums - so with the format meant for one
-			if (($this->config()['format'] ?? 'line') === 'json')
+			if (LogFormat::get() === 'json')
 			{
-				$config = $this->config();
-				$site = isset($config['site']) && is_string($config['site']) && $config['site'] !== ''
-					? $config['site']
-					: ContextProcessor::siteFromBoardUrl((string) \XF::options()->boardUrl);
+				$site = Site::get();
 
 				$processors[] = new ContextProcessor($site);
 			}
@@ -156,7 +157,7 @@ class MonologApi extends AbstractSubContainer
 				$processors[] = new VisitorProcessor();
 			}
 
-			foreach ($this->config()['processors'] ?? [] AS $factory)
+			foreach ((array) (Config::get('processors') ?? []) AS $factory)
 			{
 				$processor = $this->fromConfig('processors', $factory, 'is_callable');
 				if ($processor)
@@ -182,30 +183,6 @@ class MonologApi extends AbstractSubContainer
 	}
 
 	/**
-	 * `$config['monolog']` from config.php - the server owner's settings, which win over the
-	 * options. Recognised keys:
-	 *
-	 * - `file`: the log file. Absolute (or a stream such as `php://stderr`) is used as given;
-	 *   relative is inside internal_data; `false` turns file logging off. Unset, the
-	 *   `monologLogFile` option decides.
-	 * - `format`: `line` (the default) or `json`, one Monolog JSON record per line, with
-	 *   `extra.schema`, `extra.site` and `extra.app` added - see ContextProcessor.
-	 * - `site`: the name `extra.site` carries; defaults to the board URL's host.
-	 * - `handlers` and `processors`: lists of callables, each returning one handler or processor,
-	 *   added to the built-in stack.
-	 * - `formatter`: a callable returning the log file's formatter, in place of `format`.
-	 *
-	 * Callables rather than objects, because config.php is read before this add-on's classes can
-	 * load - see fromConfig().
-	 */
-	protected function config(): array
-	{
-		$config = $this->app->config('monolog');
-
-		return is_array($config) ? $config : [];
-	}
-
-	/**
 	 * Calls one factory from $config['monolog'] and checks what it built.
 	 *
 	 * config.php is read before add-on autoloaders are registered, so it can only hold callables -
@@ -218,7 +195,7 @@ class MonologApi extends AbstractSubContainer
 	 */
 	protected function fromConfig(string $key, $factory, callable $isValid)
 	{
-		$where = "\$config['monolog']['{$key}']";
+		$where = "\$config['monolog']['" . str_replace('.', "']['", $key) . "']";
 
 		if (!is_callable($factory))
 		{
@@ -242,26 +219,18 @@ class MonologApi extends AbstractSubContainer
 	 */
 	protected function logFile(): ?string
 	{
-		$config = $this->config();
-
-		if (array_key_exists('file', $config))
+		if (!LogFile::isEnabled())
 		{
-			$file = $config['file'];
-			if (!is_string($file) || $file === '')
-			{
-				return null;
-			}
-		}
-		else
-		{
-			$file = LogFile::getLogFile();
-			if ($file === '')
-			{
-				return null;
-			}
+			return null;
 		}
 
-		// absolute paths and stream wrappers come back unchanged
+		$file = Config::string('file', 'path') ?? LogFile::getLogFile();
+		if ($file === '')
+		{
+			return null;
+		}
+
+		// absolute paths and stream wrappers come back unchanged; only config.php can set those
 		return File::canonicalizePath($file, File::canonicalizePath($this->app->config('internalDataPath')));
 	}
 

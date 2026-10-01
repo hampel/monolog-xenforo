@@ -81,26 +81,6 @@ class OptionTest extends TestCase
 		$this->assertSame($fromMonolog, FileMinimumLogLevel::LEVELS);
 	}
 
-	public function test_the_level_select_offers_every_level()
-	{
-		$option = $this->app()->finder('XF:Option')->whereId('monologFileMinimumLogLevel')->fetchOne();
-
-		$html = FileMinimumLogLevel::renderSelect($option, [
-			'inputName' => 'options[monologFileMinimumLogLevel]',
-			'inputType' => 'select',
-			'listedHtml' => '',
-			'explainHtml' => '',
-			'hintHtml' => '',
-			'editLink' => '',
-			'title' => 'Level',
-		]);
-
-		foreach (FileMinimumLogLevel::LEVELS AS $level => $label)
-		{
-			$this->assertStringContainsString("value=\"{$level}\"", (string) $html);
-		}
-	}
-
 	public static function unsafeLogFiles(): array
 	{
 		return [

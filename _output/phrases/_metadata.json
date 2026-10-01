@@ -17,11 +17,29 @@
         "version_string": "2.0.0",
         "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
     },
+    "monolog_format_json.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "0ecd11c1d7a287401d148a23bbd7a2f8"
+    },
+    "monolog_format_line.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "4803e6b9e63dabf04de980788d6a13c4"
+    },
     "monolog_log_file_must_be_inside_internal_data.txt": {
         "global_cache": false,
-        "version_id": 5000011,
-        "version_string": "5.0.0a1",
-        "hash": "3a0271e50cfb36d1d666c231dfa4a6d4"
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "f35b90a0a63f2b94bd41ecb1f82fe085"
+    },
+    "monolog_set_in_config_php.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "1f521e695216f42c4d469d39e6f0daf7"
     },
     "monolog_test.txt": {
         "global_cache": false,
@@ -95,11 +113,23 @@
         "version_string": "2.0.0",
         "hash": "4bf2f0af2e40060db1666e3d23cd3565"
     },
+    "option.monologLogFormat.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "73cc9ed0a811e609b2d16136205729c5"
+    },
     "option.monologSendEmail.txt": {
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "86250c63885f24ad76cbec3c22fa2307"
+    },
+    "option.monologSite.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "668445f09da337d276dc852bb6a0dbb3"
     },
     "option_explain.monologAddVisitorExtra.txt": {
         "global_cache": false,
@@ -139,15 +169,27 @@
     },
     "option_explain.monologLogFile.txt": {
         "global_cache": false,
-        "version_id": 5000011,
-        "version_string": "5.0.0a1",
-        "hash": "bff0262b0f43ced57249807ec608cba0"
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "8b88570a2196b3ed6015bb2888c42aec"
+    },
+    "option_explain.monologLogFormat.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "a436373cb2a10c8c1c837bbe21fc4f8a"
     },
     "option_explain.monologSendEmail.txt": {
         "global_cache": false,
         "version_id": 2,
         "version_string": "2.0.0",
         "hash": "f29d53dd4212127c26363fc575e4c34a"
+    },
+    "option_explain.monologSite.txt": {
+        "global_cache": false,
+        "version_id": 5000033,
+        "version_string": "5.0.0b3",
+        "hash": "f0c3890177c5bb25bf0d1bde3dc2cd74"
     },
     "option_group.monolog.txt": {
         "global_cache": false,

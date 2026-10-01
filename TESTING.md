@@ -27,7 +27,8 @@ needs a person.
 
 - Admin navigation: *Test Monolog* under *Checks and tests*, and its template
   `monolog_tools_test_monolog`.
-- Options: eight, in the `monolog` group. The log file option validates on save.
+- Options: ten, in the `monolog` group, each rendered by its own callback so `config.php` can lock
+  it.
 - No template modifications, crons, routes, permissions or schema changes.
 
 ## Fragile points
@@ -40,6 +41,8 @@ needs a person.
 - **A fresh install stores on/off options as the strings `"1"` and `"0"`**, until an admin saves
   the options page. An `isEnabled()` that tests `!== false` treats `"0"` as on; 4.x shipped exactly
   that, and emailed errors from every fresh install.
+- **XenForo saves `false` for every option the page listed but got no input for.** A locked option
+  must stay off that list and keep its value in `verifyOption()`; `OptionsPageTest` guards both.
 - **Every `Monolog\` and `Psr\Log\` class may come from XenForo, not from this add-on.** XenForo
   2.4 bundles Monolog 3 and its class loader is consulted first. A handler or processor with a
   typed record parameter is a fatal error on one version or the other.
@@ -80,6 +83,13 @@ What the suite covers:
   processor.
 - **`tests/Feature/ConfigTest.php`** — `$config['monolog']`: an absolute, relative or disabled
   file overriding the option, and the JSON format, one record per line with stack traces.
+- **`tests/Unit/ConfigReaderTest.php`** — reading `$config['monolog']`: levels by name or number,
+  and what turns the `file` and `email` sections on, off, or leaves them to the options.
+- **`tests/Feature/ConfigPrecedenceTest.php`** — every setting: `config.php` wins over the option,
+  the option decides without it, and an unusable value is ignored.
+- **`tests/Feature/OptionsPageTest.php`** — the real options page: every control rendered when
+  nothing is locked; a locked option shown with its value, no input and off the save list; and a
+  save through XenForo's own controller leaving a locked option's stored value untouched.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.

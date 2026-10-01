@@ -27,7 +27,7 @@ class ConfigTest extends TestCase
 
 	public function test_a_configured_absolute_file_is_used_as_given()
 	{
-		$this->setConfig('monolog', ['file' => $this->internalData . '/absolute/app.log']);
+		$this->setConfig('monolog', ['file' => ['path' => $this->internalData . '/absolute/app.log']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('to an absolute path');
 
@@ -37,7 +37,7 @@ class ConfigTest extends TestCase
 
 	public function test_a_configured_relative_file_is_inside_internal_data()
 	{
-		$this->setConfig('monolog', ['file' => 'logs/app.log']);
+		$this->setConfig('monolog', ['file' => ['path' => 'logs/app.log']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('relative');
 
@@ -47,7 +47,7 @@ class ConfigTest extends TestCase
 	public function test_the_configured_file_wins_over_a_disabled_option()
 	{
 		$this->setOption('monologLogFile', ['enabled' => false, 'logfile' => 'monolog.log']);
-		$this->setConfig('monolog', ['file' => 'app.log']);
+		$this->setConfig('monolog', ['file' => ['path' => 'app.log']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('config wins');
 
@@ -65,7 +65,7 @@ class ConfigTest extends TestCase
 
 	public function test_json_format_writes_one_monolog_record_per_line()
 	{
-		$this->setConfig('monolog', ['format' => 'json']);
+		$this->setConfig('monolog', ['file' => ['format' => 'json']]);
 		$this->setOption('monologAddVisitorExtra', true);
 
 		$channel = $this->app()['monolog']->channel('myaddon');
@@ -88,7 +88,7 @@ class ConfigTest extends TestCase
 
 	public function test_an_exception_in_json_carries_its_stack_trace()
 	{
-		$this->setConfig('monolog', ['format' => 'json']);
+		$this->setConfig('monolog', ['file' => ['format' => 'json']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('failed', ['exception' => new \RuntimeException('boom')]);
 
@@ -98,7 +98,7 @@ class ConfigTest extends TestCase
 
 	public function test_an_unknown_format_falls_back_to_line()
 	{
-		$this->setConfig('monolog', ['format' => 'yaml']);
+		$this->setConfig('monolog', ['file' => ['format' => 'yaml']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('still written');
 

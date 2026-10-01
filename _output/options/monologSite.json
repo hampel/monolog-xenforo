@@ -1,0 +1,13 @@
+{
+    "edit_format": "callback",
+    "edit_format_params": "Hampel\\Monolog\\Option\\Site::renderOption",
+    "data_type": "string",
+    "sub_options": [],
+    "validation_class": "Hampel\\Monolog\\Option\\Site",
+    "validation_method": "verifyOption",
+    "advanced": false,
+    "default_value": "",
+    "relations": {
+        "monolog": 1003
+    }
+}

@@ -24,7 +24,7 @@ class ContextProcessorTest extends TestCase
 
 	public function test_json_records_carry_schema_site_and_app()
 	{
-		$this->setConfig('monolog', ['format' => 'json']);
+		$this->setConfig('monolog', ['file' => ['format' => 'json']]);
 
 		$this->app()['monolog']->channel('myaddon')->error('where was this');
 
@@ -36,7 +36,7 @@ class ContextProcessorTest extends TestCase
 
 	public function test_a_configured_site_wins_over_the_board_url()
 	{
-		$this->setConfig('monolog', ['format' => 'json', 'site' => 'examplecom']);
+		$this->setConfig('monolog', ['file' => ['format' => 'json'], 'site' => 'examplecom']);
 
 		$this->app()['monolog']->channel('myaddon')->error('renamed');
 

@@ -1,10 +1,10 @@
 {
     "edit_format": "callback",
-    "edit_format_params": "Hampel\\Monolog\\Option\\FileMinimumLogLevel::renderSelect",
+    "edit_format_params": "Hampel\\Monolog\\Option\\EmailMinimumLogLevel::renderOption",
     "data_type": "unsigned_integer",
     "sub_options": [],
-    "validation_class": "",
-    "validation_method": "",
+    "validation_class": "Hampel\\Monolog\\Option\\EmailMinimumLogLevel",
+    "validation_method": "verifyOption",
     "advanced": false,
     "default_value": "400",
     "relations": {

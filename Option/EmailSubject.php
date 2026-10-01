@@ -1,17 +1,32 @@
 <?php namespace Hampel\Monolog\Option;
 
-use XF\Option\AbstractOption;
+use Hampel\Monolog\Config;
+use XF\Entity\Option;
 
-class EmailSubject extends AbstractOption
+/**
+ * The email subject, with `{board}` replaced by the board title - `email.subject` in config.php
+ * can set it.
+ */
+class EmailSubject extends AbstractConfigurableOption
 {
 	public static function get()
 	{
-		$subject = \XF::options()->monologEmailSubject;
+		$subject = Config::string('email', 'subject') ?? \XF::options()->monologEmailSubject;
 		if (empty($subject)) return "Monolog";
 
 		$tokens = [
 			'{board}' => \XF::options()->boardTitle,
 		];
 		return strtr($subject, $tokens);
+	}
+
+	public static function lockedValue(): ?string
+	{
+		return Config::string('email', 'subject');
+	}
+
+	protected static function renderControl(Option $option, array $htmlParams): string
+	{
+		return static::renderTextBox($option, $htmlParams);
 	}
 }
