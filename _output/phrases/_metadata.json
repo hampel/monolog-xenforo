@@ -17,23 +17,11 @@
         "version_string": "2.0.0",
         "hash": "fe8ce1055fc5bc88118a3a3bfbc5196d"
     },
-    "monolog_log_could_not_be_processed.txt": {
-        "global_cache": false,
-        "version_id": 2,
-        "version_string": "2.0.0",
-        "hash": "585eb1061415bb18d7f40cfda82061fa"
-    },
     "monolog_log_file_must_be_inside_internal_data.txt": {
         "global_cache": false,
         "version_id": 5000011,
         "version_string": "5.0.0a1",
         "hash": "3a0271e50cfb36d1d666c231dfa4a6d4"
-    },
-    "monolog_log_successfully_processed.txt": {
-        "global_cache": false,
-        "version_id": 2,
-        "version_string": "2.0.0",
-        "hash": "6b7e76a3253d913174290c6418d4a899"
     },
     "monolog_test.txt": {
         "global_cache": false,
