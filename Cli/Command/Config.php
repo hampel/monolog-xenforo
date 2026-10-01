@@ -59,6 +59,7 @@ class Config extends Command
 		$this->detail('format', LogFormat::get() . $this->source(LogFormat::class));
 		$this->detail('level', $this->level(FileMinimumLogLevel::get()) . $this->source(FileMinimumLogLevel::class));
 		$this->detail('formatter', MonologConfig::get('file', 'formatter') !== null ? 'custom, from config.php' : '');
+		$this->detail('channels', $this->channels('file'));
 
 		$this->heading('Email');
 		$this->detail('enabled', $this->yesNo(SendEmail::isEnabled()) . $this->source(SendEmail::class));
@@ -77,6 +78,7 @@ class Config extends Command
 		$this->detail('level', $this->level(EmailMinimumLogLevel::get()) . $this->source(EmailMinimumLogLevel::class));
 		$this->detail('subject', EmailSubject::get() . $this->source(EmailSubject::class));
 		$this->detail('deduplication', EmailDeduplicationTimeout::get() . ' seconds' . $this->source(EmailDeduplicationTimeout::class));
+		$this->detail('channels', $this->channels('email'));
 
 		$this->heading('Records');
 		$this->detail('request id', $this->yesNo(LogFormat::get() === 'json' || AddRequestId::get())
@@ -124,6 +126,20 @@ class Config extends Command
 	private function level(int $level): string
 	{
 		return FileMinimumLogLevel::LEVELS[$level] ?? (string) $level;
+	}
+
+	/**
+	 * The section's per-channel levels from config.php, as "myaddon Debug, other Error".
+	 */
+	private function channels(string $section): string
+	{
+		$channels = [];
+		foreach (MonologConfig::channelLevels($section) AS $channel => $level)
+		{
+			$channels[] = "{$channel} " . $this->level($level);
+		}
+
+		return $channels ? implode(', ', $channels) . self::FROM_CONFIG : '';
 	}
 
 	private function yesNo(bool $value): string

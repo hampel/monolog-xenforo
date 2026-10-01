@@ -1,6 +1,7 @@
 <?php namespace Hampel\Monolog\SubContainer;
 
 use Hampel\Monolog\Config;
+use Hampel\Monolog\Handler\ChannelLevelHandler;
 use Hampel\Monolog\Handler\LazyHandler;
 use Hampel\Monolog\Handler\XenForoMailHandler;
 use Hampel\Monolog\Option\AddRequestId;
@@ -55,10 +56,13 @@ class MonologApi extends AbstractSubContainer
 				return null;
 			}
 
-			$handler = new StreamHandler($file, FileMinimumLogLevel::get());
-			$handler->setFormatter($c['formatter.file']);
+			return $this->byChannel('file', FileMinimumLogLevel::get(), function (int $level) use ($c, $file)
+			{
+				$handler = new StreamHandler($file, $level);
+				$handler->setFormatter($c['formatter.file']);
 
-			return $handler;
+				return $handler;
+			});
 		};
 
 		$container['formatter.file'] = function (Container $c)
@@ -95,27 +99,10 @@ class MonologApi extends AbstractSubContainer
 				return null;
 			}
 
-			$level = EmailMinimumLogLevel::get();
-
-			// built on the first record at $level, never when a channel is created - see LazyHandler
-			return new LazyHandler(function () use ($level)
+			return $this->byChannel('email', EmailMinimumLogLevel::get(), function (int $level)
 			{
-				$handler = new XenForoMailHandler(
-					$this->app->mailer(),
-					SendEmail::getAddress(),
-					EmailSubject::get(),
-					$level
-				);
-
-				// buffers the request's records into one email, sent at shutdown, and skips any
-				// already sent within the timeout
-				return new DeduplicationHandler(
-					$handler,
-					File::getTempDir() . '/monolog-dedup-email.log',
-					$level,
-					EmailDeduplicationTimeout::get()
-				);
-			}, $level);
+				return $this->emailHandler($level);
+			});
 		};
 
 		$container['handlers'] = function (Container $c)
@@ -188,6 +175,50 @@ class MonologApi extends AbstractSubContainer
 
 			return new Logger('xenforo', $handlers, $processors);
 		};
+	}
+
+	/**
+	 * Email, built on the first record at $level, never when a channel is created - see LazyHandler.
+	 */
+	private function emailHandler(int $level): HandlerInterface
+	{
+		return new LazyHandler(function () use ($level)
+		{
+			$handler = new XenForoMailHandler(
+				$this->app->mailer(),
+				SendEmail::getAddress(),
+				EmailSubject::get(),
+				$level
+			);
+
+			// buffers the request's records into one email, sent at shutdown, and skips any
+			// already sent within the timeout
+			return new DeduplicationHandler(
+				$handler,
+				File::getTempDir() . '/monolog-dedup-email.log',
+				$level,
+				EmailDeduplicationTimeout::get()
+			);
+		}, $level);
+	}
+
+	/**
+	 * One output's handler, built at its level - or, when config.php sets levels for some channels,
+	 * built at the lowest of them behind a ChannelLevelHandler that applies each channel's own.
+	 *
+	 * @param callable(int): ?HandlerInterface $build
+	 */
+	private function byChannel(string $section, int $level, callable $build): ?HandlerInterface
+	{
+		$channels = Config::channelLevels($section);
+		if (!$channels)
+		{
+			return $build($level);
+		}
+
+		$handler = $build(min(array_merge([$level], array_values($channels))));
+
+		return $handler ? new ChannelLevelHandler($handler, $level, $channels) : null;
 	}
 
 	/**

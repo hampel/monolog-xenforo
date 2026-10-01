@@ -98,15 +98,18 @@ What the suite covers:
   own controller leaving a locked option's stored value untouched.
 - **`tests/Feature/CommandsTest.php`** — `monolog:config` and `monolog:validate`: both load as
   valid XenForo commands; config shows each source and writes nothing; `--unattended` sends
-  nothing; an email level below Warning warns, under `--unattended` too; the sweep's file count
-  follows the level, counting only its own records when another
-  record quotes one (a mail transport logging what it sent); a wrong count prints the lines; and an
-  unwritable path, a bad factory and a probe that throws each exit 1 without ending the run.
+  nothing; an email level below Warning warns, under `--unattended` too, as does an email channel
+  below it or a channel level that is not a level; the sweep's file count follows its own channel's
+  level, counting only its own records when another record quotes one (a mail transport logging
+  what it sent); a wrong count prints the lines; and an unwritable path, a bad factory and a probe
+  that throws each exit 1 without ending the run.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.
 - **`tests/Feature/ContextProcessorTest.php`** — `extra.schema`, `site` and `app` on JSON records
   only, the configured site, each app type, and a running job.
+- **`tests/Feature/ChannelLevelsTest.php`** — a channel raised or lowered from its section's level,
+  every other channel left at it, a bad entry ignored, and email taking its own `channels`.
 - **`tests/Feature/RequestIdTest.php`** — one id per request, the web server's where it is shaped
   like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared

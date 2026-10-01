@@ -88,6 +88,12 @@ The stack, from `MonologApi::initialize()`:
 - **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
   `SendEmail::isEnabled()`. Level from `EmailMinimumLogLevel::get()` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
+- **per-channel levels** — when a section's `channels` in `config.php` lists any, its handler is
+  built at the lowest of them and wrapped in a `ChannelLevelHandler`, which decides each record by
+  its own channel. **Its `isHandling()` must pass the lowest level when the record has no
+  channel**: Monolog 2's `Logger` asks with `['level' => $level]` alone, so the section level there
+  drops a raised channel's records before `handle()` sees whose they are. Monolog 3 passes the
+  whole record, so only the Monolog 2 suite catches it. Without `channels` nothing is wrapped;
 - **processors** — `ContextProcessor` when the format is `json`; `RequestIdProcessor` when the
   format is `json` or *Add Request ID* is on; then Monolog's `WebProcessor` and `VisitorProcessor`,
   each behind its option. **A server-supplied request id is trusted only if it is shaped like an

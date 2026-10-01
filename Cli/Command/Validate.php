@@ -130,6 +130,24 @@ class Validate extends Command
 			}
 		}
 
+		foreach (['file', 'email'] AS $section)
+		{
+			$channels = MonologConfig::get($section, 'channels');
+			if ($channels !== null && !is_array($channels))
+			{
+				$problems++;
+				$this->checkWarn("{$section}.channels", 'is not an array of channel => level - ignored');
+				continue;
+			}
+
+			foreach (MonologConfig::invalidChannelLevels($section) AS $channel => $value)
+			{
+				$problems++;
+				$this->checkWarn("{$section}.channels", var_export($channel, true) . ' => ' . var_export($value, true)
+					. " is not a level - that channel takes the {$section} level");
+			}
+		}
+
 		$format = MonologConfig::get('file', 'format');
 		if ($format !== null && !in_array($format, LogFormat::FORMATS, true))
 		{
@@ -170,6 +188,15 @@ class Validate extends Command
 		$level < 300
 			? $this->checkWarn('email level', "{$name} - every record at {$name} or above is emailed; Error is the usual level for email")
 			: $this->checkOk('email level', "{$name}, to " . SendEmail::getAddress());
+
+		foreach (MonologConfig::channelLevels('email') AS $channel => $channelLevel)
+		{
+			if ($channelLevel < 300)
+			{
+				$at = FileMinimumLogLevel::LEVELS[$channelLevel];
+				$this->checkWarn('email level', "{$channel} at {$at} - every {$channel} record at {$at} or above is emailed");
+			}
+		}
 	}
 
 	/**
@@ -304,7 +331,7 @@ class Validate extends Command
 		}
 		else
 		{
-			$fileLevel = FileMinimumLogLevel::get();
+			$fileLevel = MonologConfig::levelFor('file', 'monolog-validate', FileMinimumLogLevel::get());
 			$expected = $this->atOrAbove($fileLevel);
 			[$own, $others] = is_file($path) ? $this->sweepLines($path, $offset, $run) : [[], []];
 			$written = count($own);
@@ -338,7 +365,7 @@ class Validate extends Command
 
 		if (SendEmail::isEnabled())
 		{
-			$emailLevel = EmailMinimumLogLevel::get();
+			$emailLevel = MonologConfig::levelFor('email', 'monolog-validate', EmailMinimumLogLevel::get());
 			$count = $this->atOrAbove($emailLevel);
 			$this->checkOk('email', "{$count} record(s) at " . (FileMinimumLogLevel::LEVELS[$emailLevel] ?? $emailLevel)
 				. ' or above sent as one email to ' . SendEmail::getAddress() . ' - only its arrival proves delivery');

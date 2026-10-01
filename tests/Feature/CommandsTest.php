@@ -229,6 +229,55 @@ class CommandsTest extends TestCase
 		$this->assertStringContainsString('Validated, with warnings', $output);
 	}
 
+	public function test_config_lists_each_sections_channel_levels()
+	{
+		$this->setConfig('monolog', ['file' => ['channels' => ['myaddon' => 'debug', 'noisy' => 'error']]]);
+
+		[, $output] = $this->runCommand(new Config());
+
+		$this->assertMatchesRegularExpression('/channels \.+ myaddon Debug, noisy Error \(config\.php\)/', $output);
+	}
+
+	public function test_a_channel_level_that_is_not_a_level_warns()
+	{
+		$this->setConfig('monolog', ['file' => ['channels' => ['myaddon' => 'loud']]]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertStringContainsString("[warn] file.channels", $output);
+		$this->assertStringContainsString("'myaddon' => 'loud' is not a level", $output);
+	}
+
+	public function test_an_email_channel_below_warning_warns()
+	{
+		$this->setOptions([
+			'monologSendEmail' => ['enabled' => true, 'email' => 'logs@example.com'],
+			'monologEmailMinimumLogLevel' => 400,
+		]);
+		$this->setConfig('monolog', ['email' => ['channels' => ['myaddon' => 'debug']]]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertMatchesRegularExpression('/\[ ok \] email level +Error/', $output);
+		$this->assertMatchesRegularExpression('/\[warn\] email level +myaddon at Debug/', $output);
+	}
+
+	/**
+	 * The sweep writes to its own channel, so it counts against that channel's level.
+	 */
+	public function test_the_sweep_counts_against_its_own_channels_level()
+	{
+		$this->setOption('monologFileMinimumLogLevel', 300); // Warning
+		$this->setConfig('monolog', ['file' => ['channels' => ['monolog-validate' => 'debug']]]);
+
+		[$code, $output] = $this->runCommand(new Validate());
+
+		$this->assertSame(0, $code);
+		$this->assertStringContainsString('8 of 8 written, as expected at Debug', $output);
+	}
+
 	public function test_a_factory_that_builds_the_wrong_thing_fails()
 	{
 		$this->setConfig('monolog', ['handlers' => [

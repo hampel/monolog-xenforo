@@ -68,12 +68,14 @@ $config['monolog'] = [
         'path' => '/var/log/xenforo/forum.log', // absolute, or relative to internal_data
         'format' => 'json',                     // 'line' or 'json'
         'level' => 'warning',                   // a level name, or Monolog's number for it
+        'channels' => ['myaddon' => 'debug'],   // a level for one channel, not every channel
     ],
     'email' => [                                // false turns email off
         'to' => 'admin@example.com',
         'level' => 'error',
         'subject' => 'Errors on {board}',
         'dedup' => 300,                         // seconds
+        'channels' => ['myaddon' => 'warning'],
     ],
     'request_id' => true,
     'visitor' => true,
@@ -88,6 +90,9 @@ $config['monolog'] = [
   options page.
 - **Levels** are `debug`, `info`, `notice`, `warning`, `error`, `critical`, `alert` and
   `emergency`, in any case.
+- **`channels` sets a level for one channel** — by convention, one add-on — raising or lowering it
+  from the section's level. Every other channel keeps the section's level. It is only here, not on
+  the options page: it is for a trial, and is best left in a file someone has to edit to undo.
 - **A log file outside `internal_data`, or a stream such as `php://stderr`, can only be set here.**
   Any admin who can edit options can change those, and a log file receives text your members can
   influence.
@@ -139,9 +144,16 @@ way on both; a processor of your own should leave its record parameter untyped.
 - **Debug is for tracing one problem, briefly.** Turn it on, reproduce the problem, turn it back
   off.
 
-**The levels apply to every add-on that logs through this one, not only the one you are
-investigating.** At Debug, some add-ons record personal data or the content of the emails they
-send. Check what lands in the log file before leaving Debug on, and delete the file when the
+**The levels on the options page apply to every add-on that logs through this one, not only the
+one you are investigating.** At Debug, some add-ons record personal data or the content of the
+emails they send. To trace one add-on, raise only its channel in `config.php`, and leave the rest
+where they were:
+
+```php
+$config['monolog'] = ['file' => ['channels' => ['myaddon' => 'debug']]];
+```
+
+Check what lands in the log file before leaving Debug on, and delete the file when the
 investigation is over.
 
 ## Command line

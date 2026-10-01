@@ -11,12 +11,14 @@ use Hampel\Monolog\Option\FileMinimumLogLevel;
  *             'format' => 'json',         // 'line' or 'json'
  *             'level' => 'warning',       // a level name or number
  *             'formatter' => callable,    // returns the file's formatter, in place of format
+ *             'channels' => ['myaddon' => 'debug'],   // a level for one channel, not all of them
  *         ],
  *         'email' => [                // or false to turn email off
  *             'to' => 'admin@example.com',
  *             'level' => 'error',
  *             'subject' => 'Errors on {board}',
  *             'dedup' => 300,
+ *             'channels' => ['myaddon' => 'warning'],
  *         ],
  *         'request_id' => true,
  *         'visitor' => true,
@@ -112,6 +114,50 @@ class Config
 		$level = array_search(ucfirst(strtolower(trim($value))), FileMinimumLogLevel::LEVELS, true);
 
 		return $level === false ? null : $level;
+	}
+
+	/**
+	 * The `channels` within a section: channel name => Monolog's level number. An entry whose level
+	 * is not a level is left out, so that channel takes the section's level.
+	 *
+	 * @return array<string, int>
+	 */
+	public static function channelLevels(string $section): array
+	{
+		$levels = [];
+		foreach (self::channels($section) AS $channel => $value)
+		{
+			$level = is_string($channel) && $channel !== '' ? self::toLevel($value) : null;
+			if ($level !== null)
+			{
+				$levels[$channel] = $level;
+			}
+		}
+
+		return $levels;
+	}
+
+	/**
+	 * The `channels` entries channelLevels() leaves out - for monolog:validate to report.
+	 */
+	public static function invalidChannelLevels(string $section): array
+	{
+		return array_diff_key(self::channels($section), self::channelLevels($section));
+	}
+
+	/**
+	 * The level for one channel in a section: its own if config.php sets one, otherwise $default.
+	 */
+	public static function levelFor(string $section, string $channel, int $default): int
+	{
+		return self::channelLevels($section)[$channel] ?? $default;
+	}
+
+	private static function channels(string $section): array
+	{
+		$channels = self::get($section, 'channels');
+
+		return is_array($channels) ? $channels : [];
 	}
 
 	public static function string(string $section, ?string $key = null): ?string
