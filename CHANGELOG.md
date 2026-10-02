@@ -1,5 +1,37 @@
 # CHANGELOG
 
+## 5.0.0 (2026-10-02)
+
+- new: `channel()` returns a PSR-3 `Psr\Log\LoggerInterface` for an add-on's own log channel —
+  type against that interface, not a Monolog class
+- deprecated: `newChannel()`, now an alias for `channel()`, and the static
+  `Hampel\Monolog\Helper\Log`
+- removed: `logger()`, `default()`, `stream()` and `visitor()` — add or replace handlers and
+  processors with the new `hampel_monolog_setup` code event instead
+- new: post log records to Slack through an incoming webhook — one message per request, sent with
+  a short timeout, and a failed post never reaches the add-on that was logging
+- new: every option can be set in `$config['monolog']` in `config.php` — `file`, `email` and
+  `slack` sections, `request_id`, `visitor`, `web` and `site` — and the options page shows it as
+  set there; `handlers`, `processors` and a file `formatter` add to the stack with no add-on
+- new: a minimum level per channel in `config.php`, so one add-on can be traced at Debug without
+  turning up every other
+- new: *Log File Format*, *Site Name* and *Add Request ID* options; every record carries a request
+  id, the web server's where it provides one
+- new: `monolog:config` and `monolog:validate` CLI commands — what is configured, and whether it
+  works, with `--unattended` for a deploy gate
+- new: JSON records carry `extra.site`, `extra.app` and `extra.schema`
+- new: README guidance on choosing log levels, and on supporting 4.x and 5.x from another add-on
+- security: the log file option only accepts a path inside `internal_data` — a path outside it is
+  ignored, and belongs in `config.php`
+- fix: email alerts were switched on by a fresh install until the options were saved — such
+  installs stop emailing until email is enabled
+- fix: creating a log channel no longer builds XenForo's mailer, which could recurse with a mail
+  add-on that logs
+- email is sent through XenForo's own mail system, on 2.2 and 2.3 alike
+- runs on Monolog 3 as well as 2, so it should work on XenForo 2.4, which bundles Monolog 3 — not
+  yet tested there
+- requires XenForo 2.2 and PHP 7.4
+
 ## 4.1.2 (2025-12-12)
 
 - run enqueuePostUpgradeCleanUp during upgrades if we're running XF2.3+
