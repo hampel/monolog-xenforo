@@ -154,6 +154,10 @@ stack and the levels on that machine. What follows is what it cannot.
   but underneath it is SwiftMailer on 2.2 and Symfony Mailer on 2.3, and the suite's fake mail
   transport is Symfony Mailer's — so only 2.3 is exercised. Enable email on a 2.2 forum, run the
   *Test Monolog* page, and confirm one email arrives.
+- **A post to a real Slack webhook.** Every Slack test uses a mock transport or a refused
+  connection, so nothing here proves Slack accepts the message. Create an incoming webhook in a
+  test workspace, enable *Post to Slack*, run *Test Monolog*, and confirm one message arrives with
+  an attachment per record at Error or above.
 - **The PHP 7.4 floor.** The suite runs on PHP 8.3 only. Lint the release zip on a PHP 7.4 install.
 - **After any `composer update`, confirm every runtime package still accepts PHP 7.4.** The
   platform pin is 8.3 so the test framework installs, which means Composer no longer stops a
