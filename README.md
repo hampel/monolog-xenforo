@@ -222,6 +222,51 @@ $container['myaddon.log'] = function (\XF\Container $c)
 };
 ```
 
+**Name the channel once, in lowercase, and keep it.** It is how a forum owner finds your add-on's
+lines in the log, and how they raise or lower its level alone in `config.php`. Ask for it wherever
+you need it: the same name returns the same logger, and creating one builds nothing until a
+record is written.
+
+### Supporting 4.x and 5.x
+
+**`channel()` arrived in 5.0; 4.x has only `newChannel()`.** If your add-on calls `channel()` and a
+forum installs it before upgrading this add-on, every page that logs fails with an undefined
+method. Until you can require 5.0, check for it:
+
+```php
+$container['myaddon.log'] = function (\XF\Container $c)
+{
+    if (!$c->offsetExists('monolog'))
+    {
+        return new \Psr\Log\NullLogger();
+    }
+
+    $monolog = $c['monolog'];
+
+    // channel() arrived in 5.0; newChannel() is the 4.x name, deprecated in 5.x
+    return method_exists($monolog, 'channel') ? $monolog->channel('myaddon') : $monolog->newChannel('myaddon');
+};
+```
+
+Or require 5.0 outright, if your add-on cannot work without logging:
+
+```json
+"require": {
+    "Hampel/Monolog": [5000070, "Monolog Logging Service 5.0.0+"]
+}
+```
+
+- **A wrapper class that null-checks the logger before every call is no longer needed.** The
+  container above always returns a logger, so call it directly.
+- **If your code implements PSR-3 itself** — a class implementing `Psr\Log\LoggerInterface`,
+  extending `AbstractLogger`, or a trait using `LoggerTrait` — **declare `log()` with a `: void`
+  return type.** XenForo 2.4 bundles a newer psr/log whose `log()` is typed, and an implementation
+  without the return type is a fatal error when its class loads. The return type works on today's
+  XenForo too.
+- **A workaround for 4.x building XenForo's mailer whenever a channel was created** — which
+  recursed for a mail add-on that logs — can go once you require 5.0. In 5.x the mailer is built
+  only when a record is emailed. Keep it while 4.x is still supported.
+
 ### Choosing a level
 
 Pick the level by what someone reading the line should do:
@@ -295,6 +340,8 @@ handler or processor meant to work on both should leave its record parameter unt
 `extra` as a whole array rather than one key at a time.
 
 ## Upgrading from 4.x
+
+For an add-on that logs through this one, see *Supporting 4.x and 5.x* under *Usage*.
 
 - `newChannel()` still works, as an alias for `channel()`. It is deprecated.
 - `Hampel\Monolog\Helper\Log` still works, logging to the `xenforo` channel. It is deprecated.
