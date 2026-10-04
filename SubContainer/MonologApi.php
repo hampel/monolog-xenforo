@@ -2,6 +2,7 @@
 
 use Hampel\Monolog\Config;
 use Hampel\Monolog\Handler\ChannelLevelHandler;
+use Hampel\Monolog\Handler\DeduplicatingHandler;
 use Hampel\Monolog\Handler\LazyHandler;
 use Hampel\Monolog\Handler\XenForoMailHandler;
 use Hampel\Monolog\Handler\XenForoSlackHandler;
@@ -24,7 +25,6 @@ use Hampel\Monolog\Processor\VisitorProcessor;
 use Monolog\Formatter\FormatterInterface;
 use Monolog\Formatter\JsonFormatter;
 use Monolog\Formatter\LineFormatter;
-use Monolog\Handler\DeduplicationHandler;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -212,7 +212,7 @@ class MonologApi extends AbstractSubContainer
 
 			// buffers the request's records into one email, sent at shutdown, and skips any
 			// already sent within the timeout
-			return new DeduplicationHandler(
+			return new DeduplicatingHandler(
 				$handler,
 				File::getTempDir() . '/monolog-dedup-email.log',
 				$level,
@@ -231,7 +231,7 @@ class MonologApi extends AbstractSubContainer
 		{
 			$dedup = Config::get('slack', 'dedup');
 
-			return new DeduplicationHandler(
+			return new DeduplicatingHandler(
 				new XenForoSlackHandler(SlackWebhook::getWebhook(), Site::get(), $level),
 				File::getTempDir() . '/monolog-dedup-slack.log',
 				$level,
@@ -276,7 +276,7 @@ class MonologApi extends AbstractSubContainer
 
 		if (!is_callable($factory))
 		{
-			\XF::logError("{$where} holds an entry that is not callable; it was skipped.");
+			\XF::logError("Monolog: {$where} holds an entry that is not callable; it was skipped.");
 			return null;
 		}
 
@@ -284,7 +284,7 @@ class MonologApi extends AbstractSubContainer
 		if (!$isValid($built))
 		{
 			$type = is_object($built) ? get_class($built) : gettype($built);
-			\XF::logError("{$where} holds a factory that returned {$type}, which is not usable; it was skipped.");
+			\XF::logError("Monolog: {$where} holds a factory that returned {$type}, which is not usable; it was skipped.");
 			return null;
 		}
 

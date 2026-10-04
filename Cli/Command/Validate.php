@@ -516,7 +516,7 @@ class Validate extends Command
 		}
 		catch (\Throwable $e)
 		{
-			\XF::logException($e, false, "monolog:validate - {$label}: ");
+			\XF::logException($e, false, "Monolog: monolog:validate - {$label}: ");
 			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
 
 			return null;

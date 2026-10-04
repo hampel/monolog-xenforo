@@ -85,10 +85,10 @@ The stack, from `MonologApi::initialize()`:
   (default `WARNING`). Formatted by `file.formatter` if set, as JSON when `LogFormat::get()` is
   `json`, otherwise as a line with the date forced back to Monolog 1's `Y-m-d H:i:s`, because
   existing parsers expect it;
-- **email** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoMailHandler`, when
+- **email** — a `LazyHandler` around a `DeduplicatingHandler` around `XenForoMailHandler`, when
   `SendEmail::isEnabled()`. Level from `EmailMinimumLogLevel::get()` (default `ERROR`); the
   recipient falls back to the board's `contactEmailAddress`;
-- **slack** — a `LazyHandler` around a `DeduplicationHandler` around `XenForoSlackHandler`, when
+- **slack** — a `LazyHandler` around a `DeduplicatingHandler` around `XenForoSlackHandler`, when
   `SlackWebhook::isEnabled()` (on, and an https webhook). It posts through XenForo's HTTP client
   with a 5-second timeout, not Monolog's `SlackWebhookHandler`, which uses raw cURL with no timeout
   and throws after five retries — a slow Slack would hang the page and an unreachable one break the
@@ -159,11 +159,26 @@ channel re-entered channel construction and recursed until the stack ran out in 
 `LazyHandler` checks the level without building, so the mailer is touched only by a record that
 will be emailed. `LazyMailTest` pins it with `isCached('mailer')`.
 
-**The request's records go out as one email, at shutdown.** `DeduplicationHandler` is a buffer: it
+**The request's records go out as one email, at shutdown.** `DeduplicatingHandler` is a buffer: it
 flushes when closed — `register_shutdown_function` in production, an explicit `close()` in tests —
-and skips any record already sent within `monologEmailDeduplicationTimeout`, using a store in XF's
-temp directory. A record logged *during* the send lands in a buffer that is then cleared, so it
-reaches the file but not the email.
+and skips a batch holding nothing new within `monologEmailDeduplicationTimeout`, using a store in
+XF's temp directory. A record logged *during* the send lands in a buffer that is then cleared, so
+it reaches the file but not the email.
+
+**`DeduplicatingHandler` is ours, not Monolog's `DeduplicationHandler`, because of what counts as
+a repeat.** Monolog's test is level and message alone. Messages here are fixed strings with the
+variable part in the context, so that test calls two different errors one, and two add-ons logging
+the same sentence suppress each other. Ours keys on channel, level, message, and a discriminator:
+the context's `fingerprint` if given, otherwise an `exception`'s class, file and line. It could
+not be a subclass — Monolog 2's `isDuplicate()` and `appendRecord()` are private, and Monolog 3's
+equivalents have other names and signatures. `DeduplicationTest` pins each part of the key, and
+`LazyMailTest` fails if the buffer is cleared before the send rather than after.
+
+**Every row this add-on writes to XenForo's server error log begins `Monolog: `.** That is a
+contract with any add-on that mirrors the error log into a log channel: it skips rows by that
+prefix. A logging failure reported without it is mirrored, alerted on through the handler that
+just failed, and logged again — once per mirror run, for as long as the fault lasts.
+`ConfigStackTest` scans the source for a `\XF::logError()` or `logException()` without it.
 
 **A transport that logs every send cannot loop the email handler, for two reasons.** The buffer
 takes its batch before sending and is cleared afterwards, so the record about the log email itself

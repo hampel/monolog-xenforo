@@ -117,6 +117,9 @@ What the suite covers:
   only when it finds the install lock, which a temporary `internal_data` lacks, and it caches that
   answer for the process. `CommandsTest` asserts the error reaches XenForo's error handler instead,
   and the `[fail]` was proved on a real install.
+- **`tests/Feature/DeduplicationTest.php`** — what counts as a repeat for email and Slack: the same
+  channel, level, message and `fingerprint` or exception is one; a different one of any of those is
+  not; one new record sends its whole request; and a zero timeout sends everything.
 - **`tests/Feature/RequestIdTest.php`** — one id per request, the web server's where it is shaped
   like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared

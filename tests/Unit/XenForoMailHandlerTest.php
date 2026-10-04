@@ -27,7 +27,7 @@ class XenForoMailHandlerTest extends TestCase
 
 	/**
 	 * Unbuffered, so nothing stands between the transport's own log record and this handler but
-	 * the guard. In the default stack DeduplicationHandler's buffer absorbs the record as well;
+	 * the guard. In the default stack DeduplicatingHandler's buffer absorbs the record as well;
 	 * this is the case where a handler stack is assembled without one.
 	 */
 	public function test_a_record_logged_by_the_transport_while_sending_is_not_sent()

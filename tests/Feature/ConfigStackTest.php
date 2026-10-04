@@ -124,5 +124,36 @@ class ConfigStackTest extends TestCase
 		$this->assertCount(1, $errors);
 		$where = "\$config['monolog']['" . str_replace('.', "']['", $key) . "']";
 		$this->assertStringContainsString($where, $errors[0]['message']);
+		$this->assertStringStartsWith('Monolog: ', $errors[0]['message']);
+	}
+
+	/**
+	 * Every row this add-on writes to XenForo's server error log begins `Monolog: `. An add-on that
+	 * mirrors the error log into a log channel skips rows by that prefix; one that began otherwise
+	 * would be mirrored, alerted on through the handler that just failed, and logged again.
+	 */
+	public function test_every_server_error_log_message_begins_with_the_prefix()
+	{
+		$calls = 0;
+		$root = dirname(__DIR__, 2);
+		foreach (new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator($root)) AS $file)
+		{
+			$path = $file->getPathname();
+			if ($file->getExtension() !== 'php' || preg_match('#/(vendor|tests|_build|_releases)/#', $path))
+			{
+				continue;
+			}
+
+			$source = file_get_contents($path);
+			// logError('Monolog: ...  and  logException($e, false, 'Monolog: ...
+			preg_match_all('/\\\\XF::log(?:Error\(|Exception\([^,]+,[^,]+,\s*)(["\'])(.{0,9})/', $source, $matches, PREG_SET_ORDER);
+			foreach ($matches AS $match)
+			{
+				$calls++;
+				$this->assertSame('Monolog: ', $match[2], basename($path) . ' logs to the server error log without the prefix');
+			}
+		}
+
+		$this->assertSame(4, $calls, 'a new call must be counted here, so it is looked at');
 	}
 }

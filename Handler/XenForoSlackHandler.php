@@ -15,7 +15,7 @@ use Monolog\Logger;
  * XenForo's server error log instead of the caller. The message itself is Monolog's: SlackRecord
  * builds each record's attachment, the same on Monolog 2 and 3.
  *
- * It extends MailHandler for the batch: behind a DeduplicationHandler, a request's records arrive
+ * It extends MailHandler for the batch: behind a DeduplicatingHandler, a request's records arrive
  * together and go out as one message - send() is the only method a subclass writes.
  */
 class XenForoSlackHandler extends MailHandler

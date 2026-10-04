@@ -46,7 +46,9 @@ field to change it.
   sends one log email about it. That cannot loop — the record about the log email itself is never
   emailed — but on a busy forum it doubles the mail.
 - **Email Deduplication Timeout** — a message already emailed within this many seconds is not sent
-  again. Each request's messages arrive as one email.
+  again. Each request's messages arrive as one email. *The same message* means the same channel,
+  level and text — and, where the record carries one, the same exception or `fingerprint`; see
+  *Events*.
 - **Post to Slack** — off by default. Posts to a Slack channel through an [incoming
   webhook](https://api.slack.com/messaging/webhooks): create one in your Slack workspace and paste
   its URL here. Each request's messages arrive as one message, and a message already posted within
@@ -321,6 +323,19 @@ $logger->info('Newsletter sent', ['event' => 'newsletter.sent', 'newsletter_id' 
 The message can be reworded freely. The event name is what a search, dashboard or alert matches
 on, so treat it as fixed once it ships. Use `noun.verb`, lowercase. Put identifiers in the context
 as well, never interpolated into the message, so each can be searched on its own.
+
+**Add a `fingerprint` when one fixed message stands for many different occurrences.** Email and
+Slack skip a record already sent within the deduplication timeout, and a fixed message makes every
+occurrence look like the last. The fingerprint is whatever tells them apart:
+
+```php
+$logger->error('Import failed', ['event' => 'import.failed', 'fingerprint' => "feed:{$feedId}"]);
+```
+
+Without it, feed 7 failing a minute after feed 3 is a repeat, and nobody is told. A record that
+carries an `exception` needs no fingerprint: its class, file and line are used. Keep the
+fingerprint coarse — an id that changes on every record, such as a timestamp, turns the
+protection off.
 
 ## Extending
 
