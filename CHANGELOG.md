@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 5.0.1 (2026-10-04)
+
+- fix: email and Slack treated two different errors with the same message as a repeat, and
+  suppressed the second — a repeat now also has to match the channel and, where the record has
+  one, the exception or a `fingerprint` in its context
+- every message this add-on writes to the server error log now begins `Monolog: `
+
 ## 5.0.0 (2026-10-02)
 
 - new: `channel()` returns a PSR-3 `Psr\Log\LoggerInterface` for an add-on's own log channel —
