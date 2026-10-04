@@ -114,6 +114,23 @@ class DeduplicationTest extends TestCase
 		$this->assertMailSentTimes(2);
 	}
 
+	/**
+	 * A forum upgrading from 5.0.0 has a store Monolog's handler wrote: `timestamp:LEVEL:message`.
+	 * Those lines match nothing, do not break the read, and are gone after the first send.
+	 */
+	public function test_a_store_left_by_monologs_handler_is_ignored_and_replaced()
+	{
+		$store = \XF\Util\File::getTempDir() . '/monolog-dedup-email.log';
+		file_put_contents($store, time() . ":ERROR:same again\n" . time() . ":ERROR:a message: with colons\nnot a line at all\n");
+
+		$this->request('myaddon', 'same again');
+
+		$this->assertMailSentTimes(1);
+		$lines = file($store, FILE_IGNORE_NEW_LINES);
+		$this->assertCount(1, $lines);
+		$this->assertMatchesRegularExpression('/^\d+:[0-9a-f]{32}$/', $lines[0]);
+	}
+
 	private function request(string $channel, string $message, array $context = [], string $level = 'error'): void
 	{
 		$logger = $this->app()['monolog']->channel($channel);
