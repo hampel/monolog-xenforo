@@ -14,6 +14,13 @@ use Symfony\Component\Console\Output\OutputInterface;
  * now and bites later, `[fail]` cannot do what it is configured to, and a blank marker did not
  * apply. A skip is never a pass.
  *
+ * **Every name here is the package's**, where the package has one - checkSection(), checkOk() and
+ * its siblings, checkResult(), checksFailed(), checksWarned(), checkExitCode(), detail(),
+ * heading(), and the $check... properties - so a command written against this reads the same as
+ * one written against the package, and moving to it would be a change of `use`. Keep it that way:
+ * add to the package's vocabulary, do not rename it. Three things are not in the package: muted(),
+ * probe() and errorLogPrefix(), which are XenForo's concerns; and checkExitCode()'s $strict.
+ *
  * For a Symfony `Command`: probe() names the command in what it logs.
  */
 trait RendersReport
@@ -21,11 +28,11 @@ trait RendersReport
 	/** @var OutputInterface */
 	protected $report;
 
-	protected int $labelWidth = 24;
+	protected int $checkLabelWidth = 24;
 
-	protected bool $failed = false;
+	protected bool $checkFailed = false;
 
-	protected bool $warned = false;
+	protected bool $checkWarned = false;
 
 	/** @var string|null the colour muted() uses, once known */
 	private static ?string $mutedColour = null;
@@ -80,26 +87,44 @@ trait RendersReport
 		return '<fg=' . self::$mutedColour . ">{$text}</>";
 	}
 
+	/**
+	 * A heading above a run of check rows, with a blank line before it.
+	 */
+	protected function checkSection(string $title): void
+	{
+		$this->heading($title);
+	}
+
 	protected function checkOk(string $label, string $detail = ''): void
 	{
-		$this->check('<info>[ ok ]</info>', $label, $detail);
+		$this->checkResult('<info>[ ok ]</info>', $label, $detail);
 	}
 
 	protected function checkWarn(string $label, string $detail = ''): void
 	{
-		$this->warned = true;
-		$this->check('<comment>[warn]</comment>', $label, $detail);
+		$this->checkWarned = true;
+		$this->checkResult('<comment>[warn]</comment>', $label, $detail);
 	}
 
 	protected function checkFail(string $label, string $detail = ''): void
 	{
-		$this->failed = true;
-		$this->check('<error>[fail]</error>', $label, $detail);
+		$this->checkFailed = true;
+		$this->checkResult('<error>[fail]</error>', $label, $detail);
 	}
 
 	protected function checkSkip(string $label, string $detail = ''): void
 	{
-		$this->check('[    ]', $label, $detail);
+		$this->checkResult('[    ]', $label, $detail);
+	}
+
+	protected function checksFailed(): bool
+	{
+		return $this->checkFailed;
+	}
+
+	protected function checksWarned(): bool
+	{
+		return $this->checkWarned;
 	}
 
 	/**
@@ -109,14 +134,14 @@ trait RendersReport
 	 * $strict makes a warning exit 2, for a caller that wants to hear of one. 1 still means failed.
 	 * This is NOT the monitoring-plugin numbering, where 1 is a warning and 2 is critical.
 	 */
-	protected function exitCode(bool $strict = false): int
+	protected function checkExitCode(bool $strict = false): int
 	{
-		if ($this->failed)
+		if ($this->checkFailed)
 		{
 			return 1;
 		}
 
-		return $strict && $this->warned ? 2 : 0;
+		return $strict && $this->checkWarned ? 2 : 0;
 	}
 
 	/**
@@ -141,9 +166,9 @@ trait RendersReport
 		}
 	}
 
-	private function check(string $marker, string $label, string $detail): void
+	protected function checkResult(string $marker, string $label, string $detail): void
 	{
-		$padding = str_repeat(' ', max(0, $this->labelWidth - mb_strlen($label)));
+		$padding = str_repeat(' ', max(0, $this->checkLabelWidth - mb_strlen($label)));
 
 		$this->report->writeln(rtrim("  {$marker} {$label}{$padding} {$detail}"));
 	}

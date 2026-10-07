@@ -58,32 +58,32 @@ class Validate extends Command
 		$this->report = $output;
 		$unattended = (bool) $input->getOption('unattended');
 
-		$this->heading('Environment');
+		$this->checkSection('Environment');
 		$this->environment();
 
 		// facts about the configuration: these report under --unattended too, so they stay above it
-		$this->heading('config.php');
+		$this->checkSection('config.php');
 		$this->configValues();
 
-		$this->heading('Email');
+		$this->checkSection('Email');
 		$this->emailLevel();
 
-		$this->heading('Slack');
+		$this->checkSection('Slack');
 		$this->slackLevel();
 
-		$this->heading('Log file');
+		$this->checkSection('Log file');
 		$path = $this->probe('log file', function ()
 		{
 			return $this->logFile();
 		});
 
-		$this->heading('Stack');
+		$this->checkSection('Stack');
 		$this->probe('stack', function ()
 		{
 			$this->stack();
 		});
 
-		$this->heading('Level sweep');
+		$this->checkSection('Level sweep');
 		if ($unattended)
 		{
 			$this->checkSkip('level sweep', 'skipped - --unattended');
@@ -97,16 +97,16 @@ class Validate extends Command
 		}
 
 		$this->report->writeln('');
-		if ($this->failed)
+		if ($this->checksFailed())
 		{
 			$this->report->writeln('<error>Validation failed - logging is not working as configured</error>');
 		}
 		else
 		{
-			$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
+			$this->report->writeln($this->checksWarned() ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
 		}
 
-		return $this->exitCode((bool) $input->getOption('strict'));
+		return $this->checkExitCode((bool) $input->getOption('strict'));
 	}
 
 	private function environment(): void

@@ -284,7 +284,7 @@ only — **not** the monitoring-plugin order, where 1 is a warning. It is that w
 means failed with the flag, without it, and in every other tool that follows the `app:validate`
 convention; and it is called `--strict` rather than `--monitor` so nobody takes it for
 plugin-compatible. Agreed with the Event Logging add-on's session and decided by Simon on
-2026-10-07. **Keep it a pure function of the tallies** — `RendersReport::exitCode()` — and
+2026-10-07. **Keep it a pure function of the tallies** — `RendersReport::checkExitCode()` — and
 orthogonal to `--unattended`: a row that should be heard under `--strict` is a `[warn]` row
 always, which is why a logger with no handlers warns rather than skips.
 
@@ -300,7 +300,8 @@ the polyfill that supplies it below that. XenForo's own `symfony/console` is not
 **The trait also holds `probe()`**, which wraps each check so none can end the run, and logs what
 one throws under the command's `errorLogPrefix()` — abstract in the trait, so a command without
 one does not load. It is kept free of anything Monolog-specific, so another add-on's copy differs
-only in its namespace.
+only in its namespace. **Its method and property names are `hampel/console-report`'s**, where that
+package has one, so the copies and the package stay one vocabulary; add to it, do not rename it.
 
 **XenForo 2.2's `symfony/console` is a fork that knows only the eight basic colours**, and throws
 on `gray`. `monolog:config` died at its first annotation on 2.2 from Beta 4 until a sandbox run
