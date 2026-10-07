@@ -365,6 +365,66 @@ class CommandsTest extends TestCase
 		}
 	}
 
+	public static function strictCases(): array
+	{
+		return [
+			'clean, no flag' => ['clean', false, 0],
+			'clean, strict' => ['clean', true, 0],
+			'warning, no flag' => ['warning', false, 0],
+			'warning, strict' => ['warning', true, 2],
+			'failure, no flag' => ['failure', false, 1],
+			'failure, strict' => ['failure', true, 1],
+			'failure and warning, strict' => ['both', true, 1],
+		];
+	}
+
+	/**
+	 * Without --strict the exit code is what it has been since the command shipped. With it, a
+	 * warning is heard as 2 - and 1 still means failed, which is not the monitoring-plugin order.
+	 */
+	#[\PHPUnit\Framework\Attributes\DataProvider('strictCases')]
+	public function test_strict_makes_a_warning_exit_2_and_changes_nothing_else($state, $strict, $expected)
+	{
+		$this->fakesErrors();
+		$config = [];
+		if ($state === 'warning' || $state === 'both')
+		{
+			$config['file'] = ['level' => 'loud'];
+		}
+		if ($state === 'failure' || $state === 'both')
+		{
+			$config['handlers'] = [function () { return 'not a handler'; }];
+		}
+		$this->setConfig('monolog', $config);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true] + ($strict ? ['--strict' => true] : []));
+
+		$this->assertSame($expected, $code, $output);
+	}
+
+	public function test_strict_does_not_skip_the_sweep()
+	{
+		[$code, $output] = $this->runCommand(new Validate(), ['--strict' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertStringContainsString('8 written to monolog-validate', $output);
+	}
+
+	/**
+	 * Every output off is not broken, and not fine either: it used to report "[ ok ] 0 handler(s)".
+	 */
+	public function test_a_logger_with_no_handlers_is_a_warning()
+	{
+		$this->setConfig('monolog', ['file' => false, 'email' => false, 'slack' => false]);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+		[$strictCode] = $this->runCommand(new Validate(), ['--unattended' => true, '--strict' => true]);
+
+		$this->assertMatchesRegularExpression('/\[warn\] logger +no handlers/', $output);
+		$this->assertSame(0, $code);
+		$this->assertSame(2, $strictCode);
+	}
+
 	public function test_a_factory_that_builds_the_wrong_thing_fails()
 	{
 		$this->setConfig('monolog', ['handlers' => [

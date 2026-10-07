@@ -103,6 +103,23 @@ trait RendersReport
 	}
 
 	/**
+	 * The exit code for the checks reported so far: 1 if any failed, otherwise 0 - a warning is not
+	 * a failure, so `command && next-step` carries on past one.
+	 *
+	 * $strict makes a warning exit 2, for a caller that wants to hear of one. 1 still means failed.
+	 * This is NOT the monitoring-plugin numbering, where 1 is a warning and 2 is critical.
+	 */
+	protected function exitCode(bool $strict = false): int
+	{
+		if ($this->failed)
+		{
+			return 1;
+		}
+
+		return $strict && $this->warned ? 2 : 0;
+	}
+
+	/**
 	 * Runs one check, and turns anything it throws into a `[fail]` row and a server error log
 	 * entry. No check may end the run: a validation that stops at its first problem hides the rest,
 	 * on the one occasion the whole list was wanted.

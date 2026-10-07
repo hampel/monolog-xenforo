@@ -101,8 +101,9 @@ What the suite covers:
   nothing; an email level below Warning warns, under `--unattended` too, as does an email channel
   below it or a channel level that is not a level; the sweep's file count follows its own channel's
   level, counting only its own records when another record quotes one (a mail transport logging
-  what it sent); a wrong count prints the lines; and an unwritable path, a bad factory and a probe
-  that throws each exit 1 without ending the run.
+  what it sent); a wrong count prints the lines; an unwritable path, a bad factory and a probe
+  that throws each exit 1 without ending the run; `--strict` turns warnings-only into exit 2 and
+  changes nothing else, across all seven combinations; and no handlers at all is a warning.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.

@@ -279,6 +279,15 @@ four outcomes (`[ ok ]`, `[warn]`, `[fail]`, and a blank `[    ]` for a check th
 exit 1 only on a failure, no check may end the run, and `--unattended` skips only the sends — the
 level sweep — while the checks that are facts about the configuration run above it.
 
+**`--strict` makes a warning exit 2, and does nothing else.** So: 0 fine, 1 failed, 2 warnings
+only — **not** the monitoring-plugin order, where 1 is a warning. It is that way round so that 1
+means failed with the flag, without it, and in every other tool that follows the `app:validate`
+convention; and it is called `--strict` rather than `--monitor` so nobody takes it for
+plugin-compatible. Agreed with the Event Logging add-on's session and decided by Simon on
+2026-10-07. **Keep it a pure function of the tallies** — `RendersReport::exitCode()` — and
+orthogonal to `--unattended`: a row that should be heard under `--strict` is a `[warn]` row
+always, which is why a logger with no handlers warns rather than skips.
+
 **The sweep counts only its own records** — `monolog-validate` channel, exact message, in the line
 or JSON layout — because another record can quote one. A mail transport that logs its
 transmissions writes the emailed copy, run id and all, into the same file; on a production forum

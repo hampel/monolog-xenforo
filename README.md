@@ -179,6 +179,7 @@ Two commands, run from the XenForo root:
 php cmd.php monolog:config                   # what this forum is configured to log
 php cmd.php monolog:validate                 # whether it can - and logs a record at every level
 php cmd.php monolog:validate --unattended    # the same, without writing or sending anything
+php cmd.php monolog:validate --unattended --strict    # for a monitor: a warning exits 2
 ```
 
 **`monolog:config` reads and prints, and changes nothing.** It shows every setting, where each
@@ -190,14 +191,24 @@ checks the log file can be written, builds the handlers and anything `config.php
 one record at each of the eight levels to the `monolog-validate` channel. It counts what reached the
 log file against the level you set, and reports what was emailed and posted. A post Slack refuses —
 a deleted or revoked webhook — or cannot be reached appears in the server error log, and fails the
-run. Each check reports `[ ok ]`,
-`[warn]`, `[fail]`, or a blank marker for a check that did not apply. It exits 1 if anything failed
-and 0 otherwise — warnings included — so a deploy or a cron job can depend on it.
+run. Each check reports `[ ok ]`, `[warn]`, `[fail]`, or a blank marker for a check that did not
+apply. With the log file, email and Slack all off it warns that records go nowhere.
 
 **Running it writes to your log, sends email and posts to Slack**, for whichever is on — that is
-the proof each works.
-Use `--unattended` where nobody is watching, such as a deploy step; it skips the level sweep and
-still checks everything else.
+the proof each works. Use `--unattended` where nobody is watching, such as a deploy step; it skips
+the level sweep and still checks everything else.
+
+**It exits 1 if anything failed and 0 otherwise — warnings included** — so a deploy or a cron job
+can depend on it. `--strict` makes a warning exit 2, for a monitor that should hear of one:
+
+| | all fine | warnings only | any failure |
+|---|---|---|---|
+| `monolog:validate` | 0 | 0 | 1 |
+| `monolog:validate --strict` | 0 | 2 | 1 |
+
+`--strict` changes only the exit code, so pair it with `--unattended` for anything that runs on a
+schedule. **This is not the monitoring-plugin numbering**, where 1 is a warning and 2 is critical:
+here 1 always means failed. Map the values explicitly in whatever reads them.
 
 ## Usage
 

@@ -28,6 +28,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  * are facts about the configuration still run.
  *
  * Exit code: 1 if any check failed, 0 otherwise - a warning does not fail, so a gate can rely on it.
+ * --strict makes a warning exit 2, for a monitor that wants to hear of one; it changes nothing
+ * else, so a monitor passes --unattended as well.
  */
 class Validate extends Command
 {
@@ -41,7 +43,9 @@ class Validate extends Command
 			->setName('monolog:validate')
 			->setDescription('Check that logging works: the log file, the handlers, and a record at every level')
 			->addOption('unattended', null, InputOption::VALUE_NONE,
-				'Skip the level sweep, which writes and emails records - for a gate nobody is watching');
+				'Skip the level sweep, which writes and emails records - for a gate nobody is watching')
+			->addOption('strict', null, InputOption::VALUE_NONE,
+				'Exit 2 when there are warnings and no failures, instead of 0');
 	}
 
 	protected function errorLogPrefix(): string
@@ -96,11 +100,13 @@ class Validate extends Command
 		if ($this->failed)
 		{
 			$this->report->writeln('<error>Validation failed - logging is not working as configured</error>');
-			return 1;
+		}
+		else
+		{
+			$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
 		}
 
-		$this->report->writeln($this->warned ? '<comment>Validated, with warnings</comment>' : '<info>Validated</info>');
-		return 0;
+		return $this->exitCode((bool) $input->getOption('strict'));
 	}
 
 	private function environment(): void
@@ -312,7 +318,10 @@ class Validate extends Command
 	{
 		$logger = \XF::app()->get('monolog')->channel('monolog-validate');
 		$handlers = method_exists($logger, 'getHandlers') ? $logger->getHandlers() : [];
-		$this->checkOk('logger', count($handlers) . ' handler(s) on every channel');
+		// works now and bites later: nothing is broken, and the first error on this forum is lost
+		$handlers
+			? $this->checkOk('logger', count($handlers) . ' handler(s) on every channel')
+			: $this->checkWarn('logger', 'no handlers - the log file, email and Slack are all off, so records go nowhere');
 
 		$factories = [
 			'handlers' => [(array) (MonologConfig::get('handlers') ?? []), HandlerInterface::class],
