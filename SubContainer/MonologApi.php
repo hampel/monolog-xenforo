@@ -214,7 +214,7 @@ class MonologApi extends AbstractSubContainer
 			// already sent within the timeout
 			return new DeduplicatingHandler(
 				$handler,
-				File::getTempDir() . '/monolog-dedup-email.log',
+				self::deduplicationStore('email'),
 				$level,
 				EmailDeduplicationTimeout::get()
 			);
@@ -233,11 +233,20 @@ class MonologApi extends AbstractSubContainer
 
 			return new DeduplicatingHandler(
 				new XenForoSlackHandler(SlackWebhook::getWebhook(), Site::get(), $level),
-				File::getTempDir() . '/monolog-dedup-slack.log',
+				self::deduplicationStore('slack'),
 				$level,
 				is_int($dedup) && $dedup >= 0 ? $dedup : self::SLACK_DEDUP
 			);
 		}, $level);
+	}
+
+	/**
+	 * Where one output - 'email' or 'slack' - records what it has already sent, in XenForo's temp
+	 * directory. monolog:validate checks it can be written.
+	 */
+	public static function deduplicationStore(string $output): string
+	{
+		return File::getTempDir() . "/monolog-dedup-{$output}.log";
 	}
 
 	/**

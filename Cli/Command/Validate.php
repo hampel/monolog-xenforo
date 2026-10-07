@@ -71,6 +71,9 @@ class Validate extends Command
 		$this->checkSection('Slack');
 		$this->slackLevel();
 
+		$this->checkSection('Deduplication');
+		$this->deduplication();
+
 		$this->checkSection('Log file');
 		$path = $this->probe('log file', function ()
 		{
@@ -256,6 +259,36 @@ class Validate extends Command
 				$at = FileMinimumLogLevel::LEVELS[$channelLevel];
 				$this->checkWarn('slack level', "{$channel} at {$at} - every {$channel} record at {$at} or above is posted");
 			}
+		}
+	}
+
+	/**
+	 * Email and Slack each keep a file of what they have already sent. The handler reads and writes
+	 * it silently, so that its own bookkeeping can never take a page down - which means a store it
+	 * cannot write fails open, with no error: every record looks new, and every request that logs
+	 * an error sends. A warning, since logging still works.
+	 */
+	private function deduplication(): void
+	{
+		$outputs = array_keys(array_filter(['email' => SendEmail::isEnabled(), 'slack' => SlackWebhook::isEnabled()]));
+		if (!$outputs)
+		{
+			$this->checkSkip('deduplication', 'email and Slack are off');
+			return;
+		}
+
+		$user = function_exists('posix_geteuid') ? (posix_getpwuid(posix_geteuid())['name'] ?? '') : '';
+		$as = $user !== '' ? " (as {$user} - the web server may run as another user)" : '';
+
+		foreach ($outputs AS $output)
+		{
+			$store = MonologApi::deduplicationStore($output);
+			// an existing store has to be writable itself; a new one needs its directory
+			$target = file_exists($store) ? $store : dirname($store);
+
+			is_writable($target)
+				? $this->checkOk('deduplication', "{$target} is writable{$as}")
+				: $this->checkWarn('deduplication', "{$target} is not writable{$as} - every repeat will be sent by {$output}");
 		}
 	}
 

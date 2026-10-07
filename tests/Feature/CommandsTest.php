@@ -429,6 +429,43 @@ class CommandsTest extends TestCase
 		$this->assertSame(2, $strictCode);
 	}
 
+	public function test_the_deduplication_store_is_checked_when_an_alert_output_is_on()
+	{
+		$this->setOption('monologSendEmail', ['enabled' => true, 'email' => 'logs@example.com']);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertSame(0, $code);
+		$this->assertMatchesRegularExpression('/\[ ok \] deduplication +.*is writable/', $output);
+	}
+
+	/**
+	 * With no store every record looks new, so every request that logs an error sends: the flood
+	 * the deduplication is there to prevent, and nothing says so. Logging still works, so a
+	 * warning - which --strict lets a monitor hear.
+	 */
+	public function test_an_unwritable_deduplication_store_is_a_warning()
+	{
+		$this->setOption('monologSendEmail', ['enabled' => true, 'email' => 'logs@example.com']);
+		$temp = \XF\Util\File::getTempDir();
+		chmod($temp, 0555);
+
+		[$code, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+		[$strictCode] = $this->runCommand(new Validate(), ['--unattended' => true, '--strict' => true]);
+		chmod($temp, 0755);
+
+		$this->assertMatchesRegularExpression('/\[warn\] deduplication +.*is not writable.*every repeat will be sent/', $output);
+		$this->assertSame(0, $code);
+		$this->assertSame(2, $strictCode);
+	}
+
+	public function test_the_deduplication_check_is_skipped_with_email_and_slack_off()
+	{
+		[, $output] = $this->runCommand(new Validate(), ['--unattended' => true]);
+
+		$this->assertMatchesRegularExpression('/\[    \] deduplication +email and Slack are off/', $output);
+	}
+
 	public function test_a_factory_that_builds_the_wrong_thing_fails()
 	{
 		$this->setConfig('monolog', ['handlers' => [

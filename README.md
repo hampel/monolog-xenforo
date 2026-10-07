@@ -187,12 +187,13 @@ comes from — `config.php` or the options page — and the full path of the log
 webhook is shown only as set, with its host: the URL is a credential.
 
 **`monolog:validate` exercises the real thing.** It warns if email or Slack is set below Warning,
-checks the log file can be written, builds the handlers and anything `config.php` adds, then writes
-one record at each of the eight levels to the `monolog-validate` channel. It counts what reached the
-log file against the level you set, and reports what was emailed and posted. A post Slack refuses —
-a deleted or revoked webhook — or cannot be reached appears in the server error log, and fails the
-run. Each check reports `[ ok ]`, `[warn]`, `[fail]`, or a blank marker for a check that did not
-apply. With the log file, email and Slack all off it warns that records go nowhere.
+checks the log file can be written, and that the record of what has already been sent can be —
+without it every repeat is sent again — builds the handlers and anything `config.php` adds, then
+writes one record at each of the eight levels to the `monolog-validate` channel. It counts what
+reached the log file against the level you set, and reports what was emailed and posted. A post
+Slack refuses — a deleted or revoked webhook — or cannot be reached appears in the server error log,
+and fails the run. Each check reports `[ ok ]`, `[warn]`, `[fail]`, or a blank marker for a check
+that did not apply. With the log file, email and Slack all off it warns that records go nowhere.
 
 **Running it writes to your log, sends email and posts to Slack**, for whichever is on — that is
 the proof each works. Use `--unattended` where nobody is watching, such as a deploy step; it skips

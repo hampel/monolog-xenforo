@@ -165,6 +165,13 @@ and skips a batch holding nothing new within `monologEmailDeduplicationTimeout`,
 XF's temp directory. A record logged *during* the send lands in a buffer that is then cleared, so
 it reaches the file but not the email.
 
+**The store is read and written with `@`, deliberately, and `monolog:validate` checks it for that
+reason.** A logging service must not take a page down over its own bookkeeping, so a store that
+cannot be written fails open and silently: every record looks new, and every request that logs an
+error sends — the flood the handler exists to prevent, arriving during an incident. The command's
+*Deduplication* check is the only thing that says so; it warns rather than fails, since logging
+still works. `MonologApi::deduplicationStore()` is the one place the path is built.
+
 **`DeduplicatingHandler` is ours, not Monolog's `DeduplicationHandler`, because of what counts as
 a repeat.** Monolog's test is level and message alone. Messages here are fixed strings with the
 variable part in the context, so that test calls two different errors one, and two add-ons logging

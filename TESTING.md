@@ -103,7 +103,8 @@ What the suite covers:
   level, counting only its own records when another record quotes one (a mail transport logging
   what it sent); a wrong count prints the lines; an unwritable path, a bad factory and a probe
   that throws each exit 1 without ending the run; `--strict` turns warnings-only into exit 2 and
-  changes nothing else, across all seven combinations; and no handlers at all is a warning.
+  changes nothing else, across all seven combinations; no handlers at all is a warning; and a
+  deduplication store that cannot be written is a warning, checked only when email or Slack is on.
 - **`tests/Feature/ConfigStackTest.php`** — `handlers`, `processors` and `formatter` from
   `config.php`: added to the stack, built only with the logger, seen by the setup event, and a bad
   entry skipped and reported rather than thrown.
