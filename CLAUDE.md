@@ -289,8 +289,9 @@ rendering is `Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout
 package needs PHP 8.3: it pads with `mb_str_pad()`, native only from 8.3, and XenForo does not ship
 the polyfill that supplies it below that. XenForo's own `symfony/console` is not the obstacle.
 **The trait also holds `probe()`**, which wraps each check so none can end the run, and logs what
-one throws under the command's `$errorLogPrefix` — set in `configure()`. It is kept free of
-anything Monolog-specific, so another add-on's copy differs only in its namespace.
+one throws under the command's `errorLogPrefix()` — abstract in the trait, so a command without
+one does not load. It is kept free of anything Monolog-specific, so another add-on's copy differs
+only in its namespace.
 
 **XenForo 2.2's `symfony/console` is a fork that knows only the eight basic colours**, and throws
 on `gray`. `monolog:config` died at its first annotation on 2.2 from Beta 4 until a sandbox run

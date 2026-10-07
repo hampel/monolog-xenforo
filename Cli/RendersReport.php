@@ -27,14 +27,16 @@ trait RendersReport
 
 	protected bool $warned = false;
 
-	/**
-	 * What every row this command writes to XenForo's server error log begins with - the add-on's
-	 * own prefix, such as `Monolog: `, so a mirror of that log can skip its rows. Set in configure().
-	 */
-	protected string $errorLogPrefix = '';
-
 	/** @var string|null the colour muted() uses, once known */
 	private static ?string $mutedColour = null;
+
+	/**
+	 * What every row this command writes to XenForo's server error log begins with - the add-on's
+	 * own prefix, such as `Monolog: `, so a mirror of that log can skip its rows. Abstract, not a
+	 * property with a default: a command that forgot it would log rows a mirror alerts on, and
+	 * nothing would say so. This way it does not load.
+	 */
+	abstract protected function errorLogPrefix(): string;
 
 	protected function heading(string $title): void
 	{
@@ -115,7 +117,7 @@ trait RendersReport
 		}
 		catch (\Throwable $e)
 		{
-			\XF::logException($e, false, "{$this->errorLogPrefix}{$this->getName()} - {$label}: ");
+			\XF::logException($e, false, "{$this->errorLogPrefix()}{$this->getName()} - {$label}: ");
 			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
 
 			return null;

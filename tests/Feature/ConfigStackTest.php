@@ -159,11 +159,11 @@ class ConfigStackTest extends TestCase
 			}
 		}
 
-		// the fourth is RendersReport::probe(), whose prefix is a property each command sets -
+		// the fourth is RendersReport::probe(), whose prefix each command must define -
 		// CommandsTest checks what monolog:validate actually logs
 		$this->assertSame(3, $calls, 'a new call must be counted here, so it is looked at');
 		$this->assertStringContainsString(
-			'\\XF::logException($e, false, "{$this->errorLogPrefix}',
+			'\\XF::logException($e, false, "{$this->errorLogPrefix()}',
 			file_get_contents($root . '/Cli/RendersReport.php')
 		);
 	}

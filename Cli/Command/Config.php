@@ -40,6 +40,11 @@ class Config extends Command
 			->setDescription('Show the logging settings in use, and where each comes from');
 	}
 
+	protected function errorLogPrefix(): string
+	{
+		return 'Monolog: ';
+	}
+
 	protected function execute(InputInterface $input, OutputInterface $output)
 	{
 		$this->report = $output;

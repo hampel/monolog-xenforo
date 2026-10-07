@@ -37,13 +37,16 @@ class Validate extends Command
 
 	protected function configure()
 	{
-		$this->errorLogPrefix = 'Monolog: ';
-
 		$this
 			->setName('monolog:validate')
 			->setDescription('Check that logging works: the log file, the handlers, and a record at every level')
 			->addOption('unattended', null, InputOption::VALUE_NONE,
 				'Skip the level sweep, which writes and emails records - for a gate nobody is watching');
+	}
+
+	protected function errorLogPrefix(): string
+	{
+		return 'Monolog: ';
 	}
 
 	protected function execute(InputInterface $input, OutputInterface $output)
