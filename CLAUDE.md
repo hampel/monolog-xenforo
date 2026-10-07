@@ -288,6 +288,11 @@ plugin-compatible. Agreed with the Event Logging add-on's session and decided by
 orthogonal to `--unattended`: a row that should be heard under `--strict` is a `[warn]` row
 always, which is why a logger with no handlers warns rather than skips.
 
+**Every record the sweep and the *Test Monolog* page write carries `'probe' => true`.** They log at
+Error and above on purpose, so an alert over the log needs one filter that leaves all probes out,
+whatever channel they use — the `monolog-validate` and `monolog-test` channels are kept, but a
+channel name per add-on does not scale. A new probe carries the key too.
+
 **The sweep counts only its own records** — `monolog-validate` channel, exact message, in the line
 or JSON layout — because another record can quote one. A mail transport that logs its
 transmissions writes the emailed copy, run id and all, into the same file; on a production forum

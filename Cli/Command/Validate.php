@@ -382,7 +382,7 @@ class Validate extends Command
 		$logger = \XF::app()->get('monolog')->channel('monolog-validate');
 		foreach (self::LEVELS AS $level)
 		{
-			$logger->log($level, "monolog:validate {$run}: {$level}", ['event' => 'monolog.validate', 'run' => $run]);
+			$logger->log($level, "monolog:validate {$run}: {$level}", ['event' => 'monolog.validate', 'probe' => true, 'run' => $run]);
 		}
 		$logger->close(); // the email is sent here, as at the end of a request
 

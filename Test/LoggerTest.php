@@ -14,16 +14,18 @@ class LoggerTest extends AbstractTest
 		$monolog = $this->app->container('monolog');
 		$logger = $monolog->channel('monolog-test');
 
-		$context = ['a' => 'foo', 'b' => 'bar', 'c' => 'baz'];
+		// probe: these are sent on purpose, at every level, and an alert over the log should be able
+		// to leave all of them out with one filter - whatever channel a probe happens to use
+		$probe = ['probe' => true];
 
-		$logger->debug('this is a debug message', $context);
-		$logger->info('this is an info message');
-		$logger->notice('this is a notice message');
-		$logger->warning('this is a warning message');
-		$logger->error('this is an error message');
-		$logger->critical('this is a critical message');
-		$logger->alert('this is an alert message');
-		$logger->emergency('this is an emergency message');
+		$logger->debug('this is a debug message', $probe + ['a' => 'foo', 'b' => 'bar', 'c' => 'baz']);
+		$logger->info('this is an info message', $probe);
+		$logger->notice('this is a notice message', $probe);
+		$logger->warning('this is a warning message', $probe);
+		$logger->error('this is an error message', $probe);
+		$logger->critical('this is a critical message', $probe);
+		$logger->alert('this is an alert message', $probe);
+		$logger->emergency('this is an emergency message', $probe);
 
 		return true;
 	}

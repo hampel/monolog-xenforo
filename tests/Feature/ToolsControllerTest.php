@@ -56,6 +56,7 @@ class ToolsControllerTest extends TestCase
 		foreach (['DEBUG', 'INFO', 'NOTICE', 'WARNING', 'ERROR', 'CRITICAL', 'ALERT', 'EMERGENCY'] AS $i => $level)
 		{
 			$this->assertStringContainsString("] monolog-test.{$level}: ", $lines[$i]);
+			$this->assertStringContainsString('"probe":true', $lines[$i], 'every test record is marked as a probe');
 		}
 	}
 

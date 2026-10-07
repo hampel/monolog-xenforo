@@ -125,6 +125,8 @@ What the suite covers:
   like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared
   logger is built, and able to add or remove handlers and processors.
+- **Probe marker** — `CommandsTest` and `ToolsControllerTest` assert that every record the sweep
+  and the test page write carries `"probe":true`.
 - **`tests/Feature/ToolsControllerTest.php`** — the ACP *Test Monolog* page: its permission, its
   rendering, and one message written at every level.
 - **`tests/Feature/HelperLogTest.php`** — the deprecated `Helper\Log` facade, every level.

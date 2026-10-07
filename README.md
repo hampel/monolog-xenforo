@@ -348,6 +348,11 @@ carries an `exception` needs no fingerprint: its class, file and line are used. 
 fingerprint coarse — an id that changes on every record, such as a timestamp, turns the
 protection off.
 
+**Mark a record you send on purpose with `'probe' => true`** — a test page, a validate command,
+anything that logs at Error to prove that Error arrives. This add-on's own do: *Test Monolog* and
+`monolog:validate` both carry it. An alert over the log can then leave every probe out with one
+filter, whichever add-on sent it.
+
 ## Extending
 
 **Listen to the `hampel_monolog_setup` code event** to add, remove or replace handlers and

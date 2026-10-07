@@ -83,6 +83,10 @@ class CommandsTest extends TestCase
 		$this->assertSame(0, $code);
 		$this->assertStringContainsString('5 of 8 written, as expected at Warning', $output);
 		$this->assertCount(5, $this->logLines());
+		foreach ($this->logLines() AS $line)
+		{
+			$this->assertStringContainsString('"probe":true', $line, 'every sweep record is marked as a probe');
+		}
 	}
 
 	public static function formats(): array
