@@ -18,8 +18,9 @@ use Symfony\Component\Console\Output\OutputInterface;
  * its siblings, checkResult(), checksFailed(), checksWarned(), checkExitCode(), detail(),
  * heading(), and the $check... properties - so a command written against this reads the same as
  * one written against the package, and moving to it would be a change of `use`. Keep it that way:
- * add to the package's vocabulary, do not rename it. Three things are not in the package: muted(),
- * probe() and errorLogPrefix(), which are XenForo's concerns; and checkExitCode()'s $strict.
+ * add to the package's vocabulary, do not rename it. Three things are not in the package, being
+ * XenForo's concerns: muted(), probe() and errorLogPrefix(). The package declined probe(): it has
+ * no logger to report what was thrown, which is what earns the method its place here.
  *
  * For a Symfony `Command`: probe() names the command in what it logs.
  */
