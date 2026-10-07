@@ -37,6 +37,8 @@ class Validate extends Command
 
 	protected function configure()
 	{
+		$this->errorLogPrefix = 'Monolog: ';
+
 		$this
 			->setName('monolog:validate')
 			->setDescription('Check that logging works: the log file, the handlers, and a record at every level')
@@ -502,24 +504,5 @@ class Validate extends Command
 		}
 
 		return (bool) preg_match('/^\[[^\]]*\] monolog-validate\.[A-Z]+: ' . preg_quote($prefix, '/') . '/', $line);
-	}
-
-	/**
-	 * No check may end the run: a validation that stops at its first problem hides the rest, on
-	 * the one occasion the whole list was wanted.
-	 */
-	private function probe(string $label, callable $probe)
-	{
-		try
-		{
-			return $probe();
-		}
-		catch (\Throwable $e)
-		{
-			\XF::logException($e, false, "Monolog: monolog:validate - {$label}: ");
-			$this->checkFail($label, get_class($e) . ': ' . strtok($e->getMessage(), "\n"));
-
-			return null;
-		}
 	}
 }

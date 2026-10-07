@@ -286,7 +286,11 @@ that read as "9 of 8". A line that mentions the run is reported, and a wrong cou
 
 **Extend `monolog:validate` whenever logging gains a new dependency on the environment.** The
 rendering is `Cli/RendersReport.php`, a copy of `hampel/console-report`'s layout, because that
-package needs PHP 8.3 and XenForo ships its own `symfony/console`.
+package needs PHP 8.3: it pads with `mb_str_pad()`, native only from 8.3, and XenForo does not ship
+the polyfill that supplies it below that. XenForo's own `symfony/console` is not the obstacle.
+**The trait also holds `probe()`**, which wraps each check so none can end the run, and logs what
+one throws under the command's `$errorLogPrefix` — set in `configure()`. It is kept free of
+anything Monolog-specific, so another add-on's copy differs only in its namespace.
 
 **XenForo 2.2's `symfony/console` is a fork that knows only the eight basic colours**, and throws
 on `gray`. `monolog:config` died at its first annotation on 2.2 from Beta 4 until a sandbox run

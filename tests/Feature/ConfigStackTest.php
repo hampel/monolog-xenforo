@@ -149,11 +149,22 @@ class ConfigStackTest extends TestCase
 			preg_match_all('/\\\\XF::log(?:Error\(|Exception\([^,]+,[^,]+,\s*)(["\'])(.{0,9})/', $source, $matches, PREG_SET_ORDER);
 			foreach ($matches AS $match)
 			{
+				if (strpos($match[2], '{$this->') === 0)
+				{
+					continue; // RendersReport::probe(), checked below
+				}
+
 				$calls++;
 				$this->assertSame('Monolog: ', $match[2], basename($path) . ' logs to the server error log without the prefix');
 			}
 		}
 
-		$this->assertSame(4, $calls, 'a new call must be counted here, so it is looked at');
+		// the fourth is RendersReport::probe(), whose prefix is a property each command sets -
+		// CommandsTest checks what monolog:validate actually logs
+		$this->assertSame(3, $calls, 'a new call must be counted here, so it is looked at');
+		$this->assertStringContainsString(
+			'\\XF::logException($e, false, "{$this->errorLogPrefix}',
+			file_get_contents($root . '/Cli/RendersReport.php')
+		);
 	}
 }

@@ -393,6 +393,10 @@ class CommandsTest extends TestCase
 		$this->assertStringContainsString('[fail] stack', $output);
 		$this->assertStringContainsString('cannot connect', $output);
 		$this->assertStringContainsString('Level sweep', $output, 'the run carried on past it');
+
+		$logged = array_column($this->getErrorFake()->getExceptions(), 'message');
+		$this->assertCount(1, $logged);
+		$this->assertStringStartsWith('Monolog: monolog:validate - stack: ', $logged[0]);
 	}
 
 	private function runCommand($command, array $input = []): array
