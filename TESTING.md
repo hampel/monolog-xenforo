@@ -27,9 +27,24 @@ needs a person.
 
 - Admin navigation: *Test Monolog* under *Checks and tests*, and its template
   `monolog_tools_test_monolog`.
-- Options: ten, in the `monolog` group, each rendered by its own callback so `config.php` can lock
-  it.
+- Options: thirteen, in the `monolog` group, each rendered by its own callback so `config.php` can
+  lock it — three for the log file, four for email, two for Slack, and four for what each record
+  carries.
 - No template modifications, crons, routes, permissions or schema changes.
+
+**Command line**
+
+- `monolog:config` — prints every setting and where it comes from. Reads only.
+- `monolog:validate` — checks the configuration, then writes a record at every level, which sends
+  email and posts to Slack where those are on. `--unattended` skips the sends; `--strict` makes a
+  warning exit 2.
+
+**Outside the forum**
+
+- **Outbound HTTP, when Slack is on**: one POST per request that logs at or above the Slack level,
+  to the configured webhook, through XenForo's HTTP client. Nothing else leaves the server.
+- **Files**: the log file, and one deduplication store per alert output in XenForo's temp
+  directory.
 
 ## Fragile points
 
@@ -46,6 +61,23 @@ needs a person.
 - **Every `Monolog\` and `Psr\Log\` class may come from XenForo, not from this add-on.** XenForo
   2.4 bundles Monolog 3 and its class loader is consulted first. A handler or processor with a
   typed record parameter is a fatal error on one version or the other.
+- **A command class that cannot load takes down every command in `cmd.php`**, not only its own —
+  XenForo loads them all to list them. Extending a class XenForo 2.2 lacks, or naming a helper
+  `run()`, does it. `CommandsTest` loads both classes the way XenForo does.
+- **XenForo 2.2's console knows only eight colours** and throws on `gray`. Grey goes through
+  `RendersReport::muted()`; the tests fail on a literal tag, but only a 2.2 install proves the
+  fallback.
+- **The Slack webhook is a credential, and Guzzle prints it.** Its exception messages contain the
+  URL, so a failed post is logged with `[webhook]` in its place. Nothing else may print it either:
+  the locked option and `monolog:config` say only that it is set.
+- **Every row written to the server error log must begin `Monolog: `.** An add-on that mirrors that
+  log skips rows by the prefix; one without it is mirrored, alerted on through the handler that
+  just failed, and logged again.
+- **Monolog 2 asks a handler whether it is handling with a level and no channel.** A per-channel
+  level that answered with the section's level would drop a raised channel's records before it saw
+  whose they were. Only the Monolog 2 run catches that; Monolog 3 passes the whole record.
+- **The deduplication store fails open, silently.** If it cannot be written, every repeat is sent.
+  `monolog:validate` warns; nothing at runtime does.
 - **A `build.json` `exec` step cannot fail the build.** If its `composer install --no-dev` fails,
   XenForo still produces a release zip, with no Monolog in it.
 
