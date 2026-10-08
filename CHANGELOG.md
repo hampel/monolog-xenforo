@@ -1,5 +1,16 @@
 # CHANGELOG
 
+## 5.0.2 (2026-10-08)
+
+- new: `monolog:validate --strict` exits 2 when there are warnings and no failures — for a monitor;
+  1 still means a failure, and without the flag nothing changes
+- `monolog:validate` warns when the log file, email and Slack are all off, where it used to report
+  the empty logger as fine
+- `monolog:validate` checks that email and Slack can record what they have sent, and warns if not
+  — without that record every repeat is sent again
+- every record `monolog:validate` and the *Test Monolog* page write carries `probe: true` in its
+  context, so an alert over the log can leave them out
+
 ## 5.0.1 (2026-10-04)
 
 - fix: email and Slack treated two different errors with the same message as a repeat, and
