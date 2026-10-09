@@ -12,8 +12,8 @@ use Monolog\Handler\HandlerInterface;
  * below that level, costs nothing.
  *
  * Records are untyped on purpose: Monolog 2 passes an array and Monolog 3 a LogRecord, and an
- * untyped parameter satisfies both interfaces. XenForo 2.4 bundles Monolog 3 and its copy wins,
- * so this class meets both; `MONOLOG3=1 vendor/bin/phpunit` runs the suite against v3.
+ * untyped parameter satisfies both interfaces. If XenForo provides Monolog its copy wins, so this
+ * class meets both; `MONOLOG3=1 vendor/bin/phpunit` runs the suite against v3.
  */
 class LazyHandler implements HandlerInterface
 {

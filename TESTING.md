@@ -58,9 +58,10 @@ needs a person.
   that, and emailed errors from every fresh install.
 - **XenForo saves `false` for every option the page listed but got no input for.** A locked option
   must stay off that list and keep its value in `verifyOption()`; `OptionsPageTest` guards both.
-- **Every `Monolog\` and `Psr\Log\` class may come from XenForo, not from this add-on.** XenForo
-  2.4 bundles Monolog 3 and its class loader is consulted first. A handler or processor with a
-  typed record parameter is a fatal error on one version or the other.
+- **Every `Monolog\` and `Psr\Log\` class may come from XenForo, not from this add-on.** XenForo's
+  class loader is consulted first, so if XenForo provides Monolog, its copy wins — and it may be
+  Monolog 3. A handler or processor with a typed record parameter is a fatal error on one version
+  or the other.
 - **A command class that cannot load takes down every command in `cmd.php`**, not only its own —
   XenForo loads them all to list them. Extending a class XenForo 2.2 lacks, or naming a helper
   `run()`, does it. `CommandsTest` loads both classes the way XenForo does.
@@ -90,7 +91,7 @@ composer install
 vendor/bin/phpunit
 ```
 
-**Then run it again against Monolog 3**, the version XenForo 2.4 loads ahead of this add-on's own:
+**Then run it again against Monolog 3**, loaded ahead of this add-on's own, as XenForo's would be:
 
 ```bash
 composer install -d tests/monolog3
@@ -168,8 +169,8 @@ What the suite covers:
 - **`tests/Feature/LazyMailTest.php`** — that neither creating a channel nor writing below the
   email level builds XenForo's mailer; and that a transport logging every send, with email logging
   at Debug, costs one log email per request rather than a loop.
-- **`tests/Feature/UntestedXenForoTest.php`** — that channels still log on XenForo 2.4 or later,
-  and the install checks warn there.
+- **`tests/Feature/UntestedXenForoTest.php`** — that channels still log on a XenForo version this
+  release has not been tested on, and that the install checks warn there.
 - **`tests/Unit/XenForoMailHandlerTest.php`** — the mail handler alone, including its guard against
   a transport that logs while sending.
 - **`tests/Unit/OptionTest.php`** — the option getters' fallbacks, the `{board}` token, the string

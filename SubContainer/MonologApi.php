@@ -318,17 +318,21 @@ class MonologApi extends AbstractSubContainer
 		return $this->channels[$name];
 	}
 
+	/** The first XenForo version id this release has not been tested on. */
+	public const UNTESTED_FROM = 2040000;
+
 	/**
 	 * Whether this release has been tested on the running XenForo.
 	 *
-	 * XenForo 2.4 bundles Monolog 3, and its class loader is consulted before any add-on's, so
-	 * there every Monolog class this add-on names resolves to core's v3. The handlers and
-	 * processors are written to run on both, and `MONOLOG3=1 vendor/bin/phpunit` proves it - but
-	 * nothing has run on XenForo 2.4 itself, so the install checks say so.
+	 * A newer XenForo may provide Monolog itself, and its class loader is consulted before any
+	 * add-on's, so every Monolog class this add-on names would resolve to core's copy. The
+	 * handlers and processors are written to run on Monolog 2 and 3, and
+	 * `MONOLOG3=1 vendor/bin/phpunit` proves it - but nothing has run on that XenForo itself, so
+	 * the install checks say so.
 	 */
 	public static function isTestedOnThisXenForo(): bool
 	{
-		return \XF::$versionId < 2040000;
+		return \XF::$versionId < self::UNTESTED_FROM;
 	}
 
 	/**

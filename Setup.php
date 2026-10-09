@@ -38,8 +38,9 @@ class Setup extends AbstractSetup
 		// a warning, not an error, so a forum on a newer XenForo can still install or upgrade
 		if (!MonologApi::isTestedOnThisXenForo())
 		{
-			$warnings[] = "This version of Monolog Logging Service has not been tested on XenForo 2.4 or "
-				. "later. It is expected to work, but check for a newer version that has been.";
+			$warnings[] = "This version of Monolog Logging Service has not been tested on the version of "
+				. "XenForo you are running. It is expected to work, but check for a newer version that "
+				. "has been.";
 		}
 	}
 }

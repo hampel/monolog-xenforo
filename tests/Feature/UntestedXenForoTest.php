@@ -2,11 +2,13 @@
 
 use Hampel\Monolog\Helper\Log;
 use Hampel\Monolog\Setup;
+use Hampel\Monolog\SubContainer\MonologApi;
 use Tests\TestCase;
 
 /**
- * XenForo 2.4 is untested: the code runs on the Monolog 3 it bundles - the MONOLOG3=1 run proves
- * that - but nothing has run on 2.4 itself. So the install checks say so, and logging carries on.
+ * A XenForo newer than this release was tested on: the code runs on Monolog 2 and 3 - the
+ * MONOLOG3=1 run proves that - but nothing has run on that XenForo itself. So the install checks
+ * say so, and logging carries on.
  */
 class UntestedXenForoTest extends TestCase
 {
@@ -29,9 +31,9 @@ class UntestedXenForoTest extends TestCase
 		parent::tearDown();
 	}
 
-	public function test_channels_still_log_on_xenforo_2_4()
+	public function test_channels_still_log_on_an_untested_xenforo()
 	{
-		\XF::$versionId = 2040011; // 2.4.0 Alpha 1
+		\XF::$versionId = MonologApi::UNTESTED_FROM + 11; // its first alpha
 
 		$this->app()['monolog']->channel('myaddon')->error('still here');
 		$this->app()['monolog']->newChannel('other')->error('and here');
@@ -40,16 +42,17 @@ class UntestedXenForoTest extends TestCase
 		$this->assertCount(3, $this->logLines());
 	}
 
-	public function test_installing_on_xenforo_2_4_warns_that_it_is_untested()
+	public function test_installing_on_an_untested_xenforo_warns()
 	{
-		\XF::$versionId = 2040011;
+		\XF::$versionId = MonologApi::UNTESTED_FROM + 11;
 
 		$errors = $warnings = [];
 		$this->addOnSetup()->checkRequirements($errors, $warnings);
 
 		$this->assertSame([], $errors);
 		$this->assertCount(1, $warnings);
-		$this->assertStringContainsString('not been tested on XenForo 2.4', $warnings[0]);
+		$this->assertStringContainsString('not been tested on the version of XenForo you are running',
+			$warnings[0]);
 	}
 
 	public function test_installing_on_xenforo_2_3_does_not_warn()

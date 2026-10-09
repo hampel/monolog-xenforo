@@ -123,7 +123,7 @@ class Config extends Command
 	}
 
 	/**
-	 * Which Monolog is loaded, and whose copy: this add-on's, or XenForo's own (2.4 bundles one).
+	 * Which Monolog is loaded, and whose copy: this add-on's, or one XenForo itself provides.
 	 */
 	public static function monologVersion(): string
 	{

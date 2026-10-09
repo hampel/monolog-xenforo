@@ -46,8 +46,7 @@
 - fix: creating a log channel no longer builds XenForo's mailer, which could recurse with a mail
   add-on that logs
 - email is sent through XenForo's own mail system, on 2.2 and 2.3 alike
-- runs on Monolog 3 as well as 2, so it should work on XenForo 2.4, which bundles Monolog 3 — not
-  yet tested there
+- runs on Monolog 3 as well as 2
 - requires XenForo 2.2 and PHP 7.4
 
 ## 4.1.2 (2025-12-12)

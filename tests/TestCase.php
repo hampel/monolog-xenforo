@@ -24,9 +24,9 @@ abstract class TestCase extends BaseTestCase
 
 	/**
 	 * With MONOLOG3=1, resolve Monolog and psr/log from tests/monolog3 instead of this add-on's
-	 * vendor tree and XenForo's - which is what XenForo 2.4 does, since it bundles Monolog 3 and
-	 * its class loader is consulted before any add-on's. So the suite runs against the classes
-	 * this add-on will actually get on 2.4.
+	 * vendor tree and XenForo's - which is what a XenForo that provides Monolog 3 itself would do,
+	 * since its class loader is consulted before any add-on's. So the suite runs against the
+	 * classes this add-on would actually get there.
 	 */
 	public function createApplication()
 	{

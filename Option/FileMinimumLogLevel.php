@@ -12,8 +12,8 @@ class FileMinimumLogLevel extends AbstractConfigurableOption
 	/**
 	 * The PSR-3 levels by Monolog's numeric value, which is what the level options store.
 	 *
-	 * Spelled out rather than read from Logger::getLevels(), which Monolog 3 removed - and
-	 * XenForo 2.4 bundles Monolog 3, so on 2.4 that call is a fatal error on the options page.
+	 * Spelled out rather than read from Logger::getLevels(), which Monolog 3 removed - so under
+	 * Monolog 3 that call would be a fatal error on the options page.
 	 */
 	public const LEVELS = [
 		100 => 'Debug',

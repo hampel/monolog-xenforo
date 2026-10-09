@@ -146,8 +146,8 @@ XenForo's own `$config['fsAdapters']`. `config.php` is read before add-on classe
 `new \Monolog\...` written directly there is a fatal error on every page. An entry that is not a
 function, or returns the wrong kind of object, is skipped and reported in the server error log.
 
-These are Monolog classes, so the same advice as for the code event applies: XenForo 2.4 loads its
-own Monolog 3 in place of this add-on's Monolog 2. Monolog's built-in handlers construct the same
+These are Monolog classes, so the same advice as for the code event applies: this add-on runs on
+Monolog 2 and Monolog 3, and a factory should too. Monolog's built-in handlers construct the same
 way on both; a processor of your own should leave its record parameter untyped.
 
 ### Choosing log levels
@@ -274,9 +274,9 @@ Or require 5.0 outright, if your add-on cannot work without logging:
   container above always returns a logger, so call it directly.
 - **If your code implements PSR-3 itself** — a class implementing `Psr\Log\LoggerInterface`,
   extending `AbstractLogger`, or a trait using `LoggerTrait` — **declare `log()` with a `: void`
-  return type.** XenForo 2.4 bundles a newer psr/log whose `log()` is typed, and an implementation
-  without the return type is a fatal error when its class loads. The return type works on today's
-  XenForo too.
+  return type.** psr/log 2 and 3 type `log()`, and an implementation without the return type is a
+  fatal error when its class loads against them. The return type works with psr/log 1, which
+  XenForo ships today, too.
 - **A workaround for 4.x building XenForo's mailer whenever a channel was created** — which
   recursed for a mail add-on that logs — can go once you require 5.0. In 5.x the mailer is built
   only when a record is emailed. Keep it while 4.x is still supported.
@@ -367,9 +367,9 @@ public static function monologSetup(\XF\App $app, array &$handlers, array &$proc
 ```
 
 These are Monolog objects, not PSR-3 ones, so this is the one place your code depends on the
-Monolog version. XenForo 2.4 ships Monolog 3 and loads it ahead of this add-on's Monolog 2. A
-handler or processor meant to work on both should leave its record parameter untyped, and assign
-`extra` as a whole array rather than one key at a time.
+Monolog version. This add-on runs on Monolog 2 and Monolog 3, so a handler or processor meant to
+work on both should leave its record parameter untyped, and assign `extra` as a whole array rather
+than one key at a time.
 
 ## Upgrading from 4.x
 

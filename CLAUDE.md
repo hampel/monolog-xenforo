@@ -67,11 +67,11 @@ email buffer.
 
 **The stack is assembled in one place, before the base `Logger` exists**: built-in handlers and
 processors, then `config.php`'s, then `hampel_monolog_setup`. The event fires once, inside the
-`logger` container closure, with the handler and processor arrays by reference —
-`SetupEventTest` fails if it moves after construction. The id is prefixed because code event ids
-are global and XenForo 2.4 core fires `monolog_setup`. There is no `xf-make` command for code
-events: the definition is hand-written in `_output/code_events/`, and `_metadata.json`'s hash is
-an md5 of the file.
+`logger` container closure, with the handler and processor arrays by reference — `SetupEventTest`
+fails if it moves after construction. The id is prefixed because code event ids are global, and a
+bare `monolog_setup` is a name XenForo could one day claim. There is no `xf-make` command for code
+events: the definition is hand-written in `_output/code_events/`, and `_metadata.json`'s hash is an
+md5 of the file.
 
 **Never push a handler or processor onto the base logger or a channel.** 4.x did exactly that,
 building its default logger by pushing handlers onto a shared instance, so whether a logger
@@ -196,10 +196,10 @@ unbuffered. `LazyMailTest` covers the Debug-level case, and fails if the buffer 
 a failing transport that logs its failure at `ERROR` from feeding back into itself when the handler
 is used unbuffered; `XenForoMailHandlerTest` proves it without the buffer in the way.
 
-**Every handler and processor here must run on Monolog 2 and Monolog 3.** XenForo 2.4 bundles
-Monolog 3, and its class loader is consulted before any add-on's, so on 2.4 every `Monolog\` and
-`Psr\Log\` class resolves to core's copy whatever this add-on bundles. Monolog 2 passes records as
-arrays and Monolog 3 as `LogRecord` objects, so:
+**Every handler and processor here must run on Monolog 2 and Monolog 3.** XenForo's class loader
+is consulted before any add-on's, so if XenForo itself provides Monolog, every `Monolog\` and
+`Psr\Log\` class resolves to core's copy whatever this add-on bundles — and that copy may be
+Monolog 3. Monolog 2 passes records as arrays and Monolog 3 as `LogRecord` objects, so:
 
 - **leave record parameters untyped** — an untyped parameter satisfies both `array $record` and
   `LogRecord $record`; either type alone is a fatal declaration error under the other version;
@@ -216,8 +216,9 @@ MONOLOG3=1 vendor/bin/phpunit
 ```
 
 `tests/TestCase.php` repoints XenForo's own class loader at `tests/monolog3/vendor` for that run,
-which is the order 2.4 will load them in. `Monolog3SimulationTest` fails if the switch is set and
-the classes still come from anywhere else, so a green run is not a silent fallback to v2.
+which is the order a XenForo that provides Monolog itself would load them in.
+`Monolog3SimulationTest` fails if the switch is set and the classes still come from anywhere else,
+so a green run is not a silent fallback to v2.
 
 ## Composer and the version floors
 

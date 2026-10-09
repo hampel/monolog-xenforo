@@ -1,5 +1,5 @@
 {
-	"description": "Monolog 3 and psr/log 3, loaded ahead of XenForo's copies to simulate XenForo 2.4 - see TESTING.md",
+	"description": "Monolog 3 and psr/log 3, loaded ahead of XenForo's copies to simulate a XenForo that provides them - see TESTING.md",
 	"require": {
 		"monolog/monolog": "^3",
 		"psr/log": "^3"

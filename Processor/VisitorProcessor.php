@@ -6,7 +6,7 @@ use Monolog\Processor\ProcessorInterface;
  * Adds the user the request is running as to extra.visitor - user id 0 for a guest.
  *
  * Written to run on Monolog 2, which passes an array, and Monolog 3, which passes a LogRecord -
- * XenForo 2.4 bundles v3, and its copy wins. So the parameter is untyped, and `extra` is read and
+ * if XenForo provides Monolog, its copy wins. So the parameter is untyped, and `extra` is read and
  * assigned whole: LogRecord's array access allows setting `extra`, but most of its fields are
  * read-only.
  *
