@@ -11,6 +11,10 @@ needs a person.
   `offsetExists('monolog')`. Nothing else in the add-on runs until something asks it for a
   channel.
 - `app_admin_setup` — registers the `monolog.test` factory the ACP test page resolves through.
+- `hampel_admin_api_redaction` — declares which settings are secrets, for an admin API add-on that
+  reports a forum's configuration: the Slack webhook, as an option member and under
+  `$config['monolog']`. Fires only where such an add-on defines the event; nothing here depends on
+  it. `SecretsDeclarationTest` checks the declaration against the options and against the code.
 
 **Code events defined**
 
@@ -159,6 +163,10 @@ What the suite covers:
   like an id and generated otherwise, in line records by option and in JSON always.
 - **`tests/Feature/SetupEventTest.php`** — `hampel_monolog_setup`: fired once, before the shared
   logger is built, and able to add or remove handlers and processors.
+- **`tests/Unit/SecretsDeclarationTest.php`** — the secrets declaration names only this add-on,
+  every declared option and member exists, any option or member that reads like a credential is
+  declared or decided, and the declared `config.php` path is the one the add-on reads its webhook
+  from.
 - **Probe marker** — `CommandsTest` and `ToolsControllerTest` assert that every record the sweep
   and the test page write carries `"probe":true`.
 - **`tests/Feature/ToolsControllerTest.php`** — the ACP *Test Monolog* page: its permission, its

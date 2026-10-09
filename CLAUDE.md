@@ -54,6 +54,14 @@ The moving parts, and where each is wired:
 | `XF/Admin/Controller/Tools.php` | class extension of `XF\Admin\Controller\Tools` | the ACP *Test Monolog* page |
 | `Test/*.php` | `Listener::appAdminSetup` as the `monolog.test` factory | the routine that page runs |
 
+**`Listener::adminApiRedaction()` declares the add-on's secrets** — the Slack webhook, as
+`monologSlack.webhook` and as `monolog.slack.webhook` under `$config['monolog']` — for an admin
+API add-on that reports a forum's settings with secrets removed. Nothing depends on that add-on:
+an event nobody defines never fires. **A new option, a new member of an array option, or a new
+`config.php` key must be decided in the same commit** — declared, or added to
+`SecretsDeclarationTest::NOT_SECRETS` with its reason. The test fails on a member that reads like
+a credential as well as an id, because this add-on's one secret is a member.
+
 **`Test/` is not the PHPUnit suite.** It is the ACP diagnostic behind *Tools > Checks and tests >
 Test Monolog*, which writes one message at every level so an admin can see where they land. The
 PHPUnit suite is `tests/`; `TESTING.md` says what it covers and what it cannot.

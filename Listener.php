@@ -31,4 +31,23 @@ class Listener
 			return $c->createObject($class, $params, true);
 		}, false);
 	}
+
+	/**
+	 * Tells Hampel/AdminApi which of this add-on's settings are secrets, so it can show the rest.
+	 * On a forum without the Admin API nothing fires this, and nothing here depends on it.
+	 *
+	 * One secret, in two places: the Slack webhook, whose URL is the credential - whoever holds it
+	 * can post to the channel. Everything else is a path, an address, a level, a format or a
+	 * switch. `config.php`'s handlers, processors and formatter are closures, which the Admin API
+	 * withholds as unrepresentable, so a key built into one cannot be read either way.
+	 *
+	 * @param array $declarations add-on id => ['options' => [...], 'config' => [...]]
+	 */
+	public static function adminApiRedaction(array &$declarations)
+	{
+		$declarations['Hampel/Monolog'] = [
+			'options' => ['monologSlack.webhook'],
+			'config' => ['monolog' => ['monolog.slack.webhook']],
+		];
+	}
 }
