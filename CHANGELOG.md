@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 5.0.3 (2026-10-09)
+
+- the README, the install warning shown on an untested XenForo version, and the code event's
+  description are revised; no change in behaviour
+
 ## 5.0.2 (2026-10-08)
 
 - new: `monolog:validate --strict` exits 2 when there are warnings and no failures — for a monitor;
